@@ -18,8 +18,8 @@ class ProductUpdate(ProductBase):
 
 class Product(ProductBase):
     id: int
-    created_at: datetime  # New field
-    updated_at: datetime  # New field
+    created_at: Optional[datetime] = None  # ← Changed to Optional
+    updated_at: Optional[datetime] = None  # ← Changed to Optional
     last_restocked: Optional[datetime] = None  # New field
 
     class Config:

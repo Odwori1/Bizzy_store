@@ -6,16 +6,20 @@ from fastapi import Depends, HTTPException, status
 from app.crud.user import get_user_by_email
 from app.database import get_db
 from app.schemas.user_schema import TokenData
-from sqlalchemy.orm import Session  # Add this import
+from sqlalchemy.orm import Session
+import os  # ← ADD THIS IMPORT
+from dotenv import load_dotenv  # ← ADD THIS IMPORT
 
-# Configuration - Generate a real secret key with:
-# openssl rand -hex 32
-SECRET_KEY = "881350699847beff9d1e35a9da56e6b1dcc2237e1b7228a0d5eaea1a0008366d"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Load environment variables from .env file
+load_dotenv()  # ← ADD THIS LINE
+
+# Configuration - Now loaded from environment variables
+SECRET_KEY = os.getenv("SECRET_KEY")  # ← UPDATE THIS LINE
+ALGORITHM = os.getenv("ALGORITHM", "HS256")  # ← UPDATE THIS LINE
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))  # ← UPDATE THIS LINE
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")  # Updated to match router
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
@@ -26,7 +30,6 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# ADD THESE MISSING FUNCTIONS:
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

@@ -4,17 +4,31 @@ from alembic import context
 from app.models.base import Base
 import os
 import sys
+from dotenv import load_dotenv  # ← ADD THIS IMPORT
+
+# Load environment variables
+load_dotenv()  # ← ADD THIS LINE
 
 # Set absolute path to backend directory
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 # Import all models (required for autogenerate)
 from app.models.user import User
+from app.models.product import Product
+from app.models.inventory import InventoryHistory
 target_metadata = Base.metadata
 
 # Standard Alembic setup
 config = context.config
+
+# Get database URL from environment
+db_url = os.getenv("DATABASE_URL")
+if db_url:
+    config.set_main_option("sqlalchemy.url", db_url)  # ← ADD THIS LINE
+
 fileConfig(config.config_file_name)
+
+# ... rest of the file remains the same ...
 
 def run_migrations_offline():
     url = config.get_main_option("sqlalchemy.url")
