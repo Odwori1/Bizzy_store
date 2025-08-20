@@ -15,4 +15,4 @@ class User(Base):
     created_at = Column(DateTime, default=func.now())
 
     # Relationships
-    #sales = relationship("Sale", back_populates="user")
+    sales = relationship("Sale", back_populates="user")

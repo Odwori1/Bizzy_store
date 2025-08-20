@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from .base import Base
 
 class Product(Base):
@@ -15,3 +16,6 @@ class Product(Base):
     last_restocked = Column(DateTime, default=func.now())  # New: Last restock date
     created_at = Column(DateTime, default=func.now())  # New: Creation timestamp
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())  # New: Update timest
+
+    # Relationships - ADDED
+    sale_items = relationship("SaleItem", back_populates="product")
