@@ -1,8 +1,24 @@
 from fastapi import FastAPI
-from app.routers import users, auth, products, inventory, sales, reports
-from app.services.scheduler import lifespan  # ADDED
+from fastapi.middleware.cors import CORSMiddleware  # Make sure this import is here
+from app.routers import users, auth, products, inventory, sales, reports, business
+from app.services.scheduler import lifespan
+from app.routers import two_factor
 
-app = FastAPI(lifespan=lifespan)  # UPDATED
+app = FastAPI(lifespan=lifespan)
+
+# CORS Middleware - UPDATE THIS SECTION
+origins = [
+    "http://localhost:3000",  # Default port for Create React App
+    "http://localhost:5173",  # Default port for Vite
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # This allows all methods, including OPTIONS
+    allow_headers=["*"],  # This allows all headers
+)
 
 app.include_router(users.router)
 app.include_router(auth.router)
@@ -10,6 +26,8 @@ app.include_router(products.router)
 app.include_router(inventory.router)
 app.include_router(sales.router)
 app.include_router(reports.router)
+app.include_router(business.router)  # ADD THIS LINE
+app.include_router(two_factor.router)  # ADD THIS LINE
 
 @app.get("/")
 def read_root():

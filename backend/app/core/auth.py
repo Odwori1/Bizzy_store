@@ -7,16 +7,16 @@ from app.crud.user import get_user_by_email
 from app.database import get_db
 from app.schemas.user_schema import TokenData
 from sqlalchemy.orm import Session
-import os  # ← ADD THIS IMPORT
-from dotenv import load_dotenv  # ← ADD THIS IMPORT
+import os
+from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv()  # ← ADD THIS LINE
+load_dotenv()
 
 # Configuration - Now loaded from environment variables
-SECRET_KEY = os.getenv("SECRET_KEY")  # ← UPDATE THIS LINE
-ALGORITHM = os.getenv("ALGORITHM", "HS256")  # ← UPDATE THIS LINE
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))  # ← UPDATE THIS LINE
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
@@ -31,6 +31,7 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    print("DEBUG: get_current_user function called!")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -39,16 +40,29 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
+        print(f"DEBUG: Decoded JWT payload: {payload}")
+        print(f"DEBUG: Extracted email: {email}")
         if email is None:
             raise credentials_exception
         token_data = TokenData(email=email)
-    except JWTError:
+    except JWTError as e:
+        print(f"DEBUG: JWTError: {e}")
         raise credentials_exception
-    
+
     user = get_user_by_email(db, email=token_data.email)
+    print(f"DEBUG: Found user: {user.id if user else None}")
     if user is None:
         raise credentials_exception
-    return {"id": user.id, "email": user.email, "role": user.role}
+    
+    # RETURN COMPLETE USER OBJECT WITH ALL REQUIRED FIELDS
+    return {
+        "id": user.id,
+        "email": user.email,
+        "username": user.username,  # ADDED
+        "role": user.role,
+        "is_active": user.is_active,  # ADDED
+        "created_at": user.created_at.isoformat() if user.created_at else None  # ADDED
+    }
 
 async def get_current_active_user(current_user: dict = Depends(get_current_user)):
     if not current_user.get("is_active", True):
