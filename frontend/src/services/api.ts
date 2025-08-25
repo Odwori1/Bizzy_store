@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { authService } from './auth';
 
 // Fix: Add type declaration for import.meta.env
 declare global {
@@ -20,11 +21,23 @@ export const api = axios.create({
 
 // Request interceptor for auth token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
-  console.log('API Request Interceptor - Token found:', !!token); // ADD FOR DEBUG
+  const token = authService.getToken();
+  console.log('API Request Interceptor - Token found:', !!token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('Authorization header set:', config.headers.Authorization); // ADD FOR DEBUG
+    console.log('Authorization header set:', config.headers.Authorization);
   }
   return config;
 });
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      authService.logout();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);

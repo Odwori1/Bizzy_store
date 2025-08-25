@@ -3,7 +3,7 @@ export interface User {
   id: number
   email: string
   username: string
-  role: 'admin' | 'cashier'
+  role: 'admin' | 'manager' | 'cashier'  // <- ADD 'manager' HERE
   is_active: boolean
   created_at: string
 }
@@ -12,6 +12,7 @@ export interface UserCreate {
   email: string
   username: string
   password: string
+  role: 'admin' | 'manager' | 'cashier'  // <- ADD 'manager' HERE
 }
 
 // Product Types

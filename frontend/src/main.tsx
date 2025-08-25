@@ -8,7 +8,7 @@ import { useAuthStore } from './hooks/useAuth'
 const queryClient = new QueryClient()
 
 // Initialize auth when app starts
-useAuthStore.getState().initialize()
+useAuthStore.getState().initializeAuth()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

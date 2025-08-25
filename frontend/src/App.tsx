@@ -1,3 +1,4 @@
+// File: frontend/src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
@@ -7,8 +8,14 @@ import Sales from './pages/Sales'
 import Products from './pages/Products'
 import Inventory from './pages/Inventory'
 import Reports from './pages/Reports'
-import BusinessSettings from './pages/BusinessSettings' // ADD THIS IMPORT
+import BusinessSettings from './pages/BusinessSettings'
+import UserManagement from './pages/UserManagement'
 import ProtectedRoute from './components/ProtectedRoute'
+// ADD THESE TWO IMPORT STATEMENTS:
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import Register from './pages/Register';
+import ProfileSettings from './pages/ProfileSettings';
 
 function App() {
   return (
@@ -16,6 +23,10 @@ function App() {
       <div className="min-h-screen bg-background">
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+	  <Route path="/register" element={<Register />} />
+	  <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
 
           {/* Protected routes with layout */}
           <Route path="/" element={
@@ -30,7 +41,8 @@ function App() {
             <Route path="products" element={<Products />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="settings/business" element={<BusinessSettings />} /> // ADD THIS LINE
+            <Route path="settings/business" element={<BusinessSettings />} />
+            <Route path="users" element={<UserManagement />} />
           </Route>
         </Routes>
       </div>
