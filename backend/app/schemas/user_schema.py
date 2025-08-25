@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from typing import Optional,  List
 from datetime import datetime
 
@@ -18,6 +18,20 @@ class User(UserBase):
 
     class Config:
         from_attributes = True
+
+class UserRegister(BaseModel):
+    email: EmailStr
+    username: str
+    password: str
+    role: str = 'cashier'  # Default role for new registrations
+
+    # Validator to ensure role is one of the allowed values
+    @validator('role')
+    def validate_role(cls, v):
+        allowed_roles = ['admin', 'manager', 'cashier']
+        if v not in allowed_roles:
+            raise ValueError(f'Role must be one of: {", ".join(allowed_roles)}')
+        return v
 
 # Auth Schemas
 class Token(BaseModel):
@@ -53,3 +67,11 @@ class TwoFactorBackupRequest(BaseModel):
 
 class TwoFactorStatusResponse(BaseModel):
     is_enabled: bool
+
+
+
+# --- ADD THIS NEW SCHEMA FOR 2FA LOGIN FLOW ---
+class TwoFactorRequiredResponse(BaseModel):
+    requires_2fa: bool = True
+    message: str = "2FA verification required"
+    temp_token: str  # We'll use this later to remember the user

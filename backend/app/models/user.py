@@ -11,7 +11,10 @@ class User(Base):
     email = Column(String(100), unique=True, index=True)
     hashed_password = Column(String(128), nullable=False)
     is_active = Column(Boolean, default=True)
-    role = Column(String(20), default="cashier")  # 'admin' or 'cashier'
+    #role = Column(String(20), default="cashier")  # 'admin' or 'cashier'
+    # ... existing code ...
+    role = Column(String, default='cashier', nullable=False)  # Options: 'admin', 'manager', 'cashier'
+    # ... existing code ...
     created_at = Column(DateTime, default=func.now())
     reset_token = Column(String(100), unique=True, index=True, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)

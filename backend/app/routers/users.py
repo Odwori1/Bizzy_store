@@ -1,10 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-
-# Import schemas, CRUD functions, and dependencies
-from app.schemas.user_schema import UserCreate, User
-from app.crud.user import create_user, get_user, get_user_by_email, get_user_by_username, get_all_users, update_user, delete_user
+from app.schemas.user_schema import UserRegister, User, UserCreate  # Import schemas
+from app.core.auth import get_password_hash
+from app.crud.user import (
+    create_user,
+    get_user,
+    get_user_by_email,
+    get_user_by_username,
+    get_all_users,
+    update_user,
+    delete_user
+)
 from app.database import get_db
 from app.core.auth import get_current_user
 
@@ -25,11 +32,11 @@ def read_users(
     """
     Retrieve all users (Admin only).
     """
-    # Simple role-based access control: only admins can list users
-    if current_user.get("role") != "admin":
+    # Simple role-based access control: only admins or managers can list users
+    if current_user.get("role") not in ["admin", "manager"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions. Admin access required."
+            detail="Not enough permissions. Admin or manager access required."
         )
     users = get_all_users(db, skip=skip, limit=limit)
     return users
@@ -41,13 +48,13 @@ def create_new_user(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Create a new user (Admin only).
+    Create a new user (Admin or manager).
     """
-    # Secure this endpoint so only admins can create new users
-    if current_user.get("role") != "admin":
+    # Secure this endpoint so only admins or managers can create new users
+    if current_user.get("role") not in ["admin", "manager"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions. Admin access required."
+            detail="Not enough permissions. Admin or manager access required."
         )
 
     # Check if email already exists
@@ -70,15 +77,15 @@ def create_new_user(
 @router.put("/{user_id}", response_model=User)
 def update_existing_user(
     user_id: int,
-    user_update: UserCreate, # Using UserCreate for simplicity; a UserUpdate schema would be better later.
+    user_update: UserCreate,  # Using UserCreate for simplicity; consider a dedicated UserUpdate schema
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Update a user's information (Admin only).
+    Update a user's information (Admin or manager).
     """
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required.")
+    if current_user.get("role") not in ["admin", "manager"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin or manager access required.")
 
     # Check if new email is taken by another user
     existing_user_by_email = get_user_by_email(db, email=user_update.email)
@@ -102,10 +109,10 @@ def delete_existing_user(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Delete a user (Admin only).
+    Delete a user (Admin or manager).
     """
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required.")
+    if current_user.get("role") not in ["admin", "manager"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin or manager access required.")
     success = delete_user(db, user_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -125,11 +132,10 @@ def read_specific_user(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Get a specific user's details (Admin only, or users getting their own info?).
-    For now, let's keep it admin-only for simplicity.
+    Get a specific user's details (Admin or the user themselves).
     """
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required.")
+    if current_user.get("role") not in ["admin", "manager"] and current_user.get("id") != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin or owner access required.")
     db_user = get_user(db, user_id=user_id)
     if db_user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -142,10 +148,10 @@ def toggle_user_status(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Toggle user active status (Admin only)
+    Toggle user active status (Admin or manager).
     """
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required.")
+    if current_user.get("role") not in ["admin", "manager"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin or manager access required.")
 
     db_user = get_user(db, user_id)
     if db_user is None:
@@ -161,3 +167,5 @@ def toggle_user_status(
     db.refresh(db_user)
 
     return db_user
+
+

@@ -3,11 +3,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import secrets
+from typing import Union
 
 from app.core.auth import create_access_token, verify_password, oauth2_scheme
 from app.crud.user import get_user_by_email_or_username, get_user_by_email, update_user
 from app.database import get_db
-from app.schemas.user_schema import Token, UserLogin, PasswordResetRequest, PasswordResetConfirm
+from app.schemas.user_schema import Token, UserLogin, PasswordResetRequest, PasswordResetConfirm, TwoFactorRequiredResponse, TwoFactorVerifyRequest
 from app.utils.email import send_password_reset_email
 from app.models.user import User
 
@@ -16,7 +17,7 @@ router = APIRouter(
     tags=["auth"]
 )
 
-@router.post("/auth/token", response_model=Token)
+@router.post("/auth/token", response_model=Union[Token, TwoFactorRequiredResponse])
 def login_for_token(login_data: UserLogin, db: Session = Depends(get_db)):
     user = get_user_by_email_or_username(db, login_data.identifier)
     if not user or not verify_password(login_data.password, user.hashed_password):
@@ -32,7 +33,23 @@ def login_for_token(login_data: UserLogin, db: Session = Depends(get_db)):
             detail="Account is disabled. Please contact administrator.",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
+
+    # NEW: Check if 2FA is enabled for the user
+        # NEW: Check if 2FA is enabled for the user
+    if user.two_factor_enabled:
+        # Return a JSON response indicating 2FA is required
+        # We use a temporary token that is just the user's email for now.
+        # Later, this should be a proper JWT with a short lifespan.
+        
+        print(f"DEBUG: 2FA is enabled for user {user.email}. Requiring verification.")
+        return TwoFactorRequiredResponse(
+            requires_2fa=True,
+            message="2FA verification required",
+            temp_token=user.email # Using email as a simple identifier for now
+        )
+    # END NEW
+    # END NEW
+
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -137,3 +154,30 @@ async def reset_password(request: PasswordResetConfirm, db: Session = Depends(ge
         )
     
     return {"msg": "Password has been reset successfully."}
+
+# --- ADD THIS NEW ENDPOINT FOR 2FA VERIFICATION ---
+@router.post("/auth/verify-2fa", response_model=Token)
+async def verify_2fa_login(verify_request: TwoFactorVerifyRequest, db: Session = Depends(get_db)):
+    # In a real implementation, the temp_token would be a JWT that we decode to get the user email.
+    # For now, we are using the email directly as the temp_token for simplicity.
+    user_email = verify_request.temp_token
+    user = get_user_by_email(db, user_email)
+
+    if not user or not user.two_factor_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid verification request."
+        )
+
+    # Verify the TOTP code using the existing utility
+    from app.utils.two_factor import verify_totp_code
+    if not verify_totp_code(user.two_factor_secret, verify_request.code):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid verification code."
+        )
+
+    # If code is valid, generate the final access token
+    access_token = create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
+# END NEW ENDPOINT
