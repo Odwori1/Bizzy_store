@@ -25,8 +25,8 @@ export interface Product {
   stock_quantity: number
   min_stock_level: number
   created_at: string
-  updated_at: string
-  last_restocked: string
+  updated_at?: string
+  last_restocked?: string
 }
 
 export interface ProductCreate {
