@@ -38,6 +38,30 @@ export interface ProductCreate {
   min_stock_level: number
 }
 
+// POS Cart Types
+export interface CartItem {
+  product_id: number;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+}
+
+export interface Cart {
+  items: CartItem[];
+  total: number;
+  tax: number;
+  grand_total: number;
+}
+
+// Payment processing
+export interface PaymentRequest {
+  sale_id: number;
+  payment_method: 'cash' | 'card' | 'mobile_money';
+  amount: number;
+  transaction_id?: string;
+}
+
 // Sale Types
 export interface Sale {
   id: number
@@ -86,6 +110,16 @@ export interface PaymentCreate {
   amount: number
   payment_method: 'cash' | 'card' | 'mobile_money'
   transaction_id?: string
+}
+
+export interface Business {
+  id?: number;
+  name?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  tax_id?: string;
+  logo_url?: string;
 }
 
 // Inventory Types

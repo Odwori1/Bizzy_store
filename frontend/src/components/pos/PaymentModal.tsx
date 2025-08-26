@@ -1,57 +1,44 @@
-import { useState } from 'react';
-import { CartItem, PaymentCreate, SaleItemCreate, Sale, Payment } from '../../types';
+import React, { useState } from 'react';
+import { CartItem, PaymentCreate, SaleItemCreate, Sale } from '../../types';
 import { saleService } from '../../services/sales';
 import { useAuthStore } from '../../hooks/useAuth';
 import { useBusinessStore } from '../../hooks/useBusiness';
-import Receipt from './Receipt'; // ADD RECEIPT IMPORT
+import Receipt from './Receipt';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onClearCart: () => void;
   cart: CartItem[];
   total: number;
-  onProcessPayment: (paymentData: any) => void;
+  onPaymentSuccess: () => void;
 }
 
-export default function PaymentModal({ isOpen, onClose, cart, total, onProcessPayment }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total, onPaymentSuccess }: PaymentModalProps) {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountReceived, setAmountReceived] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
-  const [showReceipt, setShowReceipt] = useState(false); // ADD RECEIPT STATE
-  const [completedSale, setCompletedSale] = useState<Sale | null>(null); // ADD COMPLETED SALE STATE
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const { user } = useAuthStore();
   const { business } = useBusinessStore();
 
-   // ADDED: Function to handle closing the receipt and returning to POS
   const handleReceiptClose = () => {
     setShowReceipt(false);
     setCompletedSale(null);
-    onClose(); // Close the payment modal
+    onPaymentSuccess();
+    onClose();
   };
 
-  // MODIFIED: Use the new handleReceiptClose function
   if (showReceipt && completedSale) {
     return (
       <Receipt
         sale={completedSale}
         business={business}
         payments={completedSale.payments}
-        onClose={handleReceiptClose} // Use the new handler
+        onClose={handleReceiptClose}
         amountReceived={paymentMethod === 'cash' ? parseFloat(amountReceived) : total}
-      />
-    );
-  }
-
-  // ADD RECEIPT DISPLAY LOGIC
-  if (showReceipt && completedSale) {
-    return (
-      <Receipt 
-        sale={completedSale} 
-        business={business}
-        payments={completedSale.payments}
-	onClose={onClose} // ADD CLOSE HANDLER
-        amountReceived={paymentMethod === 'cash' ? parseFloat(amountReceived) : total} // ADD AMOUNT RECEIVED
       />
     );
   }
@@ -77,11 +64,11 @@ export default function PaymentModal({ isOpen, onClose, cart, total, onProcessPa
     setError('');
 
     try {
-      // 1. Prepare the sale items for the API
+      // 1. Prepare the sale items for the API - FIXED
       const saleItems: SaleItemCreate[] = cart.map(item => ({
-        product_id: item.product.id,
+        product_id: item.product_id, // FIXED: Use product_id directly
         quantity: item.quantity,
-        unit_price: item.product.price
+        unit_price: item.unit_price
       }));
 
       // 2. Prepare the payment for the API
@@ -96,27 +83,13 @@ export default function PaymentModal({ isOpen, onClose, cart, total, onProcessPa
         user_id: user.id,
         sale_items: saleItems,
         payments: payments,
-        tax_rate: 0.0,
-        business_info: business
+        //tax_rate: 0.0,
       };
 
-      // 4. Send the sale data to the backend API
       const createdSale = await saleService.createSale(saleData);
-      console.log('Sale created successfully:', createdSale);
-
-      // STORE THE COMPLETED SALE AND SHOW RECEIPT
+      
       setCompletedSale(createdSale);
       setShowReceipt(true);
-
-      // 5. Call the parent component's success handler
-      await onProcessPayment({
-        paymentMethod,
-        amount: total,
-        amountReceived: paymentMethod === 'cash' ? parseFloat(amountReceived) : total,
-        change: paymentMethod === 'cash' ? change : 0,
-        saleId: createdSale.id,
-        businessInfo: business
-      });
 
     } catch (err: any) {
       console.error('Payment processing failed:', err);
@@ -129,7 +102,22 @@ export default function PaymentModal({ isOpen, onClose, cart, total, onProcessPa
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-2xl font-bold mb-4">Process Payment</h2>
+        {/* Header with Clear Cart button */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Process Payment</h2>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('Clear cart and cancel payment?')) {
+                onClearCart();
+              }
+            }}
+            className="text-red-600 hover:text-red-800 text-sm"
+            title="Clear cart and cancel"
+          >
+            Clear Cart
+          </button>
+        </div>
 
         <div className="mb-4">
           <p className="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
