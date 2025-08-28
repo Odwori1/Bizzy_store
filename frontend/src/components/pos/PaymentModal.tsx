@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { CartItem, PaymentCreate, SaleItemCreate, Sale } from '../../types';
-import { saleService } from '../../services/sales';
+import { salesService } from '../../services/sales';
 import { useAuthStore } from '../../hooks/useAuth';
 import { useBusinessStore } from '../../hooks/useBusiness';
 import Receipt from './Receipt';
+import { useInventory } from '../../hooks/useInventory';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const { user } = useAuthStore();
   const { business } = useBusinessStore();
+  const { loadStockLevels, loadLowStockAlerts } = useInventory();
 
   const handleReceiptClose = () => {
     setShowReceipt(false);
@@ -64,9 +66,9 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
     setError('');
 
     try {
-      // 1. Prepare the sale items for the API - FIXED
+      // 1. Prepare the sale items for the API
       const saleItems: SaleItemCreate[] = cart.map(item => ({
-        product_id: item.product_id, // FIXED: Use product_id directly
+        product_id: item.product_id,
         quantity: item.quantity,
         unit_price: item.unit_price
       }));
@@ -83,10 +85,13 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
         user_id: user.id,
         sale_items: saleItems,
         payments: payments,
-        //tax_rate: 0.0,
       };
 
-      const createdSale = await saleService.createSale(saleData);
+      const createdSale = await salesService.createSale(saleData);
+      
+      // Refresh inventory after successful sale
+      await loadStockLevels();
+      await loadLowStockAlerts();
       
       setCompletedSale(createdSale);
       setShowReceipt(true);

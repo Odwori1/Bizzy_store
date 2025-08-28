@@ -143,12 +143,13 @@ const POS: React.FC = () => {
         <div className="lg:col-span-1">
           <Cart
             items={cartItems}
-            total={subtotal}
-            tax={0}
-            grandTotal={grandTotal}
-            onUpdateQuantity={updateQuantity}
-            onRemoveItem={removeFromCart}
-            onCheckout={handleCheckout}
+  	    total={subtotal}
+  	    tax={0}
+  	    grandTotal={grandTotal}
+  	    onRemoveItem={removeFromCart}
+  	    onUpdateQuantity={updateQuantity}
+  	    onClearCart={clearCart}
+ 	    onCheckout={() => setIsPaymentModalOpen(true)}  // Add this line
           />
         </div>
       </div>

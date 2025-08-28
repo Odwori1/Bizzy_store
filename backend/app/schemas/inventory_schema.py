@@ -18,6 +18,7 @@ class InventoryHistoryBase(BaseModel):
 class InventoryHistory(InventoryHistoryBase):
     id: int
     product_id: int
+    product_name: str
     changed_by: int
 
     class Config:

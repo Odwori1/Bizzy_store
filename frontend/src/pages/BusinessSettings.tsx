@@ -1,165 +1,308 @@
 import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '../hooks/useAuth';
+import { useBusinessStore } from '../hooks/useBusiness';
+import { BusinessCreate } from '../types';
 
-interface Business {
-  id: number;
-  user_id: number;
-  name: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  logo_url?: string;
-  tax_id?: string;
-}
+const BusinessSettings: React.FC = () => {
+  const {
+    business,
+    isLoading,
+    error,
+    loadBusiness,
+    updateBusiness,
+    clearError
+  } = useBusinessStore();
 
-export default function BusinessSettings() {
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState('');
-  const { user } = useAuthStore();
+  const [formData, setFormData] = useState<BusinessCreate>({
+    name: '',
+    address: '',
+    phone: '',
+    email: '',
+    logo_url: '',
+    tax_id: ''
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [originalData, setOriginalData] = useState<BusinessCreate | null>(null);
 
+  // Load business data on mount
   useEffect(() => {
-    fetchBusiness();
-  }, []);
+    loadBusiness();
+  }, [loadBusiness]);
 
-  const fetchBusiness = async () => {
-    try {
-      const response = await fetch('/api/business/', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setBusiness(data);
-      } else if (response.status === 404) {
-        // Business not found, create empty form
-        setBusiness({
-          id: 0,
-          user_id: user?.id || 0,
-          name: '',
-          address: '',
-          phone: '',
-          email: '',
-          tax_id: ''
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch business data:', error);
-    } finally {
-      setIsLoading(false);
+  // Set form data when business loads
+  useEffect(() => {
+    if (business) {
+      const data = {
+        name: business.name || '',
+        address: business.address || '',
+        phone: business.phone || '',
+        email: business.email || '',
+        logo_url: business.logo_url || '',
+        tax_id: business.tax_id || ''
+      };
+      setFormData(data);
+      setOriginalData(data);
     }
+  }, [business]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
-    setMessage('');
-
     try {
-      const response = await fetch('/api/business/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify(business)
-      });
-
-      if (response.ok) {
-        setMessage('Business settings saved successfully!');
-        const savedBusiness = await response.json();
-        setBusiness(savedBusiness);
-      } else {
-        setMessage('Failed to save business settings');
-      }
+      await updateBusiness(formData);
+      setSuccessMessage('Business settings updated successfully!');
+      setIsEditing(false);
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Save failed:', error);
-      setMessage('Error saving business settings');
-    } finally {
-      setIsSaving(false);
+      console.error('Update failed:', error);
     }
   };
 
-  const handleInputChange = (field: keyof Business, value: string) => {
-    setBusiness(prev => prev ? {...prev, [field]: value} : null);
+  const handleCancel = () => {
+    if (originalData) {
+      setFormData(originalData);
+    }
+    setIsEditing(false);
+    clearError();
+    setSuccessMessage('');
   };
 
-  if (isLoading) return <div className="p-6">Loading business settings...</div>;
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Business Settings</h2>
-      
-      {message && (
-        <div className={`mb-4 p-3 rounded-md ${
-          message.includes('success') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {message}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Business Name *</label>
-          <input
-            type="text"
-            value={business?.name || ''}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-            required
-          />
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Business Settings</h1>
+            <p className="text-gray-600 mt-2">Manage your business information and preferences</p>
+          </div>
+          {/* Back Button */}
+          <button
+            onClick={handleBack}
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+          >
+            Back
+          </button>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Address</label>
-          <input
-            type="text"
-            value={business?.address || ''}
-            onChange={(e) => handleInputChange('address', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          />
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+            {successMessage}
+          </div>
+        )}
+
+        {/* Business Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Card Header */}
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Business Information</h2>
+              <p className="text-sm text-gray-600">Your company details and contact information</p>
+            </div>
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition"
+              >
+                Edit Information
+              </button>
+            )}
+          </div>
+
+          {/* Card Content */}
+          <div className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Basic Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Business Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    disabled={!isEditing}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                    placeholder="Enter business name"
+                  />
+                </div>
+
+                {/* Tax ID */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tax ID / VAT Number
+                  </label>
+                  <input
+                    type="text"
+                    name="tax_id"
+                    value={formData.tax_id}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                    placeholder="Enter tax identification number"
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Business Address
+                </label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                  placeholder="Enter full business address"
+                />
+              </div>
+
+              {/* Contact Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                    placeholder="+256 706 881 719"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                    placeholder="business@example.com"
+                  />
+                </div>
+              </div>
+
+              {/* Logo URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Logo URL
+                </label>
+                <input
+                  type="url"
+                  name="logo_url"
+                  value={formData.logo_url}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                  placeholder="https://example.com/logo.png"
+                />
+                {formData.logo_url && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600 mb-2">Logo Preview:</p>
+                    <img
+                      src={formData.logo_url}
+                      alt="Business logo"
+                      className="h-16 w-16 object-contain rounded-lg border border-gray-200"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              {isEditing && (
+                <div className="flex space-x-4 pt-6 border-t border-gray-200">
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-400 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Phone</label>
-          <input
-            type="tel"
-            value={business?.phone || ''}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
+        {/* Additional Settings Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          {/* Receipt Settings Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Receipt Settings</h3>
+            <p className="text-gray-600 mb-4">Customize your receipt templates and formatting</p>
+            <button
+              disabled
+              className="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+            >
+              Configure Receipts (Coming Soon)
+            </button>
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Email</label>
-          <input
-            type="email"
-            value={business?.email || ''}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          />
+          {/* Tax Settings Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Tax Settings</h3>
+            <p className="text-gray-600 mb-4">Set up tax rates and configurations</p>
+            <button
+              disabled
+              className="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+            >
+              Configure Taxes (Coming Soon)
+            </button>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Tax ID</label>
-          <input
-            type="text"
-            value={business?.tax_id || ''}
-            onChange={(e) => handleInputChange('tax_id', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {isSaving ? 'Saving...' : 'Save Settings'}
-        </button>
-      </form>
+      </div>
     </div>
   );
-}
+};
+
+export default BusinessSettings;

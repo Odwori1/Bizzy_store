@@ -7,10 +7,40 @@ from datetime import datetime
 
 def get_inventory_history(db: Session, product_id: int = None, skip: int = 0, limit: int = 100):
     """Get inventory history, optionally filtered by product"""
-    query = db.query(InventoryHistory)
+    # Use join to get product names
+    query = db.query(
+        InventoryHistory, 
+        Product.name.label('product_name')
+    ).join(
+        Product, InventoryHistory.product_id == Product.id
+    )
+    
     if product_id:
         query = query.filter(InventoryHistory.product_id == product_id)
-    return query.order_by(InventoryHistory.changed_at.desc()).offset(skip).limit(limit).all()
+    
+    # Filter out records with NULL changed_by to prevent validation errors
+    query = query.filter(InventoryHistory.changed_by.isnot(None))
+    
+    results = query.order_by(InventoryHistory.changed_at.desc()).offset(skip).limit(limit).all()
+    
+    # Convert to dictionary format with product names
+    history_with_names = []
+    for history, product_name in results:
+        history_dict = {
+            'id': history.id,
+            'product_id': history.product_id,
+            'product_name': product_name,  # Add product name
+            'change_type': history.change_type,
+            'quantity_change': history.quantity_change,
+            'previous_quantity': history.previous_quantity,
+            'new_quantity': history.new_quantity,
+            'reason': history.reason,
+            'changed_by': history.changed_by,
+            'changed_at': history.changed_at
+        }
+        history_with_names.append(history_dict)
+    
+    return history_with_names
 
 def adjust_inventory(db: Session, adjustment: InventoryAdjustment, user_id: int):
     """Adjust inventory quantity and record history"""

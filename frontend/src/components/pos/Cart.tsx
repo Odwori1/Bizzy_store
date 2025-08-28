@@ -9,6 +9,7 @@ interface CartProps {
   onUpdateQuantity: (productId: number, quantity: number) => void;
   onRemoveItem: (productId: number) => void;
   onCheckout: () => void;
+  onClearCart: () => void;  // Add this line
 }
 
 const Cart: React.FC<CartProps> = ({
@@ -18,76 +19,78 @@ const Cart: React.FC<CartProps> = ({
   grandTotal,
   onUpdateQuantity,
   onRemoveItem,
-  onCheckout
+  onCheckout,
+  onClearCart  // Add this line
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 h-full">
-      <h2 className="text-xl font-bold mb-4">Shopping Cart</h2>
-      
-      {items.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Cart is empty</p>
-          <p className="text-sm text-gray-400">Add products to begin</p>
+    <div className="bg-white rounded-lg shadow-md p-4">
+      {/* Cart Items */}
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.product_id} className="flex justify-between items-center border-b pb-2">
+            <div className="flex-1">
+              <div className="font-medium">{item.product_name}</div>
+              <div className="text-sm text-gray-500">${item.unit_price.toFixed(2)} each</div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1)}
+                className="px-2 py-1 bg-gray-200 rounded"
+                disabled={item.quantity <= 1}
+              >
+                -
+              </button>
+              <span className="w-8 text-center">{item.quantity}</span>
+              <button
+                onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1)}
+                className="px-2 py-1 bg-gray-200 rounded"
+              >
+                +
+              </button>
+              <span className="w-16 text-right">${item.subtotal.toFixed(2)}</span>
+              <button
+                onClick={() => onRemoveItem(item.product_id)}
+                className="px-2 py-1 bg-red-500 text-white rounded"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Totals */}
+      <div className="mt-4 space-y-1">
+        <div className="flex justify-between">
+          <span>Subtotal:</span>
+          <span>${total.toFixed(2)}</span>
         </div>
-      ) : (
-        <>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {items.map((item) => (
-              <div key={item.product_id} className="flex justify-between items-center p-2 border-b">
-                <div className="flex-1">
-                  <h4 className="font-medium truncate">{item.product_name}</h4>
-                  <p className="text-sm text-gray-600">${item.unit_price.toFixed(2)} each</p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1)}
-                    className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center"
-                  >
-                    -
-                  </button>
-                  <span className="w-8 text-center">{item.quantity}</span>
-                  <button
-                    onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1)}
-                    className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => onRemoveItem(item.product_id)}
-                    className="ml-2 text-red-600 hover:text-red-800"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="text-right w-16">
-                  <p className="font-semibold">${item.subtotal.toFixed(2)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="flex justify-between">
+          <span>Tax:</span>
+          <span>${tax.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between font-bold text-lg border-t pt-2">
+          <span>Total:</span>
+          <span>${grandTotal.toFixed(2)}</span>
+        </div>
+      </div>
 
-          <div className="mt-4 space-y-2 border-t pt-4">
-            <div className="flex justify-between">
-              <span>Subtotal:</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Tax:</span>
-  	      <span>$0.00</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold border-t pt-2">
-              <span>Total:</span>
-              <span>${grandTotal.toFixed(2)}</span>
-            </div>
-          </div>
-
+      {/* Action Buttons */}
+      {items.length > 0 && (
+        <div className="mt-4 space-y-2">
           <button
-            onClick={onCheckout}
-            className="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 mt-4 font-semibold"
+            onClick={onCheckout}  // RESTORE the original function call
+            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
           >
-            Process Payment
+            Process Sale
           </button>
-        </>
+          <button
+            onClick={() => {}}  // This will be handled by PaymentModal's clear cart button
+            className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
+          >
+            Clear Cart
+          </button>
+        </div>
       )}
     </div>
   );

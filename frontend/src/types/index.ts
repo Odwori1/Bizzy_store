@@ -170,21 +170,45 @@ export interface SalesReport {
   }
 }
 
+// Additional Report and Dashboard Types (Merged in)
+export interface SalesSummary {
+  total_sales: number;
+  total_tax: number;
+  total_transactions: number;
+  average_transaction_value: number;
+}
+
+export interface TopProduct {
+  product_id: number;
+  product_name: string;
+  quantity_sold: number;
+  total_revenue: number;
+  profit_margin: number;
+}
+
+export interface SalesTrend {
+  date: string;
+  daily_sales: number;
+  transactions: number;
+  average_order_value: number;
+}
+
+export interface DateRange {
+  start_date: string;
+  end_date: string;
+}
+
+// Ensure these interfaces exist and match the backend
 export interface DashboardMetrics {
-  sales_today: {
-    total_sales: number
-    total_tax: number
-    total_transactions: number
-    average_transaction_value: number
-  }
-  inventory_alerts: number
+  sales_today: SalesSummary;
+  inventory_alerts: number;
   weekly_financial: {
-    total_revenue: number
-    cogs: number
-    gross_profit: number
-    gross_margin: number
-    tax_collected: number
-    net_profit: number
-  }
-  timestamp: string
+    total_revenue: number;
+    cogs: number;
+    gross_profit: number;
+    gross_margin: number;
+    tax_collected: number;
+    net_profit: number;
+  };
+  timestamp: string;
 }
