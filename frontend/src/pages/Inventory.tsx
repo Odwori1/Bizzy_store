@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useInventory } from '../hooks/useInventory';
 import { InventoryAdjustment } from '../types';
+import BackButton from '../components/BackButton';
 
 export default function Inventory() {
   const {
@@ -59,6 +60,9 @@ export default function Inventory() {
 
   return (
     <div className="p-6 space-y-6">
+       <div className="mb-4">
+         <BackButton />
+       </div>
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

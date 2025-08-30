@@ -1,0 +1,10 @@
+{
+    "sale_id": 20,
+    "reason": "Customer changed mind",
+    "refund_items": [
+        {
+            "sale_item_id": ,
+            "quantity": 1
+        }
+    ]
+}

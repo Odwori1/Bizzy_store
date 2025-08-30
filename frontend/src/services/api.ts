@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { authService } from './auth';
 
 // Fix: Add type declaration for import.meta.env
 declare global {
@@ -19,9 +18,21 @@ export const api = axios.create({
   },
 });
 
+// Simple function to get token without circular dependencies
+const getToken = (): string | null => {
+  return localStorage.getItem('access_token') || localStorage.getItem('auth_token');
+};
+
+// Simple function to logout without circular dependencies
+const logout = (): void => {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('user_data');
+};
+
 // Request interceptor for auth token
 api.interceptors.request.use((config) => {
-  const token = authService.getToken();
+  const token = getToken();
   console.log('API Request Interceptor - Token found:', !!token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -35,7 +46,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      authService.logout();
+      logout();
       window.location.href = '/login';
     }
     return Promise.reject(error);

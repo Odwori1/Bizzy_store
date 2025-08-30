@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useReports } from '../hooks/useReports';
 import { ReportFormat } from '../types';
 import { reportsService } from '../services/reports'; // ADD THIS IMPORT
+import BackButton from '../components/BackButton';
 
 const Reports: React.FC = () => {
   const {
@@ -67,7 +68,10 @@ const Reports: React.FC = () => {
             blob = await reportsService.exportInventoryToExcel();
             filename = `inventory_report_${new Date().toISOString().split('T')[0]}.xlsx`;
           } else {
-            const data = exportFormat === 'csv' ? convertToCSV(inventoryReport) : JSON.stringify(inventoryReport, null, 2);
+            const data =
+              exportFormat === 'csv'
+                ? convertToCSV(inventoryReport)
+                : JSON.stringify(inventoryReport, null, 2);
             const fileType = exportFormat === 'csv' ? 'text/csv' : 'application/json';
             const extension = exportFormat === 'csv' ? 'csv' : 'json';
             blob = new Blob([data], { type: fileType });
@@ -76,7 +80,10 @@ const Reports: React.FC = () => {
           break;
 
         case 'financial':
-          const data = exportFormat === 'csv' ? convertToCSV(financialReport) : JSON.stringify(financialReport, null, 2);
+          const data =
+            exportFormat === 'csv'
+              ? convertToCSV(financialReport)
+              : JSON.stringify(financialReport, null, 2);
           const fileType = exportFormat === 'csv' ? 'text/csv' : 'application/json';
           const extension = exportFormat === 'csv' ? 'csv' : 'json';
           blob = new Blob([data], { type: fileType });
@@ -127,45 +134,52 @@ const Reports: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-        <p className="text-center mt-4">Loading report data...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <p className="ml-4 text-gray-700 font-medium">Loading report data...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          Error loading reports: {error}
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg max-w-2xl w-full">
+          {`Error loading reports: ${error}`}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Back Button */}
+      <div className="mb-4">
+        <BackButton />
+      </div>
+
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Business Reports</h1>
-          <p className="text-gray-600">Comprehensive analytics and insights for your business</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Business Reports</h1>
+          <p className="text-gray-600">
+            Comprehensive analytics and insights for your business
+          </p>
         </div>
       </div>
 
-      {/* Report Controls */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex flex-col lg:flex-row gap-4 mb-6">
-          {/* Tab Navigation */}
+      {/* Controls */}
+      <div className="bg-white rounded-xl shadow p-6 mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+          {/* Tabs */}
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             {(['sales', 'inventory', 'financial'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`px-4 py-2 text-sm font-medium rounded-md transition ${
                   activeTab === tab
-                    ? 'bg-white text-gray-900 shadow-sm'
+                    ? 'bg-white shadow-sm text-gray-900'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -174,108 +188,102 @@ const Reports: React.FC = () => {
             ))}
           </div>
 
-          {/* Date Range Filter */}
+          {/* Date Range */}
           {(activeTab === 'sales' || activeTab === 'financial') && (
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center mt-2 lg:mt-0">
               <input
                 type="date"
                 value={dateRange.startDate}
                 onChange={(e) => handleDateRangeChange('startDate', e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
               />
               <span className="text-gray-600">to</span>
               <input
                 type="date"
                 value={dateRange.endDate}
                 onChange={(e) => handleDateRangeChange('endDate', e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
               />
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-2 lg:mt-0">
             <button
               onClick={loadReport}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md font-medium hover:bg-indigo-700 transition"
             >
               Generate Report
             </button>
-
             <select
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value as ReportFormat)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="json">JSON</option>
               <option value="excel">Excel</option>
               <option value="csv">CSV</option>
             </select>
-
             <button
               onClick={handleExport}
               disabled={exportLoading}
-              className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+              className={`bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 transition disabled:opacity-50`}
             >
               {exportLoading ? 'Exporting...' : 'Export'}
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Report Content */}
-        <div className="mt-6">
-          {activeTab === 'sales' && salesReport && (
-            <SalesReportView report={salesReport} />
-          )}
-
-          {activeTab === 'inventory' && inventoryReport && (
-            <InventoryReportView report={inventoryReport} />
-          )}
-
-          {activeTab === 'financial' && financialReport && (
-            <FinancialReportView report={financialReport} />
-          )}
-
-          {!salesReport && !inventoryReport && !financialReport && (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📊</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Report Generated</h3>
-              <p className="text-gray-600">Select a report type and click "Generate Report" to get started</p>
-            </div>
-          )}
-        </div>
+      {/* Report Content */}
+      <div className="bg-white rounded-xl shadow p-6">
+        {activeTab === 'sales' && salesReport && <SalesReportView report={salesReport} />}
+        {activeTab === 'inventory' && inventoryReport && <InventoryReportView report={inventoryReport} />}
+        {activeTab === 'financial' && financialReport && <FinancialReportView report={financialReport} />}
+        {!salesReport && !inventoryReport && !financialReport && (
+          <div className="flex flex-col items-center justify-center py-12 text-center text-gray-500">
+            <div className="text-6xl mb-4">📊</div>
+            <h3 className="text-xl font-semibold mb-2">No Report Generated</h3>
+            <p>Select a report type and click "Generate Report" to get started</p>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-// Enhanced Sales Report Component
+// Sales Report View
 const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
   <div className="space-y-6">
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center mb-4">
       <h3 className="text-xl font-semibold text-gray-900">Sales Report</h3>
       <span className="text-sm text-gray-600">
         {report.date_range.start_date} to {report.date_range.end_date}
       </span>
     </div>
-
     {/* Summary Cards */}
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="text-sm text-blue-600">Total Sales</p>
-        <p className="text-2xl font-bold text-blue-900">${report.summary.total_sales.toFixed(2)}</p>
+        <p className="text-sm text-blue-600 mb-2">Total Sales</p>
+        <p className="text-2xl font-bold text-blue-900">
+          ${report.summary.total_sales.toFixed(2)}
+        </p>
       </div>
       <div className="bg-green-50 p-4 rounded-lg">
-        <p className="text-sm text-green-600">Transactions</p>
+        <p className="text-sm text-green-600 mb-2">Transactions</p>
         <p className="text-2xl font-bold text-green-900">{report.summary.total_transactions}</p>
       </div>
       <div className="bg-purple-50 p-4 rounded-lg">
-        <p className="text-sm text-purple-600">Average Order</p>
-        <p className="text-2xl font-bold text-purple-900">${report.summary.average_transaction_value.toFixed(2)}</p>
+        <p className="text-sm text-purple-600 mb-2">Average Order</p>
+        <p className="text-2xl font-bold text-purple-900">
+          ${report.summary.average_transaction_value.toFixed(2)}
+        </p>
       </div>
       <div className="bg-orange-50 p-4 rounded-lg">
-        <p className="text-sm text-orange-600">Tax Collected</p>
-        <p className="text-2xl font-bold text-orange-900">${report.summary.total_tax.toFixed(2)}</p>
+        <p className="text-sm text-orange-600 mb-2">Tax Collected</p>
+        <p className="text-2xl font-bold text-orange-900">
+          ${report.summary.total_tax.toFixed(2)}
+        </p>
       </div>
     </div>
 
@@ -286,10 +294,18 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity Sold</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Margin</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Product
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Quantity Sold
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Revenue
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Margin
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -331,9 +347,13 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
             {report.sales_trends.map((trend: any, index: number) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trend.date}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${trend.daily_sales.toFixed(2)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ${trend.daily_sales.toFixed(2)}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trend.transactions}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${trend.average_order_value.toFixed(2)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ${trend.average_order_value.toFixed(2)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -343,27 +363,28 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
   </div>
 );
 
-// Enhanced Inventory Report Component
+// Inventory Report View
 const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
   <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900">Inventory Report</h3>
-
+    <h3 className="text-xl font-semibold text-gray-900 mb-4">Inventory Report</h3>
     {/* Summary Cards */}
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="text-sm text-blue-600">Total Products</p>
+        <p className="text-sm text-blue-600 mb-2">Total Products</p>
         <p className="text-2xl font-bold text-blue-900">{report.summary.total_products}</p>
       </div>
       <div className="bg-green-50 p-4 rounded-lg">
-        <p className="text-sm text-green-600">Stock Value</p>
-        <p className="text-2xl font-bold text-green-900">${report.summary.total_stock_value.toFixed(2)}</p>
+        <p className="text-sm text-green-600 mb-2">Stock Value</p>
+        <p className="text-2xl font-bold text-green-900">
+          ${report.summary.total_stock_value.toFixed(2)}
+        </p>
       </div>
       <div className="bg-red-50 p-4 rounded-lg">
-        <p className="text-sm text-red-600">Low Stock Items</p>
+        <p className="text-sm text-red-600 mb-2">Low Stock Items</p>
         <p className="text-2xl font-bold text-red-900">{report.summary.low_stock_items}</p>
       </div>
       <div className="bg-orange-50 p-4 rounded-lg">
-        <p className="text-sm text-orange-600">Out of Stock</p>
+        <p className="text-sm text-orange-600 mb-2">Out of Stock</p>
         <p className="text-2xl font-bold text-orange-900">{report.summary.out_of_stock_items}</p>
       </div>
     </div>
@@ -386,10 +407,14 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
               {report.low_stock_alerts.map((alert: any, index: number) => (
                 <tr key={index} className="hover:bg-red-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{alert.product_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-bold">{alert.current_stock}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-bold">
+                    {alert.current_stock}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">{alert.min_stock_level}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-bold bg-red-100 text-red-800 rounded-full">Needs Restock</span>
+                    <span className="px-2 py-1 text-xs font-bold bg-red-100 text-red-800 rounded-full">
+                      Needs Restock
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -418,16 +443,19 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{movement.product_name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span className={`px-2 py-1 text-xs font-bold rounded-full ${
-                    movement.movement_type === 'restock'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 text-xs font-bold rounded-full ${
+                      movement.movement_type === 'restock'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}
+                  >
                     {movement.movement_type}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {movement.quantity > 0 ? '+' : ''}{movement.quantity}
+                  {movement.quantity > 0 ? '+' : ''}
+                  {movement.quantity}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${movement.value.toFixed(2)}
@@ -442,10 +470,10 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
   </div>
 );
 
-// Enhanced Financial Report Component
+// Financial Report View
 const FinancialReportView: React.FC<{ report: any }> = ({ report }) => (
   <div className="space-y-6">
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center mb-4">
       <h3 className="text-xl font-semibold text-gray-900">Financial Report</h3>
       <span className="text-sm text-gray-600">
         {report.date_range.start_date} to {report.date_range.end_date}
@@ -453,34 +481,36 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => (
     </div>
 
     {/* Financial Summary */}
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
       <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="text-sm text-blue-600">Total Revenue</p>
-        <p className="text-2xl font-bold text-blue-900">${report.summary.total_revenue.toFixed(2)}</p>
+        <p className="text-sm text-blue-600 mb-2">Total Revenue</p>
+        <p className="text-2xl font-bold text-blue-900">
+          ${report.summary.total_revenue.toFixed(2)}
+        </p>
       </div>
       <div className="bg-green-50 p-4 rounded-lg">
-        <p className="text-sm text-green-600">Gross Profit</p>
+        <p className="text-sm text-green-600 mb-2">Gross Profit</p>
         <p className="text-2xl font-bold text-green-900">${report.summary.gross_profit.toFixed(2)}</p>
       </div>
       <div className="bg-purple-50 p-4 rounded-lg">
-        <p className="text-sm text-purple-600">Gross Margin</p>
+        <p className="text-sm text-purple-600 mb-2">Gross Margin</p>
         <p className="text-2xl font-bold text-purple-900">{report.summary.gross_margin.toFixed(1)}%</p>
       </div>
       <div className="bg-orange-50 p-4 rounded-lg">
-        <p className="text-sm text-orange-600">COGS</p>
+        <p className="text-sm text-orange-600 mb-2">COGS</p>
         <p className="text-2xl font-bold text-orange-900">${report.summary.cogs.toFixed(2)}</p>
       </div>
       <div className="bg-red-50 p-4 rounded-lg">
-        <p className="text-sm text-red-600">Tax Collected</p>
+        <p className="text-sm text-red-600 mb-2">Tax Collected</p>
         <p className="text-2xl font-bold text-red-900">${report.summary.tax_collected.toFixed(2)}</p>
       </div>
       <div className="bg-indigo-50 p-4 rounded-lg">
-        <p className="text-sm text-indigo-600">Net Profit</p>
+        <p className="text-sm text-indigo-600 mb-2">Net Profit</p>
         <p className="text-2xl font-bold text-indigo-900">${report.summary.net_profit.toFixed(2)}</p>
       </div>
     </div>
 
-    {/* Profitability Analysis */}
+    {/* Product Profitability */}
     <div>
       <h4 className="text-lg font-medium text-gray-900 mb-4">Product Profitability</h4>
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -514,16 +544,22 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => (
       <h4 className="text-lg font-medium text-gray-900 mb-4">Cash Flow Summary</h4>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-green-50 p-4 rounded-lg">
-          <p className="text-sm text-green-600">Cash In</p>
-          <p className="text-2xl font-bold text-green-900">${report.cash_flow.cash_in.toFixed(2)}</p>
+          <p className="text-sm text-green-600 mb-2">Cash In</p>
+          <p className="text-2xl font-bold text-green-900">
+            ${report.cash_flow.cash_in.toFixed(2)}
+          </p>
         </div>
         <div className="bg-red-50 p-4 rounded-lg">
-          <p className="text-sm text-red-600">Cash Out</p>
-          <p className="text-2xl font-bold text-red-900">${report.cash_flow.cash_out.toFixed(2)}</p>
+          <p className="text-sm text-red-600 mb-2">Cash Out</p>
+          <p className="text-2xl font-bold text-red-900">
+            ${report.cash_flow.cash_out.toFixed(2)}
+          </p>
         </div>
         <div className="bg-blue-50 p-4 rounded-lg">
-          <p className="text-sm text-blue-600">Net Cash Flow</p>
-          <p className="text-2xl font-bold text-blue-900">${report.cash_flow.net_cash_flow.toFixed(2)}</p>
+          <p className="text-sm text-blue-600 mb-2">Net Cash Flow</p>
+          <p className="text-2xl font-bold text-blue-900">
+            ${report.cash_flow.net_cash_flow.toFixed(2)}
+          </p>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useUsersStore } from '../hooks/useUsers';
 import { useAuthStore } from '../hooks/useAuth';
 import { User, UserCreate } from '../types';
+import BackButton from '../components/BackButton';
 // NEW: Import 2FA service and modal
 import { twoFactorService, TwoFactorStatusResponse } from '../services/twoFactor';
 import TwoFactorSetupModal from '../components/TwoFactorSetupModal';
@@ -192,6 +193,9 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
+	<div className="mb-4">
+  	  <BackButton />
+	</div>
       <div className="md:flex md:items-center md:justify-between mb-6">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">

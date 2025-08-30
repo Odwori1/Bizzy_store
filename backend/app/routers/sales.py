@@ -7,6 +7,7 @@ from app.crud.sale import create_sale, get_sale, get_sales, get_daily_sales_repo
 from app.schemas.sale_schema import SaleCreate, Sale, SaleSummary, DailySalesReport
 from app.database import get_db
 from app.core.auth import get_current_user
+from app.schemas.refund_schema import SaleWithRefunds  # <-- ADD
 
 router = APIRouter(
     prefix="/api/sales",
@@ -83,3 +84,19 @@ def get_daily_report(
     """Get daily sales report"""
     report = get_daily_sales_report(db, report_date)
     return report
+
+@router.get("/{sale_id}/with-refunds", response_model=SaleWithRefunds)
+def read_sale_with_refunds(
+    sale_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get detailed sale information including refund history"""
+    sale = get_sale(db, sale_id)
+    if not sale:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Sale not found"
+        )
+    return sale
+

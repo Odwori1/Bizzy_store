@@ -102,19 +102,32 @@ def create_sale(db: Session, sale_data: SaleCreate, user_id: int):
         raise e
 
 def get_sale(db: Session, sale_id: int):
-    """Get a single sale by ID"""
-    return db.query(Sale).filter(Sale.id == sale_id).first()
+    """Get a single sale by ID with product information"""
+    sale = db.query(Sale).filter(Sale.id == sale_id).first()
+    
+    if sale:
+        # Eager load related data
+        sale.sale_items = db.query(SaleItem).filter(SaleItem.sale_id == sale_id).all()
+        sale.payments = db.query(Payment).filter(Payment.sale_id == sale_id).all()
+        
+        # Add product names to sale items by joining with products table
+        for item in sale.sale_items:
+            product = db.query(Product).filter(Product.id == item.product_id).first()
+            if product:
+                item.product_name = product.name
+    
+    return sale
 
 def get_sales(
-    db: Session, 
-    skip: int = 0, 
+    db: Session,
+    skip: int = 0,
     limit: int = 100,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None
 ):
     """Get multiple sales with optional date filtering"""
     query = db.query(Sale)
-    
+
     if start_date:
         query = query.filter(Sale.created_at >= start_date)
     if end_date:
@@ -123,8 +136,15 @@ def get_sales(
             day=end_date.day + 1
         )
         query = query.filter(Sale.created_at < next_day)
+
+    sales = query.order_by(Sale.created_at.desc()).offset(skip).limit(limit).all()
     
-    return query.order_by(Sale.created_at.desc()).offset(skip).limit(limit).all()
+    # Eager load user relationship for user_name
+    for sale in sales:
+        if sale.user:
+            sale.user_name = sale.user.username
+    
+    return sales
 
 def get_daily_sales_report(db: Session, report_date: date):
     """Generate daily sales report"""

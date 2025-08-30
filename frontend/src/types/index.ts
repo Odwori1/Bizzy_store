@@ -73,6 +73,7 @@ export interface Sale {
   sale_items: SaleItem[]
   payments: Payment[]
   user_name?: string
+  refunds?: Refund[]; // Add optional refunds array
 }
 
 export interface SaleItem {
@@ -211,4 +212,140 @@ export interface DashboardMetrics {
     net_profit: number;
   };
   timestamp: string;
+}
+
+// Add to existing types...
+
+// Customer Types
+export interface Customer {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  loyalty_points: number;
+  total_spent: number;
+  created_at: string;
+  last_purchase?: string;
+}
+
+export interface CustomerCreate {
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface CustomerUpdate {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface CustomerPurchaseHistory {
+  sale_id: number;
+  total_amount: number;
+  created_at: string;
+  items: string[];
+}
+
+// ... existing types ...
+
+// Refund Types
+export interface RefundItem {
+  id: number;
+  sale_item_id: number;
+  quantity: number;
+  refund_id: number;
+}
+
+export interface Refund {
+  id: number;
+  sale_id: number;
+  user_id: number;
+  reason: string | null;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  refund_items: RefundItem[];
+}
+
+export interface RefundCreate {
+  sale_id: number;
+  reason?: string;
+  refund_items: RefundItemCreate[];
+}
+
+export interface RefundItemCreate {
+  sale_item_id: number;
+  quantity: number;
+}
+
+// Add to existing types...
+
+// Supplier Types
+export interface Supplier {
+  id: number;
+  name: string;
+  contact_person?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  tax_id?: string;
+  payment_terms?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupplierCreate {
+  name: string;
+  contact_person?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  tax_id?: string;
+  payment_terms?: string;
+}
+
+export interface PurchaseOrderItem {
+  id: number;
+  po_id: number;
+  product_id: number;
+  quantity: number;
+  unit_cost: number;
+  received_quantity: number;
+  notes?: string;
+  product_name?: string;
+}
+
+export interface PurchaseOrder {
+  id: number;
+  supplier_id: number;
+  po_number: string;
+  status: 'draft' | 'ordered' | 'received' | 'cancelled';
+  total_amount: number;
+  order_date: string;
+  expected_delivery?: string;
+  received_date?: string;
+  notes?: string;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+  items: PurchaseOrderItem[];
+  supplier_name?: string;
+}
+
+export interface PurchaseOrderCreate {
+  supplier_id: number;
+  expected_delivery?: string;
+  notes?: string;
+  items: PurchaseOrderItemCreate[];
+}
+
+export interface PurchaseOrderItemCreate {
+  product_id: number;
+  quantity: number;
+  unit_cost: number;
+  notes?: string;
 }

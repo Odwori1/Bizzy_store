@@ -2,12 +2,30 @@ import { create } from 'zustand';
 import { reportsService } from '../services/reports';
 import { SalesReport, DashboardMetrics, InventoryReport, FinancialReport } from '../types';
 
+// Add these interfaces at the top
+export interface SalesTrend {
+  date: string;
+  daily_sales: number;
+  transactions: number;
+  average_order_value: number;
+}
+
+export interface TopProduct {
+  product_id: number;
+  product_name: string;
+  quantity_sold: number;
+  total_revenue: number;
+  profit_margin: number;
+}
+
 interface ReportsState {
   // State
   salesReport: SalesReport | null;
   dashboardMetrics: DashboardMetrics | null;
   inventoryReport: InventoryReport | null;
   financialReport: FinancialReport | null;
+  salesTrends: SalesTrend[];
+  topProducts: TopProduct[];
   loading: boolean;
   error: string | null;
 
@@ -16,6 +34,8 @@ interface ReportsState {
   loadDashboardMetrics: () => Promise<void>;
   loadInventoryReport: () => Promise<void>;
   loadFinancialReport: (startDate?: string, endDate?: string) => Promise<void>;
+  loadSalesTrends: (startDate?: string, endDate?: string) => Promise<void>;
+  loadTopProducts: (startDate?: string, endDate?: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -25,6 +45,8 @@ export const useReports = create<ReportsState>((set) => ({
   dashboardMetrics: null,
   inventoryReport: null,
   financialReport: null,
+  salesTrends: [],
+  topProducts: [],
   loading: false,
   error: null,
 
@@ -72,6 +94,26 @@ export const useReports = create<ReportsState>((set) => ({
     }
   },
 
+  // Load sales trends
+  loadSalesTrends: async (startDate?: string, endDate?: string) => {
+    try {
+      const data = await reportsService.getSalesTrends(startDate, endDate);
+      set({ salesTrends: data });
+    } catch (err: any) {
+      set({ error: err.response?.data?.detail || 'Failed to load sales trends' });
+    }
+  },
+
+  // Load top products
+  loadTopProducts: async (startDate?: string, endDate?: string) => {
+    try {
+      const data = await reportsService.getTopProducts(startDate, endDate);
+      set({ topProducts: data });
+    } catch (err: any) {
+      set({ error: err.response?.data?.detail || 'Failed to load top products' });
+    }
+  },
+
   // Clear error
-  clearError: () => set({ error: null })
+  clearError: () => set({ error: null }),
 }));

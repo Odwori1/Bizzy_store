@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware  # Make sure this import is h
 from app.routers import users, auth, products, inventory, sales, reports, business
 from app.services.scheduler import lifespan
 from app.routers import two_factor
+from app.routers import customers  # ADD THIS IMPORT
+from app.routers import refunds  # <-- ADD THIS LINE
+from app.routers import suppliers
 
 app = FastAPI(lifespan=lifespan)
 
@@ -28,6 +31,9 @@ app.include_router(sales.router)
 app.include_router(reports.router)
 app.include_router(business.router)  # ADD THIS LINE
 app.include_router(two_factor.router)  # ADD THIS LINE
+app.include_router(customers.router)  # ADD THIS LINE
+app.include_router(refunds.router)
+app.include_router(suppliers.router)
 
 @app.get("/")
 def read_root():

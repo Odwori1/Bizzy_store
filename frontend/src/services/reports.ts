@@ -1,8 +1,8 @@
 import { api } from './api';
 import { SalesReport, DashboardMetrics, InventoryReport, FinancialReport, ReportFormat } from '../types';
 
+// Sales report
 export const reportsService = {
-  // Sales report
   getSalesReport: async (startDate?: string, endDate?: string): Promise<SalesReport> => {
     const params = new URLSearchParams();
     if (startDate) params.append('start_date', startDate);
@@ -66,6 +66,26 @@ export const reportsService = {
     const response = await api.get(`/api/reports/inventory?${params}`, {
       responseType: 'blob'
     });
+    return response.data;
+  },
+
+  // Sales trends report
+  getSalesTrends: async (startDate?: string, endDate?: string): Promise<SalesTrend[]> => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+
+    const response = await api.get<SalesTrend[]>(`/api/reports/sales/trends?${params}`);
+    return response.data;
+  },
+
+  // Top products report
+  getTopProducts: async (startDate?: string, endDate?: string): Promise<TopProduct[]> => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+
+    const response = await api.get<TopProduct[]>(`/api/reports/products/top?${params}`);
     return response.data;
   }
 };

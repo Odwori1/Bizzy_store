@@ -1,6 +1,7 @@
 import { api } from './api';
 import { Product, ProductCreate } from '../types';
 
+
 export const productService = {
   // Get all products
   getProducts: async (skip: number = 0, limit: number = 100): Promise<Product[]> => {

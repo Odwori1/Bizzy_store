@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../hooks/useAuth'
 
+
 interface NavigationItem {
   name: string;
   href: string;
@@ -22,8 +23,11 @@ const Sidebar: React.FC = () => {
     { name: 'Products', href: '/products', icon: '📦' },
     { name: 'Inventory', href: '/inventory', icon: '📊' },
     { name: 'Reports', href: '/reports', icon: '📈' },
+    { name: 'Customers', href: '/customers', icon: "👥" }, // ADD THIS LINE
     { name: 'Business Settings', href: '/settings/business', icon: '⚙️' },
     { name: 'My Profile', href: '/profile', icon: '👤' },
+    { name: 'Refunds', href: '/refunds', icon: '💸' },
+    { name: 'Suppliers', href: '/suppliers', icon: '🏭' },
   ]
 
   // Admin-only navigation items

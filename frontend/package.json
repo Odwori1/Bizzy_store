@@ -21,6 +21,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.47.0",
     "react-router-dom": "^6.8.1",
+    "recharts": "^3.1.2",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5",
@@ -41,6 +42,6 @@
     "shadcn": "^2.10.0",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5"
+    "vite": "^7.1.3"
   }
 }

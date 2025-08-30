@@ -6,6 +6,10 @@ from .inventory import InventoryHistory
 from .sale import Sale, SaleItem  # ADD THESE TWO LINES
 from .payment import Payment       # ADD THIS LINE
 from .business import Business  # ADD THIS LINE
+from .customer import Customer  # ADD THIS LINE
+from .refund import Refund, RefundItem  # <--- ADD THIS LINE
+from .supplier import Supplier, PurchaseOrder, PurchaseOrderItem
 
 # This ensures all models are imported and their relationships can be resolved
-__all__ = ['Base', 'metadata', 'User', 'Product', 'InventoryHistory', 'Sale', 'SaleItem', 'Payment', 'Business']
+__all__ = ['Base', 'metadata', 'User', 'Product', 'InventoryHistory', 'Sale', 'SaleItem', 'Payment', 'Business', 'Customer', 'Refund',
+    'Supplier', 'PurchaseOrder', 'PurchaseOrderItem']

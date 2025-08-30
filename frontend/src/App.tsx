@@ -16,6 +16,9 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Register from './pages/Register';
 import ProfileSettings from './pages/ProfileSettings';
+import Customers from './pages/Customers'; // ADD THIS IMPORT
+import Refunds from './pages/Refunds';
+import Suppliers from './pages/Suppliers';
 
 function App() {
   return (
@@ -25,8 +28,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-	  <Route path="/register" element={<Register />} />
-	  <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
 
           {/* Protected routes with layout */}
           <Route path="/" element={
@@ -41,8 +44,11 @@ function App() {
             <Route path="products" element={<Products />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="reports" element={<Reports />} />
+	    <Route path="customers" element={<Customers />} /> {/* ADD THIS LINE */}
             <Route path="settings/business" element={<BusinessSettings />} />
             <Route path="users" element={<UserManagement />} />
+	    <Route path="refunds" element={<Refunds />} />
+	    <Route path="suppliers" element={<Suppliers />} />
           </Route>
         </Routes>
       </div>

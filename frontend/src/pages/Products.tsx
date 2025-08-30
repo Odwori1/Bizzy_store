@@ -3,6 +3,7 @@ import { Product, ProductCreate } from '../types';
 import { productService } from '../services/products';
 import ProductForm from '../components/ProductForm';
 import { useAuthStore } from '../hooks/useAuth';
+import BackButton from '../components/BackButton';
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -88,6 +89,9 @@ const Products: React.FC = () => {
 
   return (
     <div className="p-6">
+       <div className="mb-4">
+  	  <BackButton />
+       </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>

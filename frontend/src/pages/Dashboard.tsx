@@ -2,19 +2,35 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../hooks/useAuth';
 import { useReports } from '../hooks/useReports';
+import SalesTrendChart from '../components/charts/SalesTrendChart';
+import TopProductsChart from '../components/charts/TopProductsChart';
+import SalesMetricsCards from '../components/SalesMetricsCards';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuthStore();
-  const { dashboardMetrics, loadDashboardMetrics, loading, error } = useReports();
+  const {
+    dashboardMetrics,
+    salesTrends,
+    topProducts,
+    loadDashboardMetrics,
+    loadSalesTrends,
+    loadTopProducts,
+    loading,
+    error
+  } = useReports();
+
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // Load real data on component mount
   useEffect(() => {
     loadDashboardMetrics();
-    
+    loadSalesTrends();
+    loadTopProducts();
+
     // Update time every minute
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [loadDashboardMetrics, loadSalesTrends, loadTopProducts]);
 
   if (loading) {
     return (
@@ -45,12 +61,36 @@ const Dashboard: React.FC = () => {
             Welcome back, {user?.username}! • {currentTime.toLocaleTimeString()}
           </p>
         </div>
-        <Link 
-          to="/reports" 
+        <Link
+          to="/reports"
           className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
         >
           View Detailed Reports
         </Link>
+      </div>
+
+      {/* Sales Metrics Cards */}
+      {dashboardMetrics?.sales_today && (
+        <SalesMetricsCards
+          metrics={{
+            ...dashboardMetrics.sales_today,
+            daily_sales: dashboardMetrics.sales_today.total_sales,
+            weekly_sales: dashboardMetrics.weekly_financial?.total_revenue
+          }}
+        />
+      )}
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Map salesTrends to the required chart data format */}
+        <SalesTrendChart
+          data={salesTrends.map((trend) => ({
+            date: trend.date,
+            sales: trend.daily_sales,
+            transactions: trend.transactions
+          }))}
+        />
+        <TopProductsChart data={topProducts} />
       </div>
 
       {/* Quick Stats Grid */}
@@ -199,7 +239,7 @@ const Dashboard: React.FC = () => {
               <p className="text-sm text-green-600">View business analytics</p>
             </Link>
             <Link
-              to="/business"
+              to="/settings/business"
               className="p-4 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors"
             >
               <h4 className="font-medium text-purple-900">Business Settings</h4>

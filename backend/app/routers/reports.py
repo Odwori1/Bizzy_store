@@ -3,6 +3,11 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta
 from typing import Optional
+from typing import List  # ADD THIS IMPORT
+from sqlalchemy import func  # ADD THIS IMPORT
+from app.models.sale import Sale, SaleItem  # ADD THESE IMPORTS
+from app.models.product import Product
+from app.schemas.report_schema import SalesTrend, TopProduct  # ADD THESE IMPORTS
 
 from app.database import get_db
 from app.core.auth import get_current_user
@@ -114,3 +119,83 @@ def get_dashboard_metrics(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Dashboard metrics failed: {str(e)}")
+
+
+@router.get("/sales/trends", response_model=List[SalesTrend])
+def get_sales_trends(
+    start_date: date = Query(default=date.today() - timedelta(days=7)),
+    end_date: date = Query(default=date.today()),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get sales trends data for charts"""
+    try:
+        # Query sales data grouped by date
+        sales_data = db.query(
+            func.date(Sale.created_at).label('date'),
+            func.sum(Sale.total_amount).label('daily_sales'),
+            func.count(Sale.id).label('transactions'),
+            func.avg(Sale.total_amount).label('average_order_value')
+        ).filter(
+            Sale.created_at >= start_date,
+            Sale.created_at <= end_date + timedelta(days=1),
+            Sale.payment_status == 'completed'
+        ).group_by(func.date(Sale.created_at)).order_by('date').all()
+
+        # Format the response
+        trends = []
+        for data in sales_data:
+            trends.append({
+                "date": data.date,
+                "daily_sales": float(data.daily_sales or 0),
+                "transactions": data.transactions or 0,
+                "average_order_value": float(data.average_order_value or 0)
+            })
+        
+        return trends
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching sales trends: {str(e)}")
+
+@router.get("/products/top", response_model=List[TopProduct])
+def get_top_products(
+    start_date: date = Query(default=date.today() - timedelta(days=30)),
+    end_date: date = Query(default=date.today()),
+    limit: int = Query(default=10, ge=1, le=50),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get top selling products"""
+    try:
+        # Query top products by revenue
+        top_products = db.query(
+            Product.id.label('product_id'),
+            Product.name.label('product_name'),
+            func.sum(SaleItem.quantity).label('quantity_sold'),
+            func.sum(SaleItem.subtotal).label('total_revenue'),
+            (func.avg(Product.price * 0.2)).label('profit_margin')  # 20% default margin
+        ).join(SaleItem, SaleItem.product_id == Product.id
+        ).join(Sale, Sale.id == SaleItem.sale_id
+        ).filter(
+            Sale.created_at >= start_date,
+            Sale.created_at <= end_date + timedelta(days=1),
+            Sale.payment_status == 'completed'
+        ).group_by(Product.id, Product.name
+        ).order_by(func.sum(SaleItem.subtotal).desc()
+        ).limit(limit).all()
+
+        # Format the response
+        products = []
+        for product in top_products:
+            products.append({
+                "product_id": product.product_id,
+                "product_name": product.product_name,
+                "quantity_sold": product.quantity_sold or 0,
+                "total_revenue": float(product.total_revenue or 0),
+                "profit_margin": float(product.profit_margin or 0)
+            })
+        
+        return products
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching top products: {str(e)}")

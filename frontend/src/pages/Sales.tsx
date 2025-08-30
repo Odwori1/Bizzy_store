@@ -4,6 +4,8 @@ import { salesService } from '../services/sales';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import BackButton from '../components/BackButton';
+import RefundModal from '../components/RefundModal'; // ADD THIS IMPORT
 
 export default function Sales() {
   const [sales, setSales] = useState<SaleSummary[]>([]);
@@ -15,6 +17,8 @@ export default function Sales() {
   const [paymentStatus, setPaymentStatus] = useState<string>('all');
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null); // ADD THIS LINE
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -113,6 +117,18 @@ export default function Sales() {
     }
   };
 
+  // New refund button handler
+  const handleRefundClick = async (saleId: number) => {
+    try {
+      const saleDetails = await salesService.getSale(saleId);
+      setSelectedSaleForRefund(saleDetails);
+      setRefundModalOpen(true);
+    } catch (err: any) {
+      console.error('Error loading sale details:', err);
+      alert('Failed to load sale details for refund');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -139,6 +155,9 @@ export default function Sales() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="mb-4">
+          <BackButton />
+        </div>
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
         <div>
@@ -281,17 +300,13 @@ export default function Sales() {
               filteredSales.map(sale => (
                 <tr key={sale.id} className="border-b hover:bg-gray-50">
                   <td className="p-2 font-medium">#{sale.id}</td>
-                  <td className="p-2">
-                    {format(new Date(sale.created_at), 'MMM dd, yyyy HH:mm')}
-                  </td>
+                  <td className="p-2">{format(new Date(sale.created_at), 'MMM dd, yyyy HH:mm')}</td>
                   <td className="p-2">{sale.user_name || 'Unknown'}</td>
                   <td className="p-2">${sale.total_amount.toFixed(2)}</td>
                   <td className="p-2">${sale.tax_amount.toFixed(2)}</td>
                   <td className="p-2">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                        sale.payment_status
-                      )}`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(sale.payment_status)}`}
                     >
                       {sale.payment_status}
                     </span>
@@ -299,9 +314,17 @@ export default function Sales() {
                   <td className="p-2">
                     <button
                       onClick={() => loadSaleDetails(sale.id)}
-                      className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700"
+                      className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 mr-2"
                     >
                       View Details
+                    </button>
+                    {/* Updated Refund Button */}
+                    <button
+                      onClick={() => handleRefundClick(sale.id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                      disabled={sale.payment_status === 'refunded'}
+                    >
+                      Refund
                     </button>
                   </td>
                 </tr>
@@ -340,9 +363,7 @@ export default function Sales() {
                 <p>
                   <strong>Status:</strong>{' '}
                   <span
-                    className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      selectedSale.payment_status
-                    )}`}
+                    className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedSale.payment_status)}`}
                   >
                     {selectedSale.payment_status}
                   </span>
@@ -378,7 +399,7 @@ export default function Sales() {
                   {selectedSale.sale_items.map((item, index) => (
                     <tr key={index} className="border-b">
                       {/* Changed line to show product name if available */}
-                      <td className="p-2">{item.product_name || `Product #${item.product_id}`}</td>
+                      <td className="p-2">{item.product_name}</td>
                       <td className="p-2">{item.quantity}</td>
                       <td className="p-2">${item.unit_price.toFixed(2)}</td>
                       <td className="p-2">${item.subtotal.toFixed(2)}</td>
@@ -407,9 +428,7 @@ export default function Sales() {
                       <td className="p-2">${payment.amount.toFixed(2)}</td>
                       <td className="p-2">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            payment.status
-                          )}`}
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}
                         >
                           {payment.status}
                         </span>
@@ -432,6 +451,23 @@ export default function Sales() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Add Refund Modal */}
+      {selectedSaleForRefund && (
+        <RefundModal
+          sale={selectedSaleForRefund}
+          isOpen={refundModalOpen}
+          onClose={() => {
+            setRefundModalOpen(false);
+            setSelectedSaleForRefund(null);
+          }}
+          onRefundProcessed={() => {
+            loadSales(); // Refresh the sales list
+            setRefundModalOpen(false);
+            setSelectedSaleForRefund(null);
+          }}
+        />
       )}
     </div>
   );

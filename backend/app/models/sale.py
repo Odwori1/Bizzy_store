@@ -8,6 +8,7 @@ class Sale(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)  # ADD THIS LINE
     total_amount = Column(Float, default=0.0)
     tax_amount = Column(Float, default=0.0)
     payment_status = Column(String(20), default="pending")  # pending, completed, refunded
@@ -15,8 +16,10 @@ class Sale(Base):
 
     # Relationships
     user = relationship("User", back_populates="sales")
+    customer = relationship("Customer", back_populates="sales")  # ADD THIS LINE
     sale_items = relationship("SaleItem", back_populates="sale", cascade="all, delete-orphan")
     payments = relationship("Payment", back_populates="sale", cascade="all, delete-orphan")
+    refunds = relationship("Refund", back_populates="sale")  # Add refund relationship
 
 class SaleItem(Base):
     __tablename__ = "sale_items"
@@ -27,6 +30,7 @@ class SaleItem(Base):
     quantity = Column(Integer, default=1)
     unit_price = Column(Float)
     subtotal = Column(Float)
+    refunded_quantity = Column(Integer, default=0)  # Tracks how many of this item were refunded
 
     # Relationships
     sale = relationship("Sale", back_populates="sale_items")

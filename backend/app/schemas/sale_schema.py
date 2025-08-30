@@ -7,6 +7,7 @@ class SaleItemBase(BaseModel):
     product_id: int
     quantity: int = Field(..., gt=0)
     unit_price: float = Field(..., gt=0)
+    product_name: Optional[str] = None
 
 class SaleItemCreate(SaleItemBase):
     pass
@@ -15,7 +16,9 @@ class SaleItem(SaleItemBase):
     id: int
     subtotal: float
     sale_id: int
+    refunded_quantity: int = 0  # Add this field to the response schema
 
+    product_name: Optional[str] = None
     class Config:
         from_attributes = True
 
@@ -65,7 +68,7 @@ class SaleSummary(BaseModel):
     tax_amount: float
     payment_status: str
     created_at: datetime
-    user_name: str
+    user_name: Optional[str] = None  # Make this optional
 
     class Config:
         from_attributes = True
