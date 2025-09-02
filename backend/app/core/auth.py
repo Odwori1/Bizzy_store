@@ -9,6 +9,7 @@ from app.schemas.user_schema import TokenData
 from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
+from app.crud.user import get_user_by_email, get_user_permissions
 
 # Load environment variables from .env file
 load_dotenv()
@@ -56,17 +57,22 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     print(f"DEBUG: Found user: {user.id if user else None}")
     if user is None:
         raise credentials_exception
-    
-    # RETURN COMPLETE USER OBJECT WITH ALL REQUIRED FIELDS
+
+    # NEW: Get the user's permissions from the database
+    user_permissions = get_user_permissions(db, user.id)  # <-- ADD THIS LINE
+    print(f"DEBUG: User permissions: {user_permissions}")  # <-- Optional debug line
+
+    # RETURN USER OBJECT NOW INCLUDING PERMISSIONS
     return {
         "id": user.id,
         "email": user.email,
-        "username": user.username,  # ADDED
-        "role": user.role,
-        "is_active": user.is_active,  # ADDED
-        "created_at": user.created_at.isoformat() if user.created_at else None  # ADDED
+        "username": user.username,
+        "is_active": user.is_active,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "permissions": user_permissions  # <-- ADD THIS LINE. This is the crucial change.
     }
 
+# This function MUST be defined AFTER get_current_user
 async def get_current_active_user(current_user: dict = Depends(get_current_user)):
     if not current_user.get("is_active", True):
         raise HTTPException(status_code=400, detail="Inactive user")

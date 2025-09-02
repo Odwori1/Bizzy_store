@@ -3,24 +3,27 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta
 from typing import Optional
-from typing import List  # ADD THIS IMPORT
-from sqlalchemy import func  # ADD THIS IMPORT
-from app.models.sale import Sale, SaleItem  # ADD THESE IMPORTS
+from typing import List
+from sqlalchemy import func
+from app.models.sale import Sale, SaleItem
 from app.models.product import Product
-from app.schemas.report_schema import SalesTrend, TopProduct  # ADD THESE IMPORTS
+from app.schemas.report_schema import SalesTrend, TopProduct
 
 from app.database import get_db
 from app.core.auth import get_current_user
 from app.crud.report import get_sales_report, get_inventory_report, get_financial_report
 from app.services.export_service import ExportService
 from app.schemas.report_schema import ReportFormat, SalesReportResponse, InventoryReportResponse, FinancialReportResponse
+# ADD THIS IMPORT
+from app.core.permissions import requires_permission
 
 router = APIRouter(
     prefix="/api/reports",
     tags=["reports"]
 )
 
-@router.get("/sales", response_model=SalesReportResponse)
+# Get sales analysis report - Requires report:view permission
+@router.get("/sales", response_model=SalesReportResponse, dependencies=[Depends(requires_permission("report:view"))])
 def get_sales_analysis(
     start_date: date = Query(default=date.today() - timedelta(days=30)),
     end_date: date = Query(default=date.today()),
@@ -28,10 +31,10 @@ def get_sales_analysis(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get sales analysis report with multiple export options"""
+    """Get sales analysis report with multiple export options (requires report:view permission)"""
     try:
         report_data = get_sales_report(db, start_date, end_date)
-        
+
         if format == ReportFormat.EXCEL:
             filename = f"sales_report_{start_date}_{end_date}"
             return ExportService.export_sales_to_excel(report_data, filename)
@@ -40,20 +43,21 @@ def get_sales_analysis(
             return ExportService.export_sales_to_csv(report_data, filename)
         else:
             return report_data
-            
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Sales report generation failed: {str(e)}")
 
-@router.get("/inventory", response_model=InventoryReportResponse)
+# Get inventory analysis report - Requires report:view permission
+@router.get("/inventory", response_model=InventoryReportResponse, dependencies=[Depends(requires_permission("report:view"))])
 def get_inventory_analysis(
     format: ReportFormat = Query(default=ReportFormat.JSON),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get inventory analysis report"""
+    """Get inventory analysis report (requires report:view permission)"""
     try:
         report_data = get_inventory_report(db)
-        
+
         if format == ReportFormat.EXCEL:
             filename = f"inventory_report_{date.today()}"
             return ExportService.export_inventory_to_excel(report_data, filename)
@@ -63,11 +67,12 @@ def get_inventory_analysis(
             raise HTTPException(status_code=501, detail="CSV export for inventory not implemented yet")
         else:
             return report_data
-            
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inventory report generation failed: {str(e)}")
 
-@router.get("/financial", response_model=FinancialReportResponse)
+# Get financial analysis report - Requires report:view permission
+@router.get("/financial", response_model=FinancialReportResponse, dependencies=[Depends(requires_permission("report:view"))])
 def get_financial_analysis(
     start_date: date = Query(default=date.today() - timedelta(days=30)),
     end_date: date = Query(default=date.today()),
@@ -75,10 +80,10 @@ def get_financial_analysis(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get financial analysis report"""
+    """Get financial analysis report (requires report:view permission)"""
     try:
         report_data = get_financial_report(db, start_date, end_date)
-        
+
         if format == ReportFormat.EXCEL:
             filename = f"financial_report_{start_date}_{end_date}"
             return ExportService.export_financial_to_excel(report_data, filename)
@@ -88,47 +93,48 @@ def get_financial_analysis(
             raise HTTPException(status_code=501, detail="CSV export for financial not implemented yet")
         else:
             return report_data
-            
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Financial report generation failed: {str(e)}")
 
-@router.get("/dashboard")
+# Get dashboard metrics - Requires report:view permission
+@router.get("/dashboard", dependencies=[Depends(requires_permission("report:view"))])
 def get_dashboard_metrics(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get dashboard metrics for real-time display"""
+    """Get dashboard metrics for real-time display (requires report:view permission)"""
     try:
         # Today's sales
         today = date.today()
         sales_today = get_sales_report(db, today, today)
-        
+
         # Inventory status
         inventory = get_inventory_report(db)
-        
+
         # Financial snapshot (last 7 days)
         week_ago = today - timedelta(days=7)
         financial = get_financial_report(db, week_ago, today)
-        
+
         return {
             "sales_today": sales_today['summary'],
             "inventory_alerts": len(inventory['low_stock_alerts']),
             "weekly_financial": financial['summary'],
             "timestamp": datetime.now()
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Dashboard metrics failed: {str(e)}")
 
-
-@router.get("/sales/trends", response_model=List[SalesTrend])
+# Get sales trends data - Requires report:view permission
+@router.get("/sales/trends", response_model=List[SalesTrend], dependencies=[Depends(requires_permission("report:view"))])
 def get_sales_trends(
     start_date: date = Query(default=date.today() - timedelta(days=7)),
     end_date: date = Query(default=date.today()),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get sales trends data for charts"""
+    """Get sales trends data for charts (requires report:view permission)"""
     try:
         # Query sales data grouped by date
         sales_data = db.query(
@@ -151,13 +157,14 @@ def get_sales_trends(
                 "transactions": data.transactions or 0,
                 "average_order_value": float(data.average_order_value or 0)
             })
-        
+
         return trends
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching sales trends: {str(e)}")
 
-@router.get("/products/top", response_model=List[TopProduct])
+# Get top selling products - Requires report:view permission
+@router.get("/products/top", response_model=List[TopProduct], dependencies=[Depends(requires_permission("report:view"))])
 def get_top_products(
     start_date: date = Query(default=date.today() - timedelta(days=30)),
     end_date: date = Query(default=date.today()),
@@ -165,7 +172,7 @@ def get_top_products(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get top selling products"""
+    """Get top selling products (requires report:view permission)"""
     try:
         # Query top products by revenue
         top_products = db.query(
@@ -194,8 +201,8 @@ def get_top_products(
                 "total_revenue": float(product.total_revenue or 0),
                 "profit_margin": float(product.profit_margin or 0)
             })
-        
+
         return products
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching top products: {str(e)}")

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .base import Base
+from .permission import user_role
 
 class User(Base):
     __tablename__ = "users"
@@ -13,8 +14,9 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     #role = Column(String(20), default="cashier")  # 'admin' or 'cashier'
     # ... existing code ...
-    role = Column(String, default='cashier', nullable=False)  # Options: 'admin', 'manager', 'cashier'
+    #role = Column(String, default='cashier', nullable=False)  # Options: 'admin', 'manager', 'cashier'
     # ... existing code ...
+
     created_at = Column(DateTime, default=func.now())
     reset_token = Column(String(100), unique=True, index=True, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
@@ -27,3 +29,15 @@ class User(Base):
     # Relationships
     sales = relationship("Sale", back_populates="user")
     business = relationship("Business", back_populates="user", uselist=False)
+    roles = relationship("Role", secondary=user_role, back_populates="users")
+
+    # NEW: Property to get role names for display
+    @property
+    def role_name(self):
+        """Get a string representation of the user's roles."""
+        if not self.roles:
+            return None
+        return ", ".join([role.name for role in self.roles])
+
+    def __repr__(self):
+        return f"<User {self.username}>"

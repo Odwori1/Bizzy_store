@@ -6,6 +6,10 @@ from app.routers import two_factor
 from app.routers import customers  # ADD THIS IMPORT
 from app.routers import refunds  # <-- ADD THIS LINE
 from app.routers import suppliers
+from app.routers import roles
+from app.routers import expense
+
+from app.routers import currency
 
 app = FastAPI(lifespan=lifespan)
 
@@ -34,6 +38,17 @@ app.include_router(two_factor.router)  # ADD THIS LINE
 app.include_router(customers.router)  # ADD THIS LINE
 app.include_router(refunds.router)
 app.include_router(suppliers.router)
+app.include_router(roles.router)
+app.include_router(currency.router)
+app.include_router(expense.router)
+
+# Add this function to print all routes on startup
+@app.on_event("startup")
+async def startup_event():
+    print("Registered routes:")
+    for route in app.routes:
+        if hasattr(route, 'methods') and hasattr(route, 'path'):
+            print(f"{list(route.methods)} {route.path}")
 
 @app.get("/")
 def read_root():

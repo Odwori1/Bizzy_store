@@ -17,13 +17,16 @@ from app.schemas.inventory_schema import (
 )
 from app.database import get_db
 from app.core.auth import get_current_user
+# ADD THIS IMPORT
+from app.core.permissions import requires_permission
 
 router = APIRouter(
     prefix="/api/inventory",
     tags=["inventory"]
 )
 
-@router.get("/history", response_model=List[InventoryHistory])
+# Get inventory history - Requires inventory:read permission
+@router.get("/history", response_model=List[InventoryHistory], dependencies=[Depends(requires_permission("inventory:read"))])
 def read_inventory_history(
     product_id: int = None,
     skip: int = 0,
@@ -31,16 +34,17 @@ def read_inventory_history(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get inventory history, optionally filtered by product"""
+    """Get inventory history, optionally filtered by product (requires inventory:read permission)"""
     return get_inventory_history(db, product_id, skip, limit)
 
-@router.post("/adjust", response_model=StockLevel)
+# Adjust inventory - Requires inventory:update permission
+@router.post("/adjust", response_model=StockLevel, dependencies=[Depends(requires_permission("inventory:update"))])
 def adjust_inventory_quantity(
     adjustment: InventoryAdjustment,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Adjust inventory quantity (restock or adjustment)"""
+    """Adjust inventory quantity (restock or adjustment) (requires inventory:update permission)"""
     # Verify product exists
     product = get_product(db, adjustment.product_id)
     if not product:
@@ -48,21 +52,21 @@ def adjust_inventory_quantity(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found"
         )
-    
+
     # Verify sufficient stock for negative adjustments
     if adjustment.quantity_change < 0 and product.stock_quantity + adjustment.quantity_change < 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Insufficient stock for this adjustment"
         )
-    
+
     updated_product = adjust_inventory(db, adjustment, current_user["id"])
     if not updated_product:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Failed to adjust inventory"
         )
-    
+
     return {
         "product_id": updated_product.id,
         "product_name": updated_product.name,
@@ -72,13 +76,14 @@ def adjust_inventory_quantity(
         "needs_restock": updated_product.stock_quantity <= updated_product.min_stock_level
     }
 
-@router.get("/low-stock", response_model=List[LowStockAlert])
+# Get low stock alerts - Requires inventory:read permission
+@router.get("/low-stock", response_model=List[LowStockAlert], dependencies=[Depends(requires_permission("inventory:read"))])
 def get_low_stock_alerts(
     threshold: int = None,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get products with low stock levels"""
+    """Get products with low stock levels (requires inventory:read permission)"""
     low_stock_items = get_low_stock_items(db, threshold)
     return [
         {
@@ -90,12 +95,13 @@ def get_low_stock_alerts(
         for item in low_stock_items
     ]
 
-@router.get("/stock-levels", response_model=List[StockLevel])
+# Get current stock levels - Requires inventory:read permission
+@router.get("/stock-levels", response_model=List[StockLevel], dependencies=[Depends(requires_permission("inventory:read"))])
 def get_current_stock_levels(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    """Get current stock levels for all products"""
+    """Get current stock levels for all products (requires inventory:read permission)"""
     return get_stock_levels(db, skip, limit)

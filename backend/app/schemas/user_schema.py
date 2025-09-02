@@ -13,8 +13,10 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool
-    role: str
+    #role: str
     created_at: Optional[datetime] = None  # ← Changed to Optional
+    permissions: List[str] = []
+    role_name: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -23,15 +25,15 @@ class UserRegister(BaseModel):
     email: EmailStr
     username: str
     password: str
-    role: str = 'cashier'  # Default role for new registrations
+    #role: str = 'cashier'  # Default role for new registrations
 
     # Validator to ensure role is one of the allowed values
-    @validator('role')
-    def validate_role(cls, v):
-        allowed_roles = ['admin', 'manager', 'cashier']
-        if v not in allowed_roles:
-            raise ValueError(f'Role must be one of: {", ".join(allowed_roles)}')
-        return v
+    #@validator('role')
+    #def validate_role(cls, v):
+       # allowed_roles = ['admin', 'manager', 'cashier']
+        #if v not in allowed_roles:
+            #raise ValueError(f'Role must be one of: {", ".join(allowed_roles)}')
+        #return v
 
 # Auth Schemas
 class Token(BaseModel):

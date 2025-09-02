@@ -1,10 +1,12 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models.user import User
+from typing import List
 from app.schemas.user_schema import UserCreate
 from passlib.context import CryptContext
 from app.models.inventory import InventoryHistory
 from app.models.sale import Sale
 from app.models.business import Business
+from app.models import Permission, Role
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,7 +26,7 @@ def create_user(db: Session, user: UserCreate):
         username=user.username,
         hashed_password=hashed_password,
         is_active=True,
-        role=user.role if hasattr(user, 'role') else "cashier"
+        #role=user.role if hasattr(user, 'role') else "cashier"
     )
     db.add(db_user)
     db.commit()
@@ -32,7 +34,9 @@ def create_user(db: Session, user: UserCreate):
     return db_user
 
 def get_all_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(User).offset(skip).limit(limit).all()
+    """Get all users from the database, eager loading their roles."""
+    # Eager load the roles relationship to access the role_name property
+    return db.query(User).options(joinedload(User.roles)).offset(skip).limit(limit).all()
 
 def update_user(db: Session, user_id: int, user_update):
     """
@@ -123,3 +127,23 @@ def toggle_user_status(db: Session, user_id: int):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def get_user_permissions(db: Session, user_id: int) -> List[str]:
+    """
+    Get all permissions for a user by aggregating permissions from all their roles.
+    Returns a list of permission names (e.g., ['sale:create', 'product:read']).
+    """
+    user = db.query(User).options(
+        joinedload(User.roles).joinedload(Role.permissions)  # Eagerly load roles and their permissions
+    ).filter(User.id == user_id).first()
+
+    if not user:
+        return []
+
+    # Collect all unique permissions from all of the user's roles
+    permissions_set = set()
+    for role in user.roles:
+        for permission in role.permissions:
+            permissions_set.add(permission.name)
+
+    return list(permissions_set)
