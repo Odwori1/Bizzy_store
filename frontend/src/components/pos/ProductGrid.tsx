@@ -1,5 +1,6 @@
 import React from 'react';
 import { Product } from '../../types';
+import { CurrencyDisplay } from '../CurrencyDisplay';
 
 interface ProductGridProps {
   products: Product[];
@@ -14,33 +15,51 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart, search
   );
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-      {filteredProducts.map((product) => (
-        <div
-          key={product.id}
-          onClick={() => onAddToCart(product)}
-          className="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-indigo-300"
-        >
-          <div className="text-center mb-3">
-            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-2">
-              <span className="text-2xl">📦</span>
+    <div className="p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {filteredProducts.map((product) => (
+          <div
+            key={product.id}
+            className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => onAddToCart(product)}
+          >
+            <div className="text-center mb-3">
+              <span className="text-3xl">📦</span>
             </div>
-            <h3 className="font-semibold text-sm truncate">{product.name}</h3>
-            <p className="text-xs text-gray-600 truncate">{product.barcode}</p>
+            
+            <div className="text-center mb-2">
+              <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 h-10 overflow-hidden">
+                {product.name}
+              </h3>
+              <p className="text-xs text-gray-500 font-mono">{product.barcode}</p>
+            </div>
+
+            <div className="text-center mb-3">
+              {/* FIXED: Use CurrencyDisplay instead of hardcoded $ */}
+              <p className="text-lg font-bold text-green-700">
+                <CurrencyDisplay amount={product.price} />
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                product.stock_quantity === 0
+                  ? 'bg-red-100 text-red-800'
+                  : product.stock_quantity <= product.min_stock_level
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-green-100 text-green-800'
+              }`}>
+                Stock: {product.stock_quantity} (min: {product.min_stock_level})
+              </div>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-lg font-bold text-green-600">${product.price.toFixed(2)}</p>
-            <p className="text-xs text-gray-500">
-              Stock: {product.stock_quantity}
-              {product.min_stock_level > 0 && ` (min: ${product.min_stock_level})`}
-            </p>
-          </div>
-        </div>
-      ))}
-      
+        ))}
+      </div>
+
       {filteredProducts.length === 0 && (
-        <div className="col-span-full text-center py-8">
-          <p className="text-gray-500">No products found</p>
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">No products found</p>
+          <p className="text-gray-400 text-sm">Try a different search term</p>
         </div>
       )}
     </div>

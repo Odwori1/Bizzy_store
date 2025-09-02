@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useCurrency } from '../../hooks/useCurrency';
 import { Sale, Payment, Business, Product } from '../../types';
 import { productService } from '../../services/products';
 
@@ -11,9 +12,7 @@ interface ReceiptProps {
 }
 
 const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountReceived, onClose }) => {
-  // Debug: Log the full sale object to see what data is available
-  console.log('Full sale object received:', JSON.stringify(sale, null, 2));
-
+  const { formatCurrency } = useCurrency();
   const change = amountReceived - sale.total_amount;
   const receiptDate = new Date(sale.created_at).toLocaleString();
 
@@ -49,7 +48,8 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
   };
 
   const handleSave = () => {
-    // Create a blob of the receipt content
+    const currencyCode = business?.currency_code || 'USD';
+
     const receiptContent = `
       ${business?.name || 'Business Name'}
       ${business?.address || 'Business Address'}
@@ -60,24 +60,27 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
       Cashier: ${sale.user_name || 'System'}
 
       Items:
-      ${sale.sale_items.map(item => `
+      ${sale.sale_items
+        .map(
+          (item) => `
         ${(productNames[item.product_id]) || `Product #${item.product_id}`} x${item.quantity}
-        $${item.unit_price.toFixed(2)} each
-        $${item.subtotal.toFixed(2)}
-      `).join('')}
+        ${formatCurrency(item.unit_price)} each
+        ${formatCurrency(item.subtotal)}
+      `
+        )
+        .join('')}
 
-      Subtotal: $${(sale.total_amount - sale.tax_amount).toFixed(2)}
-      Tax: $${sale.tax_amount.toFixed(2)}
-      Total: $${sale.total_amount.toFixed(2)}
+      Subtotal: ${formatCurrency(sale.total_amount - sale.tax_amount)}
+      Tax: ${formatCurrency(sale.tax_amount)}
+      Total: ${formatCurrency(sale.total_amount)}
 
-      Payment: $${amountReceived.toFixed(2)}
-      Change: $${change.toFixed(2)}
+      Payment: ${formatCurrency(amountReceived)}
+      Change: ${formatCurrency(change)}
 
       Thank you for your business!
       Powered by Bizzy POS
     `;
 
-    // Create download link
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -127,11 +130,17 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
                   <span className="font-medium">
                     {(productNames[item.product_id]) || `Product #${item.product_id}`}
                   </span>
-                  <span>${item.subtotal.toFixed(2)}</span>
+                  <span>
+                    {formatCurrency(item.subtotal)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>{item.quantity} x ${item.unit_price.toFixed(2)}</span>
-                  <span>Subtotal: ${item.subtotal.toFixed(2)}</span>
+                  <span>
+                    {item.quantity} x {formatCurrency(item.unit_price)}
+                  </span>
+                  <span>
+                    Subtotal: {formatCurrency(item.subtotal)}
+                  </span>
                 </div>
               </div>
             ))}
@@ -142,23 +151,33 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
         <div className="space-y-1 text-sm border-t border-gray-300 pt-2">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${(sale.total_amount - sale.tax_amount).toFixed(2)}</span>
+            <span>
+              {formatCurrency(sale.total_amount - sale.tax_amount)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>Tax:</span>
-            <span>${sale.tax_amount.toFixed(2)}</span>
+            <span>
+              {formatCurrency(sale.tax_amount)}
+            </span>
           </div>
           <div className="flex justify-between font-bold text-lg border-t border-gray-300 pt-2">
             <span>Total:</span>
-            <span>${sale.total_amount.toFixed(2)}</span>
+            <span>
+              {formatCurrency(sale.total_amount)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>Amount Received:</span>
-            <span>${amountReceived.toFixed(2)}</span>
+            <span>
+              {formatCurrency(amountReceived)}
+            </span>
           </div>
           <div className="flex justify-between font-semibold border-t border-gray-300 pt-2">
             <span>Change:</span>
-            <span>${change.toFixed(2)}</span>
+            <span>
+              {formatCurrency(change)}
+            </span>
           </div>
         </div>
 

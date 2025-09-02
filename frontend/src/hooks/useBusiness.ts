@@ -1,48 +1,52 @@
 import { create } from 'zustand'
-
-interface Business {
-  id: number
-  user_id: number
-  name: string
-  address?: string
-  phone?: string
-  email?: string
-  logo_url?: string
-  tax_id?: string
-}
+import { Business } from '../types'
+import { businessService } from '../services/business' // ADD THIS
 
 interface BusinessState {
   business: Business | null
   isLoading: boolean
+  error: string | null
   loadBusiness: () => Promise<void>
+  updateBusiness: (data: Partial<Business>) => Promise<void>
+  clearError: () => void
 }
 
 export const useBusinessStore = create<BusinessState>((set) => ({
   business: null,
   isLoading: false,
+  error: null,
 
   loadBusiness: async () => {
-    const token = localStorage.getItem('auth_token')
-    if (!token) return
-
-    set({ isLoading: true })
+    set({ isLoading: true, error: null })
     try {
-      const response = await fetch('/api/business/', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      if (response.ok) {
-        const businessData = await response.json()
-        set({ business: businessData })
-      } else if (response.status === 404) {
-        // Business not set up yet, this is normal
+      const businessData = await businessService.getBusiness()
+      set({ business: businessData })
+    } catch (error: any) {
+      if (error.response?.status === 404) {
         set({ business: null })
+      } else {
+        console.error('Failed to load business data:', error)
+        set({ error: error.response?.data?.detail || 'Failed to load business data' })
       }
-    } catch (error) {
-      console.error('Failed to load business data:', error)
     } finally {
       set({ isLoading: false })
     }
-  }
+  },
+
+  updateBusiness: async (data: Partial<Business>) => {
+    set({ isLoading: true, error: null })
+    try {
+      const updatedBusiness = await businessService.updateBusiness(data)
+      set({ business: updatedBusiness })
+    } catch (error: any) {
+      console.error('Failed to update business:', error)
+      const errorMessage = error.response?.data?.detail || 'Failed to update business'
+      set({ error: errorMessage })
+      throw error
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  clearError: () => set({ error: null })
 }))

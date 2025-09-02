@@ -5,9 +5,10 @@ import { useReports } from '../hooks/useReports';
 import SalesTrendChart from '../components/charts/SalesTrendChart';
 import TopProductsChart from '../components/charts/TopProductsChart';
 import SalesMetricsCards from '../components/SalesMetricsCards';
+import { CurrencyDisplay } from '../components/CurrencyDisplay'; // ADD THIS IMPORT
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user, hasPermission } = useAuthStore(); // CHANGED: Added hasPermission
   const {
     dashboardMetrics,
     salesTrends,
@@ -94,17 +95,17 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {/* Sales Today Card */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white p-4 rounded-lg shadow">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">💰</span>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600">Sales Today</h3>
+              <h3 className="text-sm font-medium text-gray-600 mb-2">Sales Today</h3>
               <p className="text-2xl font-bold text-gray-900">
-                ${dashboardMetrics?.sales_today?.total_sales?.toFixed(2) || '0.00'}
+                <CurrencyDisplay amount={dashboardMetrics?.sales_today?.total_sales || 0} /> {/* CHANGED */}
               </p>
             </div>
           </div>
@@ -118,14 +119,14 @@ const Dashboard: React.FC = () => {
             <div>
               <span className="text-gray-600">Average: </span>
               <span className="font-semibold">
-                ${dashboardMetrics?.sales_today?.average_transaction_value?.toFixed(2) || '0.00'}
+                <CurrencyDisplay amount={dashboardMetrics?.sales_today?.average_transaction_value || 0} /> {/* CHANGED */}
               </span>
             </div>
           </div>
         </div>
 
         {/* Inventory Alerts Card */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white p-4 rounded-lg shadow">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">⚠️</span>
@@ -148,15 +149,15 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Weekly Revenue Card */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white p-4 rounded-lg shadow">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">📈</span>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-600">Weekly Revenue</h3>
+              <h3 className="text-sm font-medium text-gray-600 mb-2">Weekly Revenue</h3>
               <p className="text-2xl font-bold text-gray-900">
-                ${dashboardMetrics?.weekly_financial?.total_revenue?.toFixed(2) || '0.00'}
+                <CurrencyDisplay amount={dashboardMetrics?.weekly_financial?.total_revenue || 0} /> {/* CHANGED */}
               </p>
             </div>
           </div>
@@ -166,7 +167,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Gross Margin Card */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white p-4 rounded-lg shadow">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">📊</span>
@@ -219,32 +220,38 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Role-based Admin Section */}
-      {user?.role && ['admin', 'manager'].includes(user.role) && (
+      {/* Role-based section now uses permission check */}
+      {(hasPermission('user:read') || hasPermission('report:view')) && (
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Overview</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link
-              to="/users"
-              className="p-4 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
-            >
-              <h4 className="font-medium text-blue-900">User Management</h4>
-              <p className="text-sm text-blue-600">Manage staff accounts</p>
-            </Link>
-            <Link
-              to="/reports"
-              className="p-4 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
-            >
-              <h4 className="font-medium text-green-900">Reports</h4>
-              <p className="text-sm text-green-600">View business analytics</p>
-            </Link>
-            <Link
-              to="/settings/business"
-              className="p-4 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors"
-            >
-              <h4 className="font-medium text-purple-900">Business Settings</h4>
-              <p className="text-sm text-purple-600">Configure your store</p>
-            </Link>
+            {hasPermission('user:read') && (
+              <Link
+                to="/users"
+                className="p-4 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+              >
+                <h4 className="font-medium text-blue-900">User Management</h4>
+                <p className="text-sm text-blue-600">Manage staff accounts</p>
+              </Link>
+            )}
+            {hasPermission('report:view') && (
+              <Link
+                to="/reports"
+                className="p-4 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
+              >
+                <h4 className="font-medium text-green-900">Reports</h4>
+                <p className="text-sm text-green-600">View business analytics</p>
+              </Link>
+            )}
+            {hasPermission('business:update') && (
+              <Link
+                to="/settings/business"
+                className="p-4 bg-purple-50 rounded-md hover:bg-purple-100 transition-colors"
+              >
+                <h4 className="font-medium text-purple-900">Business Settings</h4>
+                <p className="text-sm text-purple-600">Configure your store</p>
+              </Link>
+            )}
           </div>
         </div>
       )}

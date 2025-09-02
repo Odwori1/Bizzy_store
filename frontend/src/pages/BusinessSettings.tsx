@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useBusinessStore } from '../hooks/useBusiness';
 import { BusinessCreate } from '../types';
+import { currencyService } from '../services/currency'; // Added import
+import { Currency } from '../types'; // Added import
 
 const BusinessSettings: React.FC = () => {
   const {
@@ -12,14 +14,38 @@ const BusinessSettings: React.FC = () => {
     clearError
   } = useBusinessStore();
 
+  // State for currencies
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [isLoadingCurrencies, setIsLoadingCurrencies] = useState(false);
+
+  // Load currencies on component mount
+  useEffect(() => {
+    loadCurrencies();
+  }, []);
+
+  const loadCurrencies = async () => {
+    setIsLoadingCurrencies(true);
+    try {
+      const currencyData = await currencyService.getCurrencies();
+      setCurrencies(currencyData);
+    } catch (error) {
+      console.error('Failed to load currencies:', error);
+    } finally {
+      setIsLoadingCurrencies(false);
+    }
+  };
+
+  // Initialize form data with currency_code
   const [formData, setFormData] = useState<BusinessCreate>({
     name: '',
     address: '',
     phone: '',
     email: '',
     logo_url: '',
-    tax_id: ''
+    tax_id: '',
+    currency_code: business?.currency_code || 'USD' // Default to USD
   });
+
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [originalData, setOriginalData] = useState<BusinessCreate | null>(null);
@@ -32,13 +58,14 @@ const BusinessSettings: React.FC = () => {
   // Set form data when business loads
   useEffect(() => {
     if (business) {
-      const data = {
+      const data: BusinessCreate = {
         name: business.name || '',
         address: business.address || '',
         phone: business.phone || '',
         email: business.email || '',
         logo_url: business.logo_url || '',
-        tax_id: business.tax_id || ''
+        tax_id: business.tax_id || '',
+        currency_code: business.currency_code || 'USD'
       };
       setFormData(data);
       setOriginalData(data);
@@ -46,21 +73,23 @@ const BusinessSettings: React.FC = () => {
   }, [business]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Updated handleSubmit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateBusiness(formData);
+      await updateBusiness(formData); // This should work now
       setSuccessMessage('Business settings updated successfully!');
       setIsEditing(false);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Update failed:', error);
+      // Error is already handled by the store
     }
   };
 
@@ -250,6 +279,30 @@ const BusinessSettings: React.FC = () => {
                     />
                   </div>
                 )}
+              </div>
+
+              {/* Primary Currency Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Primary Currency
+                </label>
+                <select
+                  name="currency_code"
+                  value={formData.currency_code}
+                  onChange={handleInputChange}
+                  disabled={!isEditing || isLoadingCurrencies}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                >
+                  {isLoadingCurrencies ? (
+                    <option>Loading currencies...</option>
+                  ) : (
+                    currencies.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.code} - {currency.name} ({currency.symbol})
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
 
               {/* Action Buttons */}

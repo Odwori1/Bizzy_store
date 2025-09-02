@@ -8,8 +8,9 @@ const Register: React.FC = () => {
     email: '',
     username: '',
     password: '',
-    role: 'cashier'
-  });
+    // RBAC CHANGE: Comment out role field
+    // role: 'cashier'
+  } as UserCreate); // Cast to UserCreate to handle missing role
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { user: currentUser } = useAuthStore();
@@ -50,6 +51,13 @@ const Register: React.FC = () => {
             <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
               sign in to existing account
             </Link>
+          </p>
+        </div>
+
+        {/* RBAC CHANGE: Added update notice */}
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
+          <p className="text-sm text-yellow-700">
+            <strong>Registration Update:</strong> User registration is currently being updated for the new security system. Please contact an administrator for account creation.
           </p>
         </div>
 
@@ -119,7 +127,7 @@ const Register: React.FC = () => {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Note: User registration requires administrator approval. 
+              Note: User registration requires administrator approval.
               Please contact your system administrator for account creation.
             </p>
           </div>

@@ -46,8 +46,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // Handle unauthorized (token invalid/expired)
       logout();
       window.location.href = '/login';
+    } else if (error.response?.status === 403) {
+      // NEW: Handle forbidden (user lacks permission)
+      console.error('Action forbidden: You do not have permission to perform this action.');
+      // You could trigger a notification toast here in the future
+      // Example: toast.error("Permission denied");
     }
     return Promise.reject(error);
   }

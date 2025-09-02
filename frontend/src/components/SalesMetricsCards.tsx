@@ -1,4 +1,5 @@
 import React from 'react';
+import { CurrencyDisplay } from "./CurrencyDisplay";
 
 interface SalesMetrics {
   total_sales: number;
@@ -16,21 +17,21 @@ const SalesMetricsCards: React.FC<SalesMetricsCardsProps> = ({ metrics }) => {
   const cards = [
     {
       title: 'Today\'s Sales',
-      value: `$${metrics.daily_sales?.toFixed(2) || '0.00'}`,
+      value: <CurrencyDisplay amount={metrics.daily_sales || 0} />,
       change: '+12%', // This would come from your API
       icon: '💰',
       color: 'bg-blue-50 text-blue-600'
     },
     {
       title: 'Weekly Revenue',
-      value: `$${metrics.weekly_sales?.toFixed(2) || metrics.total_sales.toFixed(2)}`,
+      value: <CurrencyDisplay amount={metrics.weekly_sales || metrics.total_sales} />,
       change: '+8%',
       icon: '📈',
       color: 'bg-green-50 text-green-600'
     },
     {
       title: 'Avg. Transaction',
-      value: `$${metrics.average_transaction_value.toFixed(2)}`,
+      value: <CurrencyDisplay amount={metrics.average_transaction_value} />,
       change: '+5%',
       icon: '📊',
       color: 'bg-purple-50 text-purple-600'

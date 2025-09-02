@@ -5,7 +5,8 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import BackButton from '../components/BackButton';
-import RefundModal from '../components/RefundModal'; // ADD THIS IMPORT
+import RefundModal from '../components/RefundModal';
+import { CurrencyDisplay } from '../components/CurrencyDisplay'; // ADD THIS IMPORT
 
 export default function Sales() {
   const [sales, setSales] = useState<SaleSummary[]>([]);
@@ -18,7 +19,7 @@ export default function Sales() {
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [refundModalOpen, setRefundModalOpen] = useState(false);
-  const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null); // ADD THIS LINE
+  const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -117,7 +118,7 @@ export default function Sales() {
     }
   };
 
-  // New refund button handler
+  // Handler for refund button
   const handleRefundClick = async (saleId: number) => {
     try {
       const saleDetails = await salesService.getSale(saleId);
@@ -155,9 +156,9 @@ export default function Sales() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="mb-4">
-          <BackButton />
-        </div>
+      <div className="mb-4">
+        <BackButton />
+      </div>
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
         <div>
@@ -192,7 +193,9 @@ export default function Sales() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Total Revenue</h3>
-          <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
+          <p className="text-2xl font-bold">
+            <CurrencyDisplay amount={totalRevenue} /> {/* CHANGED */}
+          </p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Total Transactions</h3>
@@ -201,76 +204,11 @@ export default function Sales() {
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Average Sale</h3>
           <p className="text-2xl font-bold">
-            ${totalTransactions > 0 ? (totalRevenue / totalTransactions).toFixed(2) : '0.00'}
+            <CurrencyDisplay
+              amount={totalTransactions > 0 ? totalRevenue / totalTransactions : 0}
+            /> {/* CHANGED */}
           </p>
         </div>
-      </div>
-
-      {/* Filters */}
-      <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow mb-6">
-        <h3 className="text-lg font-bold mb-4">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          {/* Search */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Search</label>
-            <input
-              type="text"
-              placeholder="Search sales..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
-          {/* Start Date */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
-          {/* End Date */}
-          <div>
-            <label className="block text-sm font-medium mb-2">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
-          {/* Payment Status */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Payment Status</label>
-            <select
-              value={paymentStatus}
-              onChange={(e) => setPaymentStatus(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-            >
-              <option value="all">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="refunded">Refunded</option>
-            </select>
-          </div>
-        </div>
-        {searchTerm || startDate || endDate || paymentStatus !== 'all' ? (
-          <div className="flex justify-end">
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setStartDate('');
-                setEndDate('');
-                setPaymentStatus('all');
-              }}
-              className="mt-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : null}
       </div>
 
       {/* Sales Table */}
@@ -283,8 +221,8 @@ export default function Sales() {
               <th className="p-2 text-left">Sale ID</th>
               <th className="p-2 text-left">Date & Time</th>
               <th className="p-2 text-left">User</th>
-              <th className="p-2 text-left">Amount</th>
-              <th className="p-2 text-left">Tax</th>
+              <th className="p-2 text-left">Amount</th> {/* CHANGED */}
+              <th className="p-2 text-left">Tax</th> {/* CHANGED */}
               <th className="p-2 text-left">Status</th>
               <th className="p-2 text-left">Actions</th>
             </tr>
@@ -297,13 +235,13 @@ export default function Sales() {
                 </td>
               </tr>
             ) : (
-              filteredSales.map(sale => (
+              filteredSales.map((sale) => (
                 <tr key={sale.id} className="border-b hover:bg-gray-50">
                   <td className="p-2 font-medium">#{sale.id}</td>
                   <td className="p-2">{format(new Date(sale.created_at), 'MMM dd, yyyy HH:mm')}</td>
                   <td className="p-2">{sale.user_name || 'Unknown'}</td>
-                  <td className="p-2">${sale.total_amount.toFixed(2)}</td>
-                  <td className="p-2">${sale.tax_amount.toFixed(2)}</td>
+                  <td className="p-2"><CurrencyDisplay amount={sale.total_amount} /></td> {/* CHANGED */}
+                  <td className="p-2"><CurrencyDisplay amount={sale.tax_amount} /></td> {/* CHANGED */}
                   <td className="p-2">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(sale.payment_status)}`}
@@ -318,7 +256,6 @@ export default function Sales() {
                     >
                       View Details
                     </button>
-                    {/* Updated Refund Button */}
                     <button
                       onClick={() => handleRefundClick(sale.id)}
                       className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
@@ -372,13 +309,13 @@ export default function Sales() {
               <div>
                 <h3 className="font-semibold mb-2">Financial Summary</h3>
                 <p>
-                  <strong>Subtotal:</strong> ${(selectedSale.total_amount - selectedSale.tax_amount).toFixed(2)}
+                  <strong>Subtotal:</strong> <CurrencyDisplay amount={selectedSale.total_amount - selectedSale.tax_amount} /> {/* CHANGED */}
                 </p>
                 <p>
-                  <strong>Tax:</strong> ${selectedSale.tax_amount.toFixed(2)}
+                  <strong>Tax:</strong> <CurrencyDisplay amount={selectedSale.tax_amount} /> {/* CHANGED */}
                 </p>
                 <p>
-                  <strong>Total:</strong> ${selectedSale.total_amount.toFixed(2)}
+                  <strong>Total:</strong> <CurrencyDisplay amount={selectedSale.total_amount} /> {/* CHANGED */}
                 </p>
               </div>
             </div>
@@ -398,11 +335,10 @@ export default function Sales() {
                 <tbody>
                   {selectedSale.sale_items.map((item, index) => (
                     <tr key={index} className="border-b">
-                      {/* Changed line to show product name if available */}
                       <td className="p-2">{item.product_name}</td>
                       <td className="p-2">{item.quantity}</td>
-                      <td className="p-2">${item.unit_price.toFixed(2)}</td>
-                      <td className="p-2">${item.subtotal.toFixed(2)}</td>
+                      <td className="p-2"><CurrencyDisplay amount={item.unit_price} /></td> {/* CHANGED */}
+                      <td className="p-2"><CurrencyDisplay amount={item.subtotal} /></td> {/* CHANGED */}
                     </tr>
                   ))}
                 </tbody>
@@ -416,7 +352,7 @@ export default function Sales() {
                 <thead>
                   <tr className="border-b bg-gray-50">
                     <th className="p-2 text-left">Method</th>
-                    <th className="p-2 text-left">Amount</th>
+                    <th className="p-2 text-left">Amount</th> {/* CHANGED */}
                     <th className="p-2 text-left">Status</th>
                     <th className="p-2 text-left">Transaction ID</th>
                   </tr>
@@ -425,7 +361,7 @@ export default function Sales() {
                   {selectedSale.payments.map((payment, index) => (
                     <tr key={index} className="border-b">
                       <td className="p-2 capitalize">{payment.payment_method}</td>
-                      <td className="p-2">${payment.amount.toFixed(2)}</td>
+                      <td className="p-2"><CurrencyDisplay amount={payment.amount} /></td> {/* CHANGED */}
                       <td className="p-2">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}

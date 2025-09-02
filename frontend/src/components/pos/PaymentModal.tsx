@@ -5,6 +5,7 @@ import { useAuthStore } from '../../hooks/useAuth';
 import { useBusinessStore } from '../../hooks/useBusiness';
 import Receipt from './Receipt';
 import { useInventory } from '../../hooks/useInventory';
+import { CurrencyDisplay } from '../CurrencyDisplay'; // ADD THIS IMPORT
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -47,6 +48,8 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
 
   if (!isOpen) return null;
 
+  const currencyCode = business?.currency_code || 'USD';
+
   const calculateChange = () => {
     const received = parseFloat(amountReceived) || 0;
     return received - total;
@@ -66,21 +69,21 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
     setError('');
 
     try {
-      // 1. Prepare the sale items for the API
+      // Prepare sale items
       const saleItems: SaleItemCreate[] = cart.map(item => ({
         product_id: item.product_id,
         quantity: item.quantity,
         unit_price: item.unit_price
       }));
 
-      // 2. Prepare the payment for the API
+      // Prepare payment
       const payments: PaymentCreate[] = [{
         amount: total,
         payment_method: paymentMethod as 'cash' | 'card' | 'mobile_money',
         transaction_id: paymentMethod === 'cash' ? undefined : `txn_${Date.now()}`
       }];
 
-      // 3. Prepare the complete sale object for the API
+      // Prepare sale data
       const saleData = {
         user_id: user.id,
         sale_items: saleItems,
@@ -88,16 +91,15 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
       };
 
       const createdSale = await salesService.createSale(saleData);
-      
-      // Refresh inventory after successful sale
+
+      // Refresh inventory
       await loadStockLevels();
       await loadLowStockAlerts();
-      
+
       setCompletedSale(createdSale);
       setShowReceipt(true);
-
     } catch (err: any) {
-      console.error('Payment processing failed:', err);
+      console.error('Payment failed:', err);
       setError(err.response?.data?.detail || 'Failed to process payment. Please try again.');
     } finally {
       setIsProcessing(false);
@@ -107,7 +109,7 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96">
-        {/* Header with Clear Cart button */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Process Payment</h2>
           <button
@@ -124,8 +126,11 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
           </button>
         </div>
 
+        {/* Total */}
         <div className="mb-4">
-          <p className="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
+          <p className="text-lg font-semibold">
+            Total: <CurrencyDisplay amount={total} /> {/* Replaced $ with CurrencyDisplay */}
+          </p>
         </div>
 
         {error && (
@@ -134,6 +139,7 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
           </div>
         )}
 
+        {/* Payment Form */}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Payment Method</label>
@@ -163,13 +169,14 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
               />
               {amountReceived && (
                 <p className="text-sm mt-1">
-                  Change: ${change >= 0 ? change.toFixed(2) : '0.00'}
+                  Change: <CurrencyDisplay amount={change >= 0 ? change : 0} /> {/* Replaced $ */}
                   {change < 0 && <span className="text-red-600 ml-2">Insufficient amount!</span>}
                 </p>
               )}
             </div>
           )}
 
+          {/* Buttons */}
           <div className="flex space-x-4">
             <button
               type="button"

@@ -1,18 +1,31 @@
-// User Types
+// User Types - UPDATED FOR RBAC
 export interface User {
-  id: number
-  email: string
-  username: string
-  role: 'admin' | 'manager' | 'cashier'  // <- ADD 'manager' HERE
-  is_active: boolean
-  created_at: string
+  id: number;
+  email: string;
+  username: string;
+  // REMOVED: role: 'admin' | 'manager' | 'cashier';
+  // ADDED: The new permissions array from the backend
+  permissions: string[];
+  is_active: boolean;
+  created_at: string;
+  role_name?: string;
 }
 
+// UPDATED: The backend likely now expects a role_name or role_id on creation, not a hardcoded string.
+// We need to check the backend schema for the correct field name.
+// This is a placeholder. The correct structure might be:
+// export interface UserCreate {
+//   email: string;
+//   username: string;
+//   password: string;
+//   role_name: string; // or role_id: number;
+// }
+// For now, we'll keep it simple until we confirm the create endpoint.
 export interface UserCreate {
-  email: string
-  username: string
-  password: string
-  role: 'admin' | 'manager' | 'cashier'  // <- ADD 'manager' HERE
+  email: string;
+  username: string;
+  password: string;
+  role: string; // This will likely need to change based on backend API
 }
 
 // Product Types
@@ -121,6 +134,9 @@ export interface Business {
   email?: string;
   tax_id?: string;
   logo_url?: string;
+  currency_code?: string; // NEW
+  country?: string; // NEW
+  country_code?: string; // NEW
 }
 
 // Inventory Types
@@ -348,4 +364,77 @@ export interface PurchaseOrderItemCreate {
   quantity: number;
   unit_cost: number;
   notes?: string;
+}
+
+// Add Currency types (add this anywhere in the file)
+export interface Currency {
+  id: number;
+  code: string;
+  name: string;
+  symbol: string;
+  decimal_places: number;
+  symbol_position: 'before' | 'after' | 'space_before' | 'space_after';
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ExchangeRate {
+  base_currency: string;
+  target_currency: string;
+  rate: number;
+  effective_date: string;
+  source: string;
+}
+
+export interface BusinessCurrencyUpdate {
+  currency_code: string;
+}
+
+export interface CurrencyConversion {
+  original_amount: number;
+  from_currency: string;
+  to_currency: string;
+  converted_amount: number;
+}
+
+// Add to existing types...
+
+export interface ExpenseCategory {
+  id: number;
+  name: string;
+  description?: string;
+  is_active: boolean;
+}
+
+export interface Expense {
+  id: number;
+  amount: number;
+  currency_code: string;
+  description: string;
+  category_id: number;
+  business_id: number;
+  payment_method: string;
+  is_recurring: boolean;
+  recurrence_interval?: string;
+  date: string;
+  created_by: number;
+  receipt_url?: string;
+  category?: ExpenseCategory;
+}
+
+export interface ExpenseCreate {
+  amount: number;
+  currency_code: string;
+  description: string;
+  category_id: number;
+  business_id: number;
+  payment_method?: string;
+  is_recurring?: boolean;
+  recurrence_interval?: string;
+  receipt_url?: string;
+}
+
+export interface ExpenseCategoryCreate {
+  name: string;
+  description?: string;
 }

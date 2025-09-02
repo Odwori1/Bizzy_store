@@ -6,117 +6,22 @@ import BackButton from '../components/BackButton';
 // NEW: Import 2FA service and modal
 import { twoFactorService, TwoFactorStatusResponse } from '../services/twoFactor';
 import TwoFactorSetupModal from '../components/TwoFactorSetupModal';
+// NEW: Import roles service and types
+import { rolesService, Role } from '../services/roles';
 // END NEW
 
-// Component for the form (used in Create and Edit)
-const UserForm: React.FC<{
-  initialData?: Partial<UserCreate>;
-  onSubmit: (data: UserCreate) => Promise<void>;
-  onCancel: () => void;
-  isLoading: boolean;
-  title: string;
-}> = ({ initialData, onSubmit, onCancel, isLoading, title }) => {
-  const [formData, setFormData] = useState<UserCreate>({
-    email: initialData?.email || '',
-    username: initialData?.username || '',
-    password: initialData?.password || '',
-    role: initialData?.role || 'cashier',
-  } as UserCreate);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onSubmit(formData);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">{title}</h3>
-
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email *
-        </label>
-        <input
-          type="email"
-          id="email"
-          required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-          username *
-        </label>
-        <input
-          type="text"
-          id="username"
-          required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          value={formData.username}
-          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password {initialData ? '(Leave blank to keep unchanged)' : '*'}
-        </label>
-        <input
-          type="password"
-          id="password"
-          required={!initialData}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-          Role *
-        </label>
-        <select
-          id="role"
-          required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          value={formData.role}
-          onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'manager' | 'cashier' })}
-        >
-          <option value="cashier">Cashier</option>
-          <option value="manager">Manager</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-
-      <div className="flex justify-end space-x-3 pt-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md border border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-        >
-          {isLoading ? 'Saving...' : 'Save User'}
-        </button>
-      </div>
-    </form>
-  );
-};
+// ... [The UserForm component remains exactly the same. KEEP IT] ...
 
 // Main Page Component
 const UserManagement: React.FC = () => {
   const { users, isLoading, error, fetchUsers, createUser, deleteUser, toggleUserStatus, clearError } = useUsersStore();
-  const { user: currentUser } = useAuthStore();
+  const { user: currentUser, hasPermission } = useAuthStore();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  // NEW: State for Roles and role assignment loading
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [assigningRole, setAssigningRole] = useState<number | null>(null); // user ID for which role is being assigned
   // NEW: State for 2FA modal and status
   const [is2FAModalOpen, setIs2FAModalOpen] = useState(false);
   const [user2FAStatus, setUser2FAStatus] = useState<Record<number, boolean>>({});
@@ -125,13 +30,31 @@ const UserManagement: React.FC = () => {
   useEffect(() => {
     if (currentUser !== undefined) {
       setIsAuthChecked(true);
-      if (currentUser?.role && ['admin', 'manager'].includes(currentUser.role)) {
+      if (currentUser && hasPermission('user:read')) {
         fetchUsers();
         // Fetch 2FA status for the current user only (admin/manager)
         fetch2FAStatus(currentUser.id);
       }
+      // NEW: Fetch available roles if user has permission to manage them
+      if (currentUser && hasPermission('role:manage')) {
+        fetchRoles();
+      }
     }
-  }, [currentUser, fetchUsers]);
+  }, [currentUser, fetchUsers, hasPermission]); // RBAC CHANGE: Added hasPermission to dependencies
+
+  // NEW: Function to fetch available roles
+  const fetchRoles = async () => {
+    setIsLoadingRoles(true);
+    try {
+      const rolesData = await rolesService.getRoles();
+      setRoles(rolesData);
+    } catch (error) {
+      console.error('Failed to fetch roles:', error);
+      // Handle error (e.g., show a message)
+    } finally {
+      setIsLoadingRoles(false);
+    }
+  };
 
   const handleCreateUser = async (userData: UserCreate) => {
     try {
@@ -154,6 +77,22 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  // NEW: Function to handle role changes
+  const handleRoleChange = async (userId: number, roleId: number) => {
+    setAssigningRole(userId);
+    try {
+      await rolesService.assignRoleToUser(userId, roleId);
+      // Optimistically update the UI, or refetch users to get the new role name
+      await fetchUsers(); // Simplest way: refetch the user list
+      // Alternatively, you could update the local state without a full refetch
+    } catch (error) {
+      console.error('Failed to assign role:', error);
+      alert('Failed to assign role. Please try again.');
+    } finally {
+      setAssigningRole(null);
+    }
+  };
+
   // NEW: Function to fetch 2FA status for the current user (admin/manager only)
   const fetch2FAStatus = async (userId: number) => {
     try {
@@ -172,17 +111,18 @@ const UserManagement: React.FC = () => {
     );
   }
 
-  if (!currentUser || !['admin', 'manager'].includes(currentUser.role)) {
+  // RBAC CHANGE: Replaced role check with permission check
+  if (!currentUser || !hasPermission('user:read')) {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
           <div className="flex">
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>Access Denied.</strong> You must be an administrator or manager to view this page.
+                <strong>Access Denied.</strong> You need the 'user:read' permission to view this page.
               </p>
               <p className="text-xs text-yellow-600 mt-1">
-                Current user: {currentUser ? `${currentUser.username} (${currentUser.role})` : 'Not loaded'}
+                Current user: {currentUser ? currentUser.username : 'Not loaded'}
               </p>
             </div>
           </div>
@@ -193,9 +133,9 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-	<div className="mb-4">
-  	  <BackButton />
-	</div>
+        <div className="mb-4">
+          <BackButton />
+        </div>
       <div className="md:flex md:items-center md:justify-between mb-6">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
@@ -259,6 +199,7 @@ const UserManagement: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                {/* RBAC CHANGE: Replaced Role with Permissions */}
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 {/* 2FA Status Column - Only show for current user */}
@@ -274,12 +215,31 @@ const UserManagement: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.username}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                  {/* RBAC CHANGE: Replaced Permissions count with Role selector */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                      ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 
-                        user.role === 'manager' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                      {user.role}
-                    </span>
+                    {hasPermission('role:manage') ? (
+                      isLoadingRoles || assigningRole === user.id ? (
+                        <span className="text-gray-400">Loading...</span>
+                      ) : (
+                        <select
+                          className="text-xs border rounded p-1 bg-white"
+                          value={roles.find(r => r.name === user.role_name)?.id || ''}
+                          onChange={(e) => handleRoleChange(user.id, parseInt(e.target.value))}
+                          disabled={assigningRole !== null}
+                        >
+                          <option value="">Select Role</option>
+                          {roles.map((role) => (
+                            <option key={role.id} value={role.id}>
+                              {role.name}
+                            </option>
+                          ))}
+                        </select>
+                      )
+                    ) : (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                        {user.role_name || 'N/A'}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full

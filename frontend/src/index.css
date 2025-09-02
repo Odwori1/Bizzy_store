@@ -67,3 +67,190 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ===== ENHANCED CURRENCY DISPLAY ===== */
+.currency-display {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+  min-width: 60px;
+  max-width: 140px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: help;
+  position: relative;
+  gap: 0.1rem;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+/* Currency code (top line) */
+.currency-display .currency-code {
+  font-size: 0.7em;
+  font-weight: 600;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Amount (bottom line) */
+.currency-display .currency-amount {
+  font-size: 1em;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Adaptive font sizing for long amounts */
+.currency-display.currency-long .currency-amount {
+  font-size: 0.85em;
+}
+
+.currency-display.currency-very-long .currency-amount {
+  font-size: 0.75em;
+}
+
+/* Hover tooltip shows full formatted value */
+.currency-display[data-full-value]:hover::after {
+  content: attr(data-full-value);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #000;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.currency-display[data-full-value]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #000;
+  z-index: 1001;
+}
+
+/* Loading state */
+.currency-display.currency-loading {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.currency-display.currency-loading .currency-code,
+.currency-display.currency-loading .currency-amount {
+  color: #999;
+}
+
+/* Error state */
+.currency-display.currency-error {
+  background-color: rgba(255, 165, 0, 0.1);
+  border-color: rgba(255, 165, 0, 0.3);
+}
+
+.currency-display.currency-error .currency-amount {
+  color: #f97316;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .currency-display {
+    max-width: 110px;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .currency-display .currency-amount {
+    font-size: 0.9em;
+  }
+  
+  .currency-display.currency-long .currency-amount {
+    font-size: 0.8em;
+  }
+  
+  .currency-display.currency-very-long .currency-amount {
+    font-size: 0.7em;
+  }
+}
+
+/* Special cases for different contexts */
+.product-grid .currency-display {
+  max-width: 100px;
+}
+
+.metric-card .currency-display {
+  max-width: 160px;
+  background-color: transparent;
+  border: none;
+}
+
+.metric-card .currency-display .currency-amount {
+  font-size: 1.5em;
+}
+
+.cart-item .currency-display {
+  max-width: 90px;
+  background-color: transparent;
+  border: none;
+}
+
+/* Compact variant */
+.currency-display.currency-compact {
+  min-width: 50px;
+  max-width: 100px;
+  padding: 0.15rem 0.3rem;
+}
+
+.currency-display.currency-compact .currency-code {
+  font-size: 0.6em;
+}
+
+.currency-display.currency-compact .currency-amount {
+  font-size: 0.85em;
+}
+
+/* Ensure product names don't overflow */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Product grid specific improvements */
+.product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+}
+
+.product-grid > div {
+  min-width: 0; /* Critical for text overflow in flex/grid children */
+}
+
+.product-grid h3 {
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Cart item layout fixes */
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+}

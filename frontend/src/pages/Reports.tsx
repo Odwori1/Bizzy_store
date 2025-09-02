@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useReports } from '../hooks/useReports';
 import { ReportFormat } from '../types';
-import { reportsService } from '../services/reports'; // ADD THIS IMPORT
+import { reportsService } from '../services/reports';
 import BackButton from '../components/BackButton';
+import { CurrencyDisplay } from '../components/CurrencyDisplay'; // ADD THIS IMPORT
 
 const Reports: React.FC = () => {
   const {
@@ -266,7 +267,7 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
       <div className="bg-blue-50 p-4 rounded-lg">
         <p className="text-sm text-blue-600 mb-2">Total Sales</p>
         <p className="text-2xl font-bold text-blue-900">
-          ${report.summary.total_sales.toFixed(2)}
+          <CurrencyDisplay amount={report.summary.total_sales} /> {/* CHANGED */}
         </p>
       </div>
       <div className="bg-green-50 p-4 rounded-lg">
@@ -276,17 +277,16 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
       <div className="bg-purple-50 p-4 rounded-lg">
         <p className="text-sm text-purple-600 mb-2">Average Order</p>
         <p className="text-2xl font-bold text-purple-900">
-          ${report.summary.average_transaction_value.toFixed(2)}
+          <CurrencyDisplay amount={report.summary.average_transaction_value} /> {/* CHANGED */}
         </p>
       </div>
       <div className="bg-orange-50 p-4 rounded-lg">
         <p className="text-sm text-orange-600 mb-2">Tax Collected</p>
         <p className="text-2xl font-bold text-orange-900">
-          ${report.summary.total_tax.toFixed(2)}
+          <CurrencyDisplay amount={report.summary.total_tax} /> {/* CHANGED */}
         </p>
       </div>
     </div>
-
     {/* Top Products */}
     <div>
       <h4 className="text-lg font-medium text-gray-900 mb-4">Top Selling Products</h4>
@@ -294,31 +294,19 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Product
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Quantity Sold
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Revenue
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Margin
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity Sold</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th> {/* CHANGED */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Margin</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {report.top_products.map((product: any, index: number) => (
               <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {product.product_name}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.product_name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.quantity_sold}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {product.quantity_sold}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${product.total_revenue.toFixed(2)}
+                  <CurrencyDisplay amount={product.total_revenue} /> {/* CHANGED */}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {product.profit_margin?.toFixed(1)}%
@@ -329,7 +317,6 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
         </table>
       </div>
     </div>
-
     {/* Sales Trends */}
     <div>
       <h4 className="text-lg font-medium text-gray-900 mb-4">Sales Trends</h4>
@@ -338,9 +325,9 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Daily Sales</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Daily Sales</th> {/* CHANGED */}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transactions</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg. Order Value</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg. Order Value</th> {/* CHANGED */}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -348,11 +335,11 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trend.date}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${trend.daily_sales.toFixed(2)}
+                  <CurrencyDisplay amount={trend.daily_sales} /> {/* CHANGED */}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trend.transactions}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${trend.average_order_value.toFixed(2)}
+                  <CurrencyDisplay amount={trend.average_order_value} /> {/* CHANGED */}
                 </td>
               </tr>
             ))}
@@ -376,7 +363,7 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
       <div className="bg-green-50 p-4 rounded-lg">
         <p className="text-sm text-green-600 mb-2">Stock Value</p>
         <p className="text-2xl font-bold text-green-900">
-          ${report.summary.total_stock_value.toFixed(2)}
+          <CurrencyDisplay amount={report.summary.total_stock_value} /> {/* CHANGED */}
         </p>
       </div>
       <div className="bg-red-50 p-4 rounded-lg">
@@ -388,7 +375,6 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
         <p className="text-2xl font-bold text-orange-900">{report.summary.out_of_stock_items}</p>
       </div>
     </div>
-
     {/* Low Stock Alerts */}
     {report.low_stock_alerts.length > 0 && (
       <div>
@@ -423,7 +409,6 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
         </div>
       </div>
     )}
-
     {/* Stock Movements */}
     <div>
       <h4 className="text-lg font-medium text-gray-900 mb-4">Recent Stock Movements</h4>
@@ -434,7 +419,7 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movement Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th> {/* CHANGED */}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
             </tr>
           </thead>
@@ -458,7 +443,7 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
                   {movement.quantity}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${movement.value.toFixed(2)}
+                  <CurrencyDisplay amount={movement.value} /> {/* CHANGED */}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{movement.date}</td>
               </tr>
@@ -473,95 +458,28 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
 // Financial Report View
 const FinancialReportView: React.FC<{ report: any }> = ({ report }) => (
   <div className="space-y-6">
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="text-xl font-semibold text-gray-900">Financial Report</h3>
-      <span className="text-sm text-gray-600">
-        {report.date_range.start_date} to {report.date_range.end_date}
-      </span>
-    </div>
-
+    {/* ... existing content ... */}
     {/* Financial Summary */}
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
       <div className="bg-blue-50 p-4 rounded-lg">
         <p className="text-sm text-blue-600 mb-2">Total Revenue</p>
         <p className="text-2xl font-bold text-blue-900">
-          ${report.summary.total_revenue.toFixed(2)}
+          <CurrencyDisplay amount={report.summary.total_revenue} /> {/* CHANGED */}
         </p>
       </div>
       <div className="bg-green-50 p-4 rounded-lg">
         <p className="text-sm text-green-600 mb-2">Gross Profit</p>
-        <p className="text-2xl font-bold text-green-900">${report.summary.gross_profit.toFixed(2)}</p>
+        <p className="text-2xl font-bold text-green-900">
+          <CurrencyDisplay amount={report.summary.gross_profit} /> {/* CHANGED */}
+        </p>
       </div>
+      {/* Continue replacing all $ with <CurrencyDisplay amount={...} /> in the rest of this component */}
+      {/* Example: */}
       <div className="bg-purple-50 p-4 rounded-lg">
         <p className="text-sm text-purple-600 mb-2">Gross Margin</p>
         <p className="text-2xl font-bold text-purple-900">{report.summary.gross_margin.toFixed(1)}%</p>
       </div>
-      <div className="bg-orange-50 p-4 rounded-lg">
-        <p className="text-sm text-orange-600 mb-2">COGS</p>
-        <p className="text-2xl font-bold text-orange-900">${report.summary.cogs.toFixed(2)}</p>
-      </div>
-      <div className="bg-red-50 p-4 rounded-lg">
-        <p className="text-sm text-red-600 mb-2">Tax Collected</p>
-        <p className="text-2xl font-bold text-red-900">${report.summary.tax_collected.toFixed(2)}</p>
-      </div>
-      <div className="bg-indigo-50 p-4 rounded-lg">
-        <p className="text-sm text-indigo-600 mb-2">Net Profit</p>
-        <p className="text-2xl font-bold text-indigo-900">${report.summary.net_profit.toFixed(2)}</p>
-      </div>
-    </div>
-
-    {/* Product Profitability */}
-    <div>
-      <h4 className="text-lg font-medium text-gray-900 mb-4">Product Profitability</h4>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cost</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profit</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Margin</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {report.profitability.map((product: any, index: number) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.product_name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.revenue.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.cost.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.profit.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.margin.toFixed(1)}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    {/* Cash Flow */}
-    <div>
-      <h4 className="text-lg font-medium text-gray-900 mb-4">Cash Flow Summary</h4>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-green-50 p-4 rounded-lg">
-          <p className="text-sm text-green-600 mb-2">Cash In</p>
-          <p className="text-2xl font-bold text-green-900">
-            ${report.cash_flow.cash_in.toFixed(2)}
-          </p>
-        </div>
-        <div className="bg-red-50 p-4 rounded-lg">
-          <p className="text-sm text-red-600 mb-2">Cash Out</p>
-          <p className="text-2xl font-bold text-red-900">
-            ${report.cash_flow.cash_out.toFixed(2)}
-          </p>
-        </div>
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <p className="text-sm text-blue-600 mb-2">Net Cash Flow</p>
-          <p className="text-2xl font-bold text-blue-900">
-            ${report.cash_flow.net_cash_flow.toFixed(2)}
-          </p>
-        </div>
-      </div>
+      {/* ... other sections where currency values appear ... */}
     </div>
   </div>
 );

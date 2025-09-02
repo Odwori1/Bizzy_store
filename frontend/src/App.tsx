@@ -19,6 +19,7 @@ import ProfileSettings from './pages/ProfileSettings';
 import Customers from './pages/Customers'; // ADD THIS IMPORT
 import Refunds from './pages/Refunds';
 import Suppliers from './pages/Suppliers';
+import Expenses from './pages/Expenses';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path="users" element={<UserManagement />} />
 	    <Route path="refunds" element={<Refunds />} />
 	    <Route path="suppliers" element={<Suppliers />} />
+	    <Route path="expenses" element={<Expenses />} />
           </Route>
         </Routes>
       </div>

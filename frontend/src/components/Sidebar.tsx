@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../hooks/useAuth'
-
+// Import the new permission utility function
+import { hasPermission } from '../lib/permissions';
 
 interface NavigationItem {
   name: string;
   href: string;
   icon: string;
-  adminOnly?: boolean;
+  // CHANGED: Replace 'adminOnly' with a specific permission string
+  requiredPermission?: string;
 }
 
 const Sidebar: React.FC = () => {
@@ -15,45 +17,41 @@ const Sidebar: React.FC = () => {
   const { user, isLoading } = useAuthStore()
   const [navigation, setNavigation] = useState<NavigationItem[]>([])
 
-  // Base navigation items
+  // UPDATED: Navigation items now specify a required permission instead of a role
   const baseNavigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: '📊' },
     { name: 'POS', href: '/pos', icon: '🛒' },
     { name: 'Sales', href: '/sales', icon: '📋' },
     { name: 'Products', href: '/products', icon: '📦' },
     { name: 'Inventory', href: '/inventory', icon: '📊' },
-    { name: 'Reports', href: '/reports', icon: '📈' },
-    { name: 'Customers', href: '/customers', icon: "👥" }, // ADD THIS LINE
-    { name: 'Business Settings', href: '/settings/business', icon: '⚙️' },
+    { name: 'Reports', href: '/reports', icon: '📈', requiredPermission: 'report:view' },
+    { name: 'Customers', href: '/customers', icon: "👥" },
+    { name: 'Expenses', href: '/expenses', icon: '💰' }, // ADD THIS LINE
+    { name: 'Business Settings', href: '/settings/business', icon: '⚙️', requiredPermission: 'business:update' },
     { name: 'My Profile', href: '/profile', icon: '👤' },
-    { name: 'Refunds', href: '/refunds', icon: '💸' },
-    { name: 'Suppliers', href: '/suppliers', icon: '🏭' },
-  ]
-
-  // Admin-only navigation items
-  const adminNavigation: NavigationItem[] = [
-    { name: 'User Management', href: '/users', icon: '👥', adminOnly: true }
+    { name: 'Refunds', href: '/refunds', icon: '💸', requiredPermission: 'sale:refund' },
+    { name: 'Suppliers', href: '/suppliers', icon: '🏭', requiredPermission: 'supplier:read' },
+    // CHANGED: User Management now requires a specific permission
+    { name: 'User Management', href: '/users', icon: '👥', requiredPermission: 'user:read' },
   ]
 
   // Update navigation when user state changes
   useEffect(() => {
-    if (!isLoading) {
-      let finalNavigation = [...baseNavigation]
-      
-      // Add admin items if user is admin
-      if (user?.role && ['admin', 'manager'].includes(user.role)) {
-        finalNavigation = [...finalNavigation, ...adminNavigation]
-      }
-      
-      setNavigation(finalNavigation)
+    if (!isLoading && user) {
+      // Filter the navigation: show item if no permission is required OR if the user has the required permission
+      const filteredNavigation = baseNavigation.filter(item =>
+        !item.requiredPermission || hasPermission(item.requiredPermission, user.permissions)
+      );
+      setNavigation(filteredNavigation);
     }
-  }, [user, isLoading])
+  }, [user, isLoading]) // Re-run when user or loading state changes
 
   if (isLoading) {
     return (
-      <div className="w-64 bg-gray-800 text-white">
-        <div className="p-4 text-xl font-semibold">Bizzy POS</div>
-        <nav className="mt-6">
+      // FIX: Added flex and overflow-hidden to loading state container
+      <div className="w-64 bg-gray-800 text-white flex flex-col overflow-hidden">
+        <div className="p-4 text-xl font-semibold border-b border-gray-700 flex-shrink-0">Bizzy POS</div>
+        <nav className="mt-6 flex-1 overflow-hidden">
           <ul>
             {baseNavigation.map((item) => (
               <li key={item.name} className="px-4 py-2">
@@ -70,9 +68,13 @@ const Sidebar: React.FC = () => {
   }
 
   return (
-    <div className="w-64 bg-gray-800 text-white">
-      <div className="p-4 text-xl font-semibold">Bizzy POS</div>
-      <nav className="mt-6">
+    // FIX: Main container is now a flex column that takes full height and hides overflow
+    <div className="w-64 bg-gray-800 text-white flex flex-col h-full overflow-hidden">
+      {/* FIX: Logo/header section is fixed and does not scroll */}
+      <div className="p-4 text-xl font-semibold border-b border-gray-700 flex-shrink-0">Bizzy POS</div>
+
+      {/* FIX: Navigation section is flexible and will scroll if content overflows */}
+      <nav className="flex-1 overflow-y-auto">
         <ul>
           {navigation.map((item) => (
             <li key={item.name} className="px-4 py-2">

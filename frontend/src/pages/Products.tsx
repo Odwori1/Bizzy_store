@@ -4,6 +4,7 @@ import { productService } from '../services/products';
 import ProductForm from '../components/ProductForm';
 import { useAuthStore } from '../hooks/useAuth';
 import BackButton from '../components/BackButton';
+import { CurrencyDisplay } from '../components/CurrencyDisplay'; // ADD THIS IMPORT
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -43,7 +44,7 @@ const Products: React.FC = () => {
 
   const handleUpdateProduct = async (productData: ProductCreate) => {
     if (!editingProduct) return;
-    
+
     try {
       await productService.updateProduct(editingProduct.id, productData);
       setIsEditModalOpen(false);
@@ -89,9 +90,9 @@ const Products: React.FC = () => {
 
   return (
     <div className="p-6">
-       <div className="mb-4">
-  	  <BackButton />
-       </div>
+      <div className="mb-4">
+        <BackButton />
+      </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
@@ -163,7 +164,7 @@ const Products: React.FC = () => {
                     {product.barcode}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${product.price.toFixed(2)}
+                    <CurrencyDisplay amount={product.price} /> {/* UPDATED */}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.stock_quantity}

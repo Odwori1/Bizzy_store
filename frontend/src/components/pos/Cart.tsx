@@ -1,5 +1,6 @@
 import React from 'react';
 import { CartItem } from '../../types';
+import { CurrencyDisplay } from '../CurrencyDisplay'; // ADD THIS IMPORT
 
 interface CartProps {
   items: CartItem[];
@@ -9,7 +10,7 @@ interface CartProps {
   onUpdateQuantity: (productId: number, quantity: number) => void;
   onRemoveItem: (productId: number) => void;
   onCheckout: () => void;
-  onClearCart: () => void;  // Add this line
+  onClearCart: () => void;
 }
 
 const Cart: React.FC<CartProps> = ({
@@ -20,7 +21,7 @@ const Cart: React.FC<CartProps> = ({
   onUpdateQuantity,
   onRemoveItem,
   onCheckout,
-  onClearCart  // Add this line
+  onClearCart
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
@@ -30,7 +31,9 @@ const Cart: React.FC<CartProps> = ({
           <div key={item.product_id} className="flex justify-between items-center border-b pb-2">
             <div className="flex-1">
               <div className="font-medium">{item.product_name}</div>
-              <div className="text-sm text-gray-500">${item.unit_price.toFixed(2)} each</div>
+              <div className="text-sm text-gray-500">
+                <CurrencyDisplay amount={item.unit_price} /> {/* Replaced $ formatting */}
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -47,7 +50,9 @@ const Cart: React.FC<CartProps> = ({
               >
                 +
               </button>
-              <span className="w-16 text-right">${item.subtotal.toFixed(2)}</span>
+              <span className="w-16 text-right">
+                <CurrencyDisplay amount={item.subtotal} /> {/* Replaced $ formatting */}
+              </span>
               <button
                 onClick={() => onRemoveItem(item.product_id)}
                 className="px-2 py-1 bg-red-500 text-white rounded"
@@ -63,15 +68,15 @@ const Cart: React.FC<CartProps> = ({
       <div className="mt-4 space-y-1">
         <div className="flex justify-between">
           <span>Subtotal:</span>
-          <span>${total.toFixed(2)}</span>
+          <span><CurrencyDisplay amount={total} /></span> {/* Replaced $ formatting */}
         </div>
         <div className="flex justify-between">
           <span>Tax:</span>
-          <span>${tax.toFixed(2)}</span>
+          <span><CurrencyDisplay amount={tax} /></span> {/* Replaced $ formatting */}
         </div>
         <div className="flex justify-between font-bold text-lg border-t pt-2">
           <span>Total:</span>
-          <span>${grandTotal.toFixed(2)}</span>
+          <span><CurrencyDisplay amount={grandTotal} /></span> {/* Replaced $ formatting */}
         </div>
       </div>
 
@@ -79,13 +84,13 @@ const Cart: React.FC<CartProps> = ({
       {items.length > 0 && (
         <div className="mt-4 space-y-2">
           <button
-            onClick={onCheckout}  // RESTORE the original function call
+            onClick={onCheckout}
             className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
           >
             Process Sale
           </button>
           <button
-            onClick={() => {}}  // This will be handled by PaymentModal's clear cart button
+            onClick={onClearCart}
             className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
           >
             Clear Cart
