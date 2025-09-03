@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON,  ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .base import Base
@@ -20,6 +20,8 @@ class User(Base):
     created_at = Column(DateTime, default=func.now())
     reset_token = Column(String(100), unique=True, index=True, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
+    # NEW: Foreign key to associate a user with a business (nullable for migration)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=True)
      # --- ADD THESE NEW 2FA FIELDS ---
     two_factor_enabled = Column(Boolean, default=False)
     two_factor_secret = Column(String(32), nullable=True)
@@ -28,7 +30,7 @@ class User(Base):
 
     # Relationships
     sales = relationship("Sale", back_populates="user")
-    business = relationship("Business", back_populates="user", uselist=False)
+    business = relationship("Business", back_populates="users")
     roles = relationship("Role", secondary=user_role, back_populates="users")
 
     # NEW: Property to get role names for display

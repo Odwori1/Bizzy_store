@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Product, ProductCreate } from '../types';
+import { useCurrency } from '../hooks/useCurrency';
 
 interface ProductFormProps {
   initialData?: Partial<Product>;
@@ -24,24 +25,31 @@ const ProductForm: React.FC<ProductFormProps> = ({
     stock_quantity: 0,
     min_stock_level: 5
   });
-
+const { convertToUSD, convertAmount } = useCurrency(); // <--- ADD THIS LINE
   useEffect(() => {
     if (initialData) {
+      // Convert the stored USD price to local currency for display when editing
+      const displayPrice = initialData.price ? convertAmount(initialData.price) : 0;
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
-        price: initialData.price || 0,
+        price: displayPrice,
         barcode: initialData.barcode || '',
         stock_quantity: initialData.stock_quantity || 0,
         min_stock_level: initialData.min_stock_level || 5
       });
     }
-  }, [initialData]);
+  }, [initialData, convertAmount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(formData);
-  };
+  
+    // Convert the local currency price BACK to USD before submitting
+    const usdPrice = convertToUSD(formData.price);
+    const dataToSubmit = { ...formData, price: usdPrice };
+  
+    await onSubmit(dataToSubmit);
+};
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

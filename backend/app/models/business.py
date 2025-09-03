@@ -7,7 +7,7 @@ class Business(Base):
     __tablename__ = "businesses"
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    #user_id = Column(Integer, ForeignKey("users.id"))
     name = Column(String(100))
     address = Column(String(200))
     phone = Column(String(20))
@@ -21,5 +21,8 @@ class Business(Base):
     country_code = Column(String(2), default="US")
     
     # Relationship
-    user = relationship("User", back_populates="business")
+    #user = relationship("User", back_populates="business")
+    #currency = relationship("Currency")  # Relationship to Currency model
     currency = relationship("Currency")  # Relationship to Currency model
+    # NEW 1:M relationship: A business has many users
+    users = relationship("User", back_populates="business")

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useBusinessStore } from './useBusiness';
 import { currencyService } from '../services/currency';
 
@@ -45,10 +45,21 @@ export const useCurrency = () => {
   }, [businessCurrency]); // Re-run this effect if the business currency changes
 
   // Function to convert an amount from BASE_CURRENCY to the business currency
-  const convertAmount = (amount: number): number => {
+  // OLD: const convertAmount = (amount: number): number => {
+// NEW:
+ const convertAmount = useCallback((amount: number): number => {
+   if (exchangeRate === null) return amount; // Wait for rate to load
+   return amount * exchangeRate;
+},  [exchangeRate]); // <-- Add dependency array
+  
+
+    // Function to convert an amount from the business currency BACK to BASE_CURRENCY (USD)
+  const convertToUSD = useCallback((amount: number): number => {
     if (exchangeRate === null) return amount; // Wait for rate to load
-    return amount * exchangeRate;
-  };
+  // To get USD, we divide the local amount by the exchange rate
+    return amount / exchangeRate;
+},   [exchangeRate]); // <-- Add dependency array
+
 
   // Main function: Convert AND format an amount
   const formatCurrency = (amount: number, currencyCode?: string): string => {
@@ -105,6 +116,8 @@ export const useCurrency = () => {
   return {
     formatCurrency,
     getCurrencySymbol,
+    convertAmount,    // <--- ADD THIS LINE
+    convertToUSD,     // This should already be there
     currencyCode: businessCurrency,
     baseCurrency: BASE_CURRENCY,
     exchangeRate,

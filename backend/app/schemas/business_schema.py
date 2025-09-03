@@ -20,7 +20,7 @@ class BusinessCreate(BusinessBase):
 
 class Business(BusinessBase):
     id: int
-    user_id: int
+    #user_id: int
 
     class Config:
         from_attributes = True

@@ -4,11 +4,13 @@ import { refundsService } from '../services/refunds';
 import { salesService } from '../services/sales'; // CORRECT IMPORT
 import { format } from 'date-fns';
 import BackButton from '../components/BackButton';
+import { useCurrency } from '../hooks/useCurrency'; // <--- ADD THIS LINE
 
 export default function Refunds() {
   const [refunds, setRefunds] = useState<Refund[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { formatCurrency } = useCurrency(); // <--- ADD THIS LINE
 
   useEffect(() => {
     loadRefunds();
@@ -99,7 +101,7 @@ export default function Refunds() {
                     <tr key={refund.id} className="border-b hover:bg-gray-50">
                       <td className="p-3">#{refund.id}</td>
                       <td className="p-3">Sale #{refund.sale_id}</td>
-                      <td className="p-3">${refund.total_amount.toFixed(2)}</td>
+                      <td className="p-3">{formatCurrency(refund.total_amount)}</td>
                       <td className="p-3">{refund.reason || 'N/A'}</td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${

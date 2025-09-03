@@ -7,6 +7,7 @@ from app.database import get_db
 from app.models.expense import Expense, ExpenseCategory
 from app.schemas.expense_schema import ExpenseCreate, Expense as ExpenseSchema, ExpenseCategoryCreate, ExpenseCategory as ExpenseCategorySchema
 from app.core.auth import get_current_user
+from app.models.user import User  # Import the User model at the top of the file if it's not already there
 
 router = APIRouter(prefix="/api/expenses", tags=["expenses"])
 
@@ -33,12 +34,13 @@ def create_expense_category(category: ExpenseCategoryCreate, db: Session = Depen
 def get_expenses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """Get all expenses for the current user's business"""
     # Get user's business
-    from app.models.business import Business
-    business = db.query(Business).filter(Business.user_id == current_user["id"]).first()
-    if not business:
-        raise HTTPException(status_code=404, detail="Business not found")
-
-    return db.query(Expense).filter(Expense.business_id == business.id).offset(skip).limit(limit).all()
+    user = db.query(User).filter(User.id == current_user["id"]).first()
+    if not user or not user.business_id:
+        raise HTTPException(status_code=404, detail="User business not found")
+    
+    # Query expenses for the user's business
+    expenses = db.query(Expense).filter(Expense.business_id == user.business_id).offset(skip).limit(limit).all()
+    return expenses  # <-- This line was missing!
 
 @router.post("/", response_model=ExpenseSchema)
 def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
