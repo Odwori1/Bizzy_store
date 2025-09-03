@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, History, User } from 'lucide-react';
 import { useCustomers } from '../hooks/useCustomers';
 import { Customer, CustomerCreate } from '../types';
+import { CurrencyDisplay } from '../components/CurrencyDisplay';
 
 const Customers: React.FC = () => {
   const { customers, loading, error, loadCustomers, createCustomer, deleteCustomer } = useCustomers();
@@ -118,7 +119,7 @@ const Customers: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                  ${customer.total_spent.toFixed(2)}
+                  <CurrencyDisplay amount={customer.total_spent} />
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">

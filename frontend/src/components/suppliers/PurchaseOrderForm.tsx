@@ -191,8 +191,8 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ suppliers, produc
                         <tr key={index}>
                           <td className="text-sm text-gray-900">{getProductName(item.product_id)}</td>
                           <td className="text-sm text-gray-900">{item.quantity}</td>
-                          <td className="text-sm text-gray-900">${item.unit_cost.toFixed(2)}</td>
-                          <td className="text-sm text-gray-900">${(item.quantity * item.unit_cost).toFixed(2)}</td>
+                          <td className="text-sm text-gray-900"><CurrencyDisplay amount={item.unit_cost} /></td>
+                          <td className="text-sm text-gray-900"><CurrencyDisplay amount={item.quantity * item.unit_cost} /></td>
                           <td>
                             <button
                               type="button"
@@ -207,7 +207,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ suppliers, produc
                     </tbody>
                   </table>
                   <div className="mt-4 text-right font-semibold">
-                    Total: ${totalAmount.toFixed(2)}
+                    Total: <CurrencyDisplay amount={totalAmount} />
                   </div>
                 </div>
               )}

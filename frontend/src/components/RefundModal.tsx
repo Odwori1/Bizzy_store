@@ -148,7 +148,7 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
                         Purchased: {saleItem.quantity} | Already refunded: {saleItem.refunded_quantity || 0} |
                         Available to refund: {maxRefundable}
                       </p>
-                      <p className="text-sm">Unit price: ${saleItem.unit_price.toFixed(2)}</p>
+                      <p className="text-sm">Unit price: <CurrencyDisplay amount={saleItem.unit_price} /></p>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -171,7 +171,7 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
 
           <div className="bg-gray-50 p-4 rounded">
             <p className="text-lg font-semibold">
-              Total Refund Amount: ${calculateTotalRefund().toFixed(2)}
+              Total Refund Amount: <CurrencyDisplay amount={calculateTotalRefund()} />
             </p>
           </div>
 
@@ -189,7 +189,7 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
               className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:bg-red-400"
               disabled={loading || !hasRefundableItems()}
             >
-              {loading ? 'Processing...' : `Process Refund ($${calculateTotalRefund().toFixed(2)})`}
+              {loading ? 'Processing...' : `Process Refund (`}<CurrencyDisplay amount={calculateTotalRefund()} />{`)`}
             </button>
           </div>
         </form>

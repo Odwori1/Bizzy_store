@@ -1,6 +1,7 @@
 import React from 'react';
 import { PurchaseOrder } from '../../types';
 import { useSuppliers } from '../../hooks/useSuppliers';
+import { CurrencyDisplay } from '../CurrencyDisplay';
 
 interface PurchaseOrderListProps {
   purchaseOrders: PurchaseOrder[];
@@ -96,7 +97,7 @@ const PurchaseOrderList: React.FC<PurchaseOrderListProps> = ({ purchaseOrders, o
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">${po.total_amount.toFixed(2)}</div>
+                <div className="text-sm text-gray-900"><CurrencyDisplay amount={po.total_amount} /></div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">

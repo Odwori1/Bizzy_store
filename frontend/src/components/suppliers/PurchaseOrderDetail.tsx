@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'; // <-- Added useEffect
 import { PurchaseOrder } from '../../types';
 import { useSuppliers } from '../../hooks/useSuppliers';
 import { productService } from '../../services/products'; // <-- Import the existing service
+import { CurrencyDisplay } from '../CurrencyDisplay';
 
 interface PurchaseOrderDetailProps {
   purchaseOrder: PurchaseOrder;
@@ -128,7 +129,7 @@ const PurchaseOrderDetail: React.FC<PurchaseOrderDetailProps> = ({ purchaseOrder
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">Total Amount</h4>
               <p className="text-sm text-gray-900 font-semibold">
-                ${purchaseOrder.total_amount.toFixed(2)}
+                <CurrencyDisplay amount={purchaseOrder.total_amount} />
               </p>
             </div>
 
@@ -172,9 +173,9 @@ const PurchaseOrderDetail: React.FC<PurchaseOrderDetailProps> = ({ purchaseOrder
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">{item.quantity}</td>
                     <td className="px-4 py-2 text-sm text-gray-900">{item.received_quantity}</td>
-                    <td className="px-4 py-2 text-sm text-gray-900">${item.unit_cost.toFixed(2)}</td>
+                    <td className="px-4 py-2 text-sm text-gray-900"><CurrencyDisplay amount={item.unit_cost} /></td>
                     <td className="px-4 py-2 text-sm text-gray-900">
-                      ${(item.quantity * item.unit_cost).toFixed(2)}
+                       <CurrencyDisplay amount={item.quantity * item.unit_cost} />
                     </td>
                     {purchaseOrder.status === 'ordered' && (
                       <td className="px-4 py-2">

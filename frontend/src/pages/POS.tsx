@@ -160,7 +160,8 @@ const POS: React.FC = () => {
         onClose={() => setIsPaymentModalOpen(false)}
         onClearCart={handleClearCartFromModal}
         cart={cartItems}
-        total={grandTotal}
+        total={grandTotal} // USD total for calculations
+        totalDisplay={grandTotal} // This will be converted for display. We pass the same value.
         onPaymentSuccess={handlePaymentComplete}
       />
     </div>
