@@ -17,6 +17,8 @@ app = FastAPI(lifespan=lifespan)
 origins = [
     "http://localhost:3000",  # Default port for Create React App
     "http://localhost:5173",  # Default port for Vite
+    "http://127.0.0.1:3000",  # Add this line
+    "http://127.0.0.1:5173",   # Add this line
 ]
 
 app.add_middleware(

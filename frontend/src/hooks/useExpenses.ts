@@ -1,19 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Expense, ExpenseCategory, ExpenseCreate, ExpenseCategoryCreate } from '../types';
 import { expenseService } from '../services/expense';
+import { useBusinessStore } from './useBusiness';
 
 export const useExpenses = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { business } = useBusinessStore();
 
   // Load expenses
   const loadExpenses = async () => {
+    if (!business?.id) {
+      setError('No business selected');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const data = await expenseService.getExpenses();
+      const data = await expenseService.getExpenses(business.id);  // Pass business_id
       setExpenses(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load expenses');
@@ -76,11 +83,13 @@ export const useExpenses = () => {
     }
   };
 
-  // Load data on mount
+  // Load data on mount or when business changes
   useEffect(() => {
-    loadExpenses();
-    loadCategories();
-  }, []);
+    if (business?.id) {
+      loadExpenses();
+      loadCategories();
+    }
+  }, [business?.id]);  // Add business.id as dependency
 
   return {
     expenses,

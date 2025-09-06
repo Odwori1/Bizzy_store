@@ -2,9 +2,11 @@ import { api } from './api';
 import { Expense, ExpenseCategory, ExpenseCreate, ExpenseCategoryCreate } from '../types';
 
 export const expenseService = {
-  // Get all expenses
-  getExpenses: async (): Promise<Expense[]> => {
-    const response = await api.get<Expense[]>('/api/expenses/');
+  // Get all expenses for a specific business
+  getExpenses: async (business_id: number): Promise<Expense[]> => {
+    const response = await api.get<Expense[]>('/api/expenses/', {
+      params: { business_id }  // Add the required business_id parameter
+    });
     return response.data;
   },
 
@@ -27,21 +29,21 @@ export const expenseService = {
 
   // Get all expense categories
   getCategories: async (): Promise<ExpenseCategory[]> => {
-    const response = await api.get<ExpenseCategory[]>('/api/expenses/categories/');
+    const response = await api.get<ExpenseCategory[]>('/api/expenses/categories');
     return response.data;
   },
 
   // Create new category
   createCategory: async (category: ExpenseCategoryCreate): Promise<ExpenseCategory> => {
-    const response = await api.post<ExpenseCategory>('/api/expenses/categories/', category);
+    const response = await api.post<ExpenseCategory>('/api/expenses/categories', category);
     return response.data;
   },
 
   // Get expense summary by category
-  getExpenseSummary: async (): Promise<{ category: string; total_amount: number }[]> => {
+  getExpenseSummary: async (business_id: number): Promise<{ category: string; total_amount: number }[]> => {
     // This would call a backend endpoint for summary data
     // For now, we'll calculate it from the expenses list
-    const expenses = await expenseService.getExpenses();
+    const expenses = await expenseService.getExpenses(business_id);
     const summary = expenses.reduce((acc, expense) => {
       const categoryName = expense.category?.name || 'Unknown';
       acc[categoryName] = (acc[categoryName] || 0) + expense.amount;

@@ -3,10 +3,13 @@ import { ExpenseCreate, ExpenseCategoryCreate } from '../types';
 import { useExpenses } from '../hooks/useExpenses';
 import { ExpenseForm } from '../components/expenses/ExpenseForm';
 import { ExpenseList } from '../components/expenses/ExpenseList';
-import { CurrencyDisplay } from '../components/CurrencyDisplay';
+import { useBusinessStore } from '../hooks/useBusiness';
+import { useCurrency } from '../hooks/useCurrency';
 
 const Expenses: React.FC = () => {
   const { expenses, categories, loading, error, createExpense, deleteExpense, createCategory } = useExpenses();
+  const { business } = useBusinessStore();
+  const { convertAmount } = useCurrency();
   const [showForm, setShowForm] = useState(false);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -43,7 +46,36 @@ const Expenses: React.FC = () => {
     }
   };
 
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  // Simple formatter for summary
+  const formatCurrencyDirectly = (amount: number, currencyCode: string = business?.currency_code || 'USD'): string => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: currencyCode
+      }).format(amount);
+    } catch (error) {
+      return `${currencyCode} ${amount.toFixed(2)}`;
+    }
+  };
+
+  // Calculate totals - FIXED: Proper multi-currency handling
+  const calculateTotalInBusinessCurrency = () => {
+    if (!business) return 0;
+    
+    return expenses.reduce((sum, expense) => {
+      if (expense.original_currency_code === business.currency_code) {
+        // If expense was originally in the same currency as business, use original amount
+        return sum + expense.original_amount;
+      } else {
+        // If expense was in different currency, convert the USD amount to business currency
+        const amountInBusinessCurrency = convertAmount(expense.amount);
+        return sum + amountInBusinessCurrency;
+      }
+    }, 0);
+  };
+
+  const totalExpenses = calculateTotalInBusinessCurrency();
+  const averageExpense = expenses.length ? totalExpenses / expenses.length : 0;
 
   return (
     <div className="space-y-6">
@@ -70,7 +102,7 @@ const Expenses: React.FC = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">Total Expenses</p>
             <p className="text-2xl font-bold text-gray-900">
-              <CurrencyDisplay amount={totalExpenses} />
+              {formatCurrencyDirectly(totalExpenses, business?.currency_code)}
             </p>
           </div>
           <div className="text-center">
@@ -80,7 +112,7 @@ const Expenses: React.FC = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">Average per Expense</p>
             <p className="text-2xl font-bold text-gray-900">
-              <CurrencyDisplay amount={expenses.length ? totalExpenses / expenses.length : 0} />
+              {formatCurrencyDirectly(averageExpense, business?.currency_code)}
             </p>
           </div>
         </div>
@@ -159,4 +191,4 @@ const Expenses: React.FC = () => {
   );
 };
 
-export default Expenses; // Change to default export
+export default Expenses;

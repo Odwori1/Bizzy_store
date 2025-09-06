@@ -11,6 +11,7 @@ declare global {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+// 1. Create the api instance FIRST with the base URL.
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -18,42 +19,39 @@ export const api = axios.create({
   },
 });
 
-// Simple function to get token without circular dependencies
+// 2. NOW, define the helper functions that use the api instance.
+// Simple function to get token
 const getToken = (): string | null => {
   return localStorage.getItem('access_token') || localStorage.getItem('auth_token');
 };
 
-// Simple function to logout without circular dependencies
+// Simple function to logout
 const logout = (): void => {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('access_token');
   localStorage.removeItem('user_data');
+  // Redirect to login page
+  window.location.href = '/login';
 };
 
-// Request interceptor for auth token
+// 3. Add the request interceptor that uses the helpers
 api.interceptors.request.use((config) => {
   const token = getToken();
-  console.log('API Request Interceptor - Token found:', !!token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('Authorization header set:', config.headers.Authorization);
   }
   return config;
 });
 
-// Add response interceptor to handle auth errors
+// 4. Add response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized (token invalid/expired)
-      logout();
-      window.location.href = '/login';
+      logout(); // Handle unauthorized
     } else if (error.response?.status === 403) {
-      // NEW: Handle forbidden (user lacks permission)
-      console.error('Action forbidden: You do not have permission to perform this action.');
-      // You could trigger a notification toast here in the future
-      // Example: toast.error("Permission denied");
+      console.error('Action forbidden: Missing permission.');
+      // Consider displaying a user-friendly message here
     }
     return Promise.reject(error);
   }

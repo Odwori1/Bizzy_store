@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query  # ADD Query import
 from sqlalchemy.orm import Session
 from app.crud.product import (
     get_product,
@@ -10,16 +10,12 @@ from app.crud.product import (
 )
 from app.schemas.product_schema import ProductCreate, ProductUpdate, Product
 from app.database import get_db
-# REPLACE this import
-# from app.core.auth import oauth2_scheme
-# WITH these imports:
 from app.core.permissions import requires_permission
+from typing import List, Optional  # ADD Optional import
 
 router = APIRouter(
     prefix="/api/products",
     tags=["products"],
-    # REPLACE the global dependency. We will protect each endpoint individually.
-    # dependencies=[Depends(oauth2_scheme)]
 )
 
 # Create a product - Requires product:create permission
@@ -31,11 +27,22 @@ def create_new_product(product: ProductCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Barcode already registered")
     return create_product(db=db, product=product)
 
-# List all products - Requires product:read permission
-@router.get("/", response_model=list[Product], dependencies=[Depends(requires_permission("product:read"))])
-def read_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """List all products (requires product:read permission)"""
-    return get_products(db, skip=skip, limit=limit)
+# List all products with optional barcode filtering - Requires product:read permission
+@router.get("/", response_model=List[Product], dependencies=[Depends(requires_permission("product:read"))])
+def read_products(
+    skip: int = 0,
+    limit: int = 100,
+    barcode: Optional[str] = Query(None, description="Filter by barcode"),
+    db: Session = Depends(get_db)
+):
+    """List all products with optional barcode filtering"""
+    if barcode:
+        # If barcode filter provided, search by barcode
+        product = get_product_by_barcode(db, barcode=barcode)
+        return [product] if product else []
+    else:
+        # Otherwise return all products with pagination
+        return get_products(db, skip=skip, limit=limit)
 
 # Get product details - Requires product:read permission
 @router.get("/{product_id}", response_model=Product, dependencies=[Depends(requires_permission("product:read"))])
@@ -62,3 +69,5 @@ def remove_product(product_id: int, db: Session = Depends(get_db)):
     """Delete a product (requires product:delete permission)"""
     delete_product(db, product_id=product_id)
     return {"ok": True}
+
+

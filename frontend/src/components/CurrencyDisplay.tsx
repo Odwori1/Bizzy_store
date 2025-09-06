@@ -22,7 +22,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
 
   // Get the formatted currency value for the tooltip
   const formattedValue = formatCurrency(amount, currencyCode);
-  
+
   // Extract the display amount and currency symbol from the formatted value
   const displaySymbol = getCurrencySymbol(currencyCode);
   const isLongValue = amount >= 1000000; // 1 million+
@@ -50,8 +50,8 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   if (error) {
     console.error(error);
     return (
-      <span 
-        className={`currency-display currency-error ${className}`} 
+      <span
+        className={`currency-display currency-error ${className}`}
         title={error}
         data-full-value={showTooltip ? formattedValue : undefined}
       >

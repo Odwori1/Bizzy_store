@@ -20,6 +20,7 @@ import Customers from './pages/Customers'; // ADD THIS IMPORT
 import Refunds from './pages/Refunds';
 import Suppliers from './pages/Suppliers';
 import Expenses from './pages/Expenses';
+import ScannerDiagnostics from './pages/ScannerDiagnostics';
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
 	    <Route path="refunds" element={<Refunds />} />
 	    <Route path="suppliers" element={<Suppliers />} />
 	    <Route path="expenses" element={<Expenses />} />
+	    <Route path="/scanner-diagnostics" element={<ScannerDiagnostics />} />
           </Route>
         </Routes>
       </div>

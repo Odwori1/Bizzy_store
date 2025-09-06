@@ -1,6 +1,6 @@
 import React from 'react';
 import { Expense } from '../../types';
-import { CurrencyDisplay } from '../CurrencyDisplay';
+import { ExpenseAmountDisplay } from './ExpenseAmountDisplay';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -53,7 +53,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({ expenses, onDelete, lo
                 {expense.category?.name || 'Unknown'}
               </td>
               <td className="px-6 py-4 text-sm text-gray-900">
-                <CurrencyDisplay amount={expense.amount} currencyCode={expense.currency_code} />
+                <ExpenseAmountDisplay expense={expense} />
               </td>
               <td className="px-6 py-4 text-sm text-gray-900 capitalize">
                 {expense.payment_method.replace('_', ' ')}

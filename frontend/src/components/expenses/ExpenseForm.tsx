@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ExpenseCreate, ExpenseCategory } from '../../types';
 import { useBusinessStore } from '../../hooks/useBusiness';
-import { CurrencyDisplay } from '../CurrencyDisplay';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface ExpenseFormProps {
   categories: ExpenseCategory[];
@@ -17,13 +17,21 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   loading = false
 }) => {
   const { business } = useBusinessStore();
+  const { getCurrencySymbol } = useCurrency();
+
+  // Get the business's currency code to use as the original_currency_code
+  const businessCurrencyCode = business?.currency_code || 'USD';
+
   const [formData, setFormData] = useState<Omit<ExpenseCreate, 'business_id'>>({
-    amount: 0,
-    currency_code: business?.currency_code || 'USD',
+    // The key change: We now track original_amount and original_currency_code
+    original_amount: 0,
+    original_currency_code: businessCurrencyCode,
     description: '',
     category_id: categories[0]?.id || 0,
     payment_method: 'cash',
-    is_recurring: false
+    is_recurring: false,
+    recurrence_interval: undefined,
+    receipt_url: undefined
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,21 +47,24 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Amount</label>
+        <label className="block text-sm font-medium text-gray-700">Amount ({businessCurrencyCode})</label>
         <div className="mt-1 flex rounded-md shadow-sm">
           <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-            <CurrencyDisplay amount={formData.amount} currencyCode={formData.currency_code} showCurrencyCode={true} />
+            {getCurrencySymbol(formData.original_currency_code)}
           </span>
           <input
             type="number"
             step="0.01"
             required
-            value={formData.amount}
-            onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+            value={formData.original_amount}
+            onChange={(e) => setFormData({ ...formData, original_amount: parseFloat(e.target.value) || 0 })}
             className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             placeholder="0.00"
           />
         </div>
+        <p className="mt-1 text-xs text-gray-500">
+          Amount is in {businessCurrencyCode} and will be converted to USD for storage
+        </p>
       </div>
 
       <div>

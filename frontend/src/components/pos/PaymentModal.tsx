@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CartItem, PaymentCreate, SaleItemCreate, Sale } from '../../types';
 import { salesService } from '../../services/sales';
 import { useAuthStore } from '../../hooks/useAuth';
 import { useBusinessStore } from '../../hooks/useBusiness';
 import Receipt from './Receipt';
 import { useInventory } from '../../hooks/useInventory';
-import { CurrencyDisplay } from '../CurrencyDisplay'; // ADD THIS IMPORT
+import { CurrencyDisplay } from '../CurrencyDisplay';
 import { useCurrency } from '../../hooks/useCurrency';
 
 interface PaymentModalProps {
@@ -19,7 +19,7 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total, totalDisplay, onPaymentSuccess }: PaymentModalProps) {
-  const { convertToUSD, convertAmount, formatCurrency } = useCurrency();
+  const { convertToUSD, convertToLocal, exchangeRate } = useCurrency();
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountReceived, setAmountReceived] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,6 +37,21 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
     onClose();
   };
 
+  // Calculate change using useMemo to avoid unnecessary recalculations
+  const change = useMemo(() => {
+    if (paymentMethod !== 'cash' || !amountReceived) return 0;
+    
+    const received = parseFloat(amountReceived);
+    if (isNaN(received)) return 0;
+
+    // CRITICAL FIX: Convert received amount to USD, calculate change in USD, then convert back to local
+    const receivedUSD = convertToUSD(received);
+    const changeUSD = receivedUSD - total;
+    return convertToLocal(changeUSD);
+  }, [amountReceived, paymentMethod, total, convertToUSD, convertToLocal]);
+
+  const isValidPayment = paymentMethod === 'cash' ? change >= 0 : true;
+
   if (showReceipt && completedSale) {
     return (
       <Receipt
@@ -50,20 +65,6 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
   }
 
   if (!isOpen) return null;
-
-  const currencyCode = business?.currency_code || 'USD';
-
-  const calculateChange = () => {
-    const received = parseFloat(amountReceived) || 0;
-    const receivedUSD = convertToUSD(received);
-    // Now subtract the total (which is in USD) to get the change in USD
-    const changeUSD = receivedUSD - total;
-    // Convert the change back to local currency for display
-    return convertAmount(changeUSD);
-  };
-
-  const change = calculateChange();
-  const isValidPayment = paymentMethod === 'cash' ? calculateChange() >= 0 : true;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,7 +137,7 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
         {/* Total */}
         <div className="mb-4">
           <p className="text-lg font-semibold">
-            Total: <CurrencyDisplay amount={totalDisplay} /> {/* Replaced $ with CurrencyDisplay */}
+            Total: <CurrencyDisplay amount={totalDisplay} />
           </p>
         </div>
 
@@ -176,8 +177,8 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
               />
               {amountReceived && (
                 <p className="text-sm mt-1">
-                  Change: <CurrencyDisplay amount={calculateChange()} /> {/* Now uses the function */}
-                  {calculateChange() < 0 && <span className="text-red-600 ml-2">Insufficient amount!</span>}  
+                  Change: <CurrencyDisplay amount={change} />
+                  {change < 0 && <span className="text-red-600 ml-2">Insufficient amount!</span>}
                 </p>
               )}
             </div>
