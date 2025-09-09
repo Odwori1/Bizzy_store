@@ -9,13 +9,14 @@ from app.models.payment import Payment
 from app.models.product import Product
 from app.models.inventory import InventoryHistory
 from app.models.user import User
+from app.models.expense import Expense, ExpenseCategory  # UPDATED IMPORT: Added ExpenseCategory
 
 def get_sales_report(db: Session, start_date: date, end_date: date) -> Dict:
     """Generate comprehensive sales report"""
     # Convert dates to datetime for comparison
     start_dt = datetime.combine(start_date, datetime.min.time())
     end_dt = datetime.combine(end_date, datetime.max.time())
-    
+
     # Sales summary
     sales_data = db.query(
         func.coalesce(func.sum(Sale.total_amount), 0).label('total_sales'),
@@ -38,16 +39,17 @@ def get_sales_report(db: Session, start_date: date, end_date: date) -> Dict:
         Sale.created_at <= end_dt,
         Payment.status == 'completed'
      ).group_by(Payment.payment_method).all()
-    
+
     payment_methods = {pmt[0]: pmt[1] for pmt in payment_methods_query}
 
-    # Top products
+    # Top products - UPDATED: Use real cost price instead of 70% assumption
     top_products = db.query(
         Product.id,
         Product.name,
         func.coalesce(func.sum(SaleItem.quantity), 0).label('quantity_sold'),
         func.coalesce(func.sum(SaleItem.subtotal), 0).label('total_revenue'),
-        func.coalesce(func.avg(Product.price), 0).label('avg_price')
+        func.coalesce(func.avg(Product.price), 0).label('avg_price'),
+        func.coalesce(func.avg(Product.cost_price), 0).label('avg_cost_price')  # NEW: Get actual cost price
     ).join(SaleItem, SaleItem.product_id == Product.id)\
      .join(Sale, Sale.id == SaleItem.sale_id)\
      .filter(
@@ -85,7 +87,8 @@ def get_sales_report(db: Session, start_date: date, end_date: date) -> Dict:
                 'product_name': p[1],
                 'quantity_sold': p[2],
                 'total_revenue': float(p[3]),
-                'profit_margin': float((p[3] - (p[2] * p[4] * 0.7)) / p[3] * 100) if p[3] > 0 else 0
+                # FIXED: Use actual cost price (p[5]) instead of 70% assumption
+                'profit_margin': float((p[3] - (p[2] * p[5])) / p[3] * 100) if p[3] > 0 and p[5] > 0 else 0
             } for p in top_products
         ],
         'sales_trends': [
@@ -163,12 +166,12 @@ def get_financial_report(db: Session, start_date: date, end_date: date) -> Dict:
     """Generate comprehensive financial report"""
     start_dt = datetime.combine(start_date, datetime.min.time())
     end_dt = datetime.combine(end_date, datetime.max.time())
-    
-    # Financial summary
+
+    # Financial summary - FIXED: Use real cost_price for COGS calculation
     sales_data = db.query(
         func.coalesce(func.sum(Sale.total_amount), 0).label('total_revenue'),
         func.coalesce(func.sum(Sale.tax_amount), 0).label('tax_collected'),
-        func.coalesce(func.sum(SaleItem.quantity * Product.price * 0.7), 0).label('cogs')  # 70% cost assumption
+        func.coalesce(func.sum(SaleItem.quantity * Product.cost_price), 0).label('cogs')  # FIXED: Use cost_price
     ).join(SaleItem, SaleItem.sale_id == Sale.id)\
      .join(Product, Product.id == SaleItem.product_id)\
      .filter(
@@ -182,12 +185,56 @@ def get_financial_report(db: Session, start_date: date, end_date: date) -> Dict:
     gross_profit = total_revenue - cogs
     gross_margin = (gross_profit / total_revenue * 100) if total_revenue > 0 else 0
 
-    # Profitability by product
+    # NEW QUERY: Get REAL operating expenses for the period
+    operating_expenses_query = db.query(
+        func.coalesce(func.sum(Expense.amount), 0).label('total_expenses')
+    ).filter(
+        Expense.date >= start_dt,
+        Expense.date <= end_dt
+    ).first()
+
+    operating_expenses = float(operating_expenses_query.total_expenses)
+    net_profit = gross_profit - operating_expenses  # CORRECTED: Gross Profit - Real Operating Expenses
+
+    # NEW: Get expense breakdown by category
+    expense_breakdown_query = db.query(
+        ExpenseCategory.name,
+        func.coalesce(func.sum(Expense.amount), 0).label('category_total')
+    ).join(Expense, Expense.category_id == ExpenseCategory.id)\
+     .filter(
+        Expense.date >= start_dt,
+        Expense.date <= end_dt
+     ).group_by(ExpenseCategory.name).all()
+
+     # DEBUG: Print the raw query results
+    print(f"DEBUG: expense_breakdown_query results = {expense_breakdown_query}")
+    print(f"DEBUG: Number of results = {len(expense_breakdown_query)}")
+
+    # FIXED: Convert to a list of dictionaries with calculated percentages
+    expense_breakdown_list = []
+    total_expenses = operating_expenses  # We already calculated the total op expenses
+
+    for category_name, category_amount in expense_breakdown_query:
+        amount_float = float(category_amount)
+        # Calculate the percentage this category contributes to the total expenses
+        # Avoid division by zero if there are no expenses in the period
+        percentage = (amount_float / total_expenses * 100) if total_expenses > 0 else 0
+
+        expense_breakdown_list.append({
+            "category": category_name,
+            "amount": amount_float,
+            "percentage": percentage
+        })  # FIXED: Added missing closing parenthesis and brace
+    print(f"DEBUG: expense_breakdown_list = {expense_breakdown_list}")  
+
+    # Now we have expense_breakdown_list as a list of dicts, formatted for the frontend
+
+    # Profitability by product - FIXED: Use real cost_price instead of 70% assumption
     profitability = db.query(
         Product.id,
         Product.name,
         func.coalesce(func.sum(SaleItem.subtotal), 0).label('revenue'),
-        func.coalesce(func.sum(SaleItem.quantity * Product.price * 0.7), 0).label('cost')
+        func.coalesce(func.sum(SaleItem.quantity * Product.cost_price), 0).label('cost')  # FIXED: Use cost_price
     ).join(SaleItem, SaleItem.product_id == Product.id)\
      .join(Sale, Sale.id == SaleItem.sale_id)\
      .filter(
@@ -210,7 +257,7 @@ def get_financial_report(db: Session, start_date: date, end_date: date) -> Dict:
      ).group_by(Payment.payment_method).all()
 
     cash_in = sum(float(cf[1]) for cf in cash_flow)
-    cash_out = cogs  # Simplified: COGS as cash out
+    cash_out = cogs + operating_expenses  # CORRECTED: COGS + Real Operating Expenses
     net_cash_flow = cash_in - cash_out
 
     return {
@@ -220,7 +267,9 @@ def get_financial_report(db: Session, start_date: date, end_date: date) -> Dict:
             'gross_profit': gross_profit,
             'gross_margin': gross_margin,
             'tax_collected': float(sales_data.tax_collected),
-            'net_profit': gross_profit
+            'operating_expenses': operating_expenses,
+            'net_profit': net_profit,
+            'net_income': net_profit  # NEW: Explicitly add the field the frontend expects
         },
         'profitability': [
             {
@@ -238,6 +287,7 @@ def get_financial_report(db: Session, start_date: date, end_date: date) -> Dict:
             'net_cash_flow': net_cash_flow,
             'payment_method_breakdown': {cf[0]: float(cf[1]) for cf in cash_flow}
         },
+        'expense_breakdown': expense_breakdown_list,  # NEW: This is the formatted list for the frontend
         'date_range': {
             'start_date': start_date,
             'end_date': end_date

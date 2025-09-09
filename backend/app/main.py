@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # Make sure this import is here
-from app.routers import users, auth, products, inventory, sales, reports, business
+from app.routers import users, auth, products, inventory, sales, reports, business, scanner, analytics
 from app.services.scheduler import lifespan
 from app.routers import two_factor
 from app.routers import customers  # ADD THIS IMPORT
@@ -8,6 +8,8 @@ from app.routers import refunds  # <-- ADD THIS LINE
 from app.routers import suppliers
 from app.routers import roles
 from app.routers import expense
+from app.routers import activity  # Add this line
+#from app.routers import test_auth  # Temporary for debugging
 
 from app.routers import currency
 
@@ -43,6 +45,10 @@ app.include_router(suppliers.router)
 app.include_router(roles.router)
 app.include_router(currency.router)
 app.include_router(expense.router)
+app.include_router(scanner.router)
+app.include_router(analytics.router)
+app.include_router(activity.router)  # Add this line
+#app.include_router(test_auth.router)  # Temporary for debugging
 
 # Add this function to print all routes on startup
 @app.on_event("startup")

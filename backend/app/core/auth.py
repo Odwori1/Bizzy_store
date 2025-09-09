@@ -59,8 +59,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
 
     # NEW: Get the user's permissions from the database
-    user_permissions = get_user_permissions(db, user.id)  # <-- ADD THIS LINE
-    print(f"DEBUG: User permissions: {user_permissions}")  # <-- Optional debug line
+    user_permissions = get_user_permissions(db, user.id)
+    print(f"DEBUG: User permissions: {user_permissions}")
 
     # RETURN USER OBJECT NOW INCLUDING PERMISSIONS
     return {

@@ -20,6 +20,7 @@ def create_product(db: Session, product: ProductCreate):
         name=product.name,
         description=product.description,
         price=product.price,
+        cost_price=product.cost_price,  # NEW: Add cost price
         barcode=product.barcode,
         stock_quantity=product.stock_quantity,
         min_stock_level=product.min_stock_level if hasattr(product, 'min_stock_level') else 5

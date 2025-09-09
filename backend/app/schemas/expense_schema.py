@@ -16,18 +16,6 @@ class ExpenseBase(BaseModel):
 class ExpenseCreate(ExpenseBase):
     business_id: int
 
-class Expense(ExpenseBase):
-    id: int
-    date: datetime
-    created_by: int
-    business_id: int
-    # These are calculated by the backend upon creation
-    amount: float = Field(..., description="The calculated USD equivalent of the original_amount")
-    exchange_rate: Optional[float] = Field(None, description="The rate used for the conversion")
-
-    class Config:
-        from_attributes = True
-
 class ExpenseCategoryBase(BaseModel):
     name: str = Field(..., max_length=100)
     description: Optional[str] = Field(None, max_length=255)
@@ -38,6 +26,20 @@ class ExpenseCategoryCreate(ExpenseCategoryBase):
 class ExpenseCategory(ExpenseCategoryBase):
     id: int
     is_active: bool
+
+    class Config:
+        from_attributes = True
+
+class Expense(ExpenseBase):
+    id: int
+    date: datetime
+    created_by: int
+    business_id: int
+    # These are calculated by the backend upon creation
+    amount: float = Field(..., description="The calculated USD equivalent of the original_amount")
+    exchange_rate: Optional[float] = Field(None, description="The rate used for the conversion")
+    # Add nested category information for frontend display
+    category: Optional[ExpenseCategory] = Field(None, description="Category details")
 
     class Config:
         from_attributes = True

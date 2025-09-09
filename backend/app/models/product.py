@@ -10,6 +10,7 @@ class Product(Base):
     name = Column(String(100), index=True)
     description = Column(String(300), nullable=True)
     price = Column(Float)
+    cost_price = Column(Float, nullable=True)  # NEW: Cost price for profit calculation
     barcode = Column(String(50), unique=True)
     stock_quantity = Column(Integer, default=0)
     min_stock_level = Column(Integer, default=5)  # New: Minimum stock before alert

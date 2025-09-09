@@ -1,14 +1,27 @@
+"""create_clean_expenses_table
+
+Revision ID: 2fab14b85d84
+Revises: b2214e934633
+Create Date: 2025-09-07 12:49:00.000000
+
+"""
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+# revision identifiers, used by Alembic.
+revision = '2fab14b85d84'
+down_revision = 'b2214e934633'
+branch_labels = None
+depends_on = None
+
 def upgrade():
     # 1. First, backup the old table (just in case)
     op.execute("CREATE TABLE expenses_backup AS SELECT * FROM expenses")
-    
+
     # 2. Drop the old table
     op.drop_table('expenses')
-    
+
     # 3. Create the new clean table
     op.create_table('expenses',
         sa.Column('id', sa.Integer(), nullable=False),
@@ -27,16 +40,16 @@ def upgrade():
         sa.ForeignKeyConstraint(['category_id'], ['expense_categories.id'], ),
         sa.ForeignKeyConstraint(['created_by'], ['users.id'], )
     )
-    
+
     # 4. Create index
     op.create_index('ix_expenses_id', 'expenses', ['id'])
 
 def downgrade():
     # 1. Drop the new table
     op.drop_table('expenses')
-    
+
     # 2. Restore the old table from backup
     op.execute("CREATE TABLE expenses AS SELECT * FROM expenses_backup")
-    
+
     # 3. Drop the backup table
     op.drop_table('expenses_backup')

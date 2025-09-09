@@ -37,14 +37,34 @@ def get_business_expenses(db: Session, business_id: int,
                          start_date: Optional[datetime] = None,
                          end_date: Optional[datetime] = None):
     """Get expenses for a business with optional date filtering"""
-    query = db.query(Expense).filter(Expense.business_id == business_id)
+    # Updated query to join with ExpenseCategory and include category name
+    query = db.query(
+        Expense,
+        ExpenseCategory.name.label('category_name')  # Add category name
+    ).join(
+        ExpenseCategory, Expense.category_id == ExpenseCategory.id  # Join with category table
+    ).filter(
+        Expense.business_id == business_id,
+        ExpenseCategory.is_active == True  # Only include active categories
+    )
 
     if start_date:
         query = query.filter(Expense.date >= start_date)
     if end_date:
         query = query.filter(Expense.date <= end_date)
 
-    return query.order_by(Expense.date.desc()).all()
+    # Execute query and format results
+    results = query.order_by(Expense.date.desc()).all()
+    
+    # Convert results to include category name in each expense object
+    expenses_with_category = []
+    for expense, category_name in results:
+        # Create a copy of the expense object and add category_name
+        expense_with_category = expense
+        expense_with_category.category_name = category_name  # Add category name to expense object
+        expenses_with_category.append(expense_with_category)
+    
+    return expenses_with_category
 
 def delete_expense(db: Session, expense_id: int):
     """Delete an expense"""

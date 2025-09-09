@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON,  ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .base import Base
@@ -12,26 +12,19 @@ class User(Base):
     email = Column(String(100), unique=True, index=True)
     hashed_password = Column(String(128), nullable=False)
     is_active = Column(Boolean, default=True)
-    #role = Column(String(20), default="cashier")  # 'admin' or 'cashier'
-    # ... existing code ...
-    #role = Column(String, default='cashier', nullable=False)  # Options: 'admin', 'manager', 'cashier'
-    # ... existing code ...
-
     created_at = Column(DateTime, default=func.now())
     reset_token = Column(String(100), unique=True, index=True, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
-    # NEW: Foreign key to associate a user with a business (nullable for migration)
     business_id = Column(Integer, ForeignKey("businesses.id"), nullable=True)
-     # --- ADD THESE NEW 2FA FIELDS ---
     two_factor_enabled = Column(Boolean, default=False)
     two_factor_secret = Column(String(32), nullable=True)
-    two_factor_backup_codes = Column(JSON, nullable=True)  # Store as JSON array
-    # --- END OF 2FA FIELDS ---
+    two_factor_backup_codes = Column(JSON, nullable=True)
 
     # Relationships
     sales = relationship("Sale", back_populates="user")
     business = relationship("Business", back_populates="users")
     roles = relationship("Role", secondary=user_role, back_populates="users")
+    scan_events = relationship("BarcodeScanEvent", back_populates="user")  # String-based reference
 
     # NEW: Property to get role names for display
     @property

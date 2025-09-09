@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from datetime import date, datetime
 from enum import Enum
 
@@ -64,7 +64,12 @@ class FinancialSummary(BaseModel):
     gross_profit: float
     gross_margin: float
     tax_collected: float
+    operating_expenses: float  # NEW: Added this field
     net_profit: float
+    net_income: float  # NEW: Added this field for frontend compatibility
+
+    class Config:
+        orm_mode = True
 
 class ProfitabilityAnalysis(BaseModel):
     product_id: int
@@ -84,4 +89,5 @@ class FinancialReportResponse(BaseModel):
     summary: FinancialSummary
     profitability: List[ProfitabilityAnalysis]
     cash_flow: CashFlowSummary
+    expense_breakdown: List[Dict[str, Any]]  # NEW: Add this field
     date_range: DateRange
