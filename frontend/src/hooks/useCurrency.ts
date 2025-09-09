@@ -57,6 +57,11 @@ export const useCurrency = () => {
     return amount / exchangeRate;
   }, [exchangeRate]);
 
+  // Alias function for convertToLocal (used by Expenses component)
+  const convertAmount = useCallback((amount: number): number => {
+    return convertToLocal(amount);
+  }, [convertToLocal]);
+
   // Main function: Convert AND format an amount
   const formatCurrency = (amount: number, currencyCode?: string): string => {
     const targetCurrencyCode = currencyCode || businessCurrency;
@@ -106,7 +111,8 @@ export const useCurrency = () => {
     getCurrencySymbol,
     convertToLocal,
     convertToUSD,
-    exchangeRate, // Added for debugging
+    convertAmount, // Added missing function
+    exchangeRate,
     currencyCode: businessCurrency,
     baseCurrency: BASE_CURRENCY,
     isLoading,

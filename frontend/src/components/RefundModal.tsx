@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sale, SaleItem, RefundItemCreate } from '../types';
 import { useRefunds } from '../hooks/useRefunds';
+import { CurrencyDisplay } from './CurrencyDisplay'; // <--- ADD THIS IMPORT
 
 interface RefundModalProps {
   sale: Sale;

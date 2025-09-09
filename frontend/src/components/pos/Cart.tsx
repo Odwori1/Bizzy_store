@@ -1,14 +1,14 @@
 import React from 'react';
 import { CartItem } from '../../types';
-import { CurrencyDisplay } from '../CurrencyDisplay'; // ADD THIS IMPORT
+import { CurrencyDisplay } from '../CurrencyDisplay';
 
 interface CartProps {
   items: CartItem[];
   total: number;
   tax: number;
   grandTotal: number;
-  onUpdateQuantity: (productId: number, quantity: number) => void;
-  onRemoveItem: (productId: number) => void;
+  onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemoveItem: (productId: string) => void;
   onCheckout: () => void;
   onClearCart: () => void;
 }
@@ -28,16 +28,16 @@ const Cart: React.FC<CartProps> = ({
       {/* Cart Items */}
       <div className="space-y-2">
         {items.map((item) => (
-          <div key={item.product_id} className="flex justify-between items-center border-b pb-2">
+          <div key={item.product.id} className="flex justify-between items-center border-b pb-2">
             <div className="flex-1">
-              <div className="font-medium">{item.product_name}</div>
+              <div className="font-medium">{item.product.name}</div>
               <div className="text-sm text-gray-500">
-                <CurrencyDisplay amount={item.unit_price} /> {/* Replaced $ formatting */}
+                <CurrencyDisplay amount={item.product.price} />
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1)}
+                onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
                 className="px-2 py-1 bg-gray-200 rounded"
                 disabled={item.quantity <= 1}
               >
@@ -45,16 +45,16 @@ const Cart: React.FC<CartProps> = ({
               </button>
               <span className="w-8 text-center">{item.quantity}</span>
               <button
-                onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1)}
+                onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
                 className="px-2 py-1 bg-gray-200 rounded"
               >
                 +
               </button>
               <span className="w-16 text-right">
-                <CurrencyDisplay amount={item.subtotal} /> {/* Replaced $ formatting */}
+                <CurrencyDisplay amount={item.product.price * item.quantity} />
               </span>
               <button
-                onClick={() => onRemoveItem(item.product_id)}
+                onClick={() => onRemoveItem(item.product.id)}
                 className="px-2 py-1 bg-red-500 text-white rounded"
               >
                 ×
@@ -68,15 +68,15 @@ const Cart: React.FC<CartProps> = ({
       <div className="mt-4 space-y-1">
         <div className="flex justify-between">
           <span>Subtotal:</span>
-          <span><CurrencyDisplay amount={total} /></span> {/* Replaced $ formatting */}
+          <span><CurrencyDisplay amount={total} /></span>
         </div>
         <div className="flex justify-between">
           <span>Tax:</span>
-          <span><CurrencyDisplay amount={tax} /></span> {/* Replaced $ formatting */}
+          <span><CurrencyDisplay amount={tax} /></span>
         </div>
         <div className="flex justify-between font-bold text-lg border-t pt-2">
           <span>Total:</span>
-          <span><CurrencyDisplay amount={grandTotal} /></span> {/* Replaced $ formatting */}
+          <span><CurrencyDisplay amount={grandTotal} /></span>
         </div>
       </div>
 

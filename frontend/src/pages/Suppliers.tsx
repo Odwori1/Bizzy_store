@@ -9,16 +9,16 @@ import PurchaseOrderForm from '../components/suppliers/PurchaseOrderForm';
 import PurchaseOrderDetail from '../components/suppliers/PurchaseOrderDetail';
 
 const Suppliers: React.FC = () => {
-  const { 
-    suppliers, 
-    purchaseOrders, 
-    loading, 
-    error, 
-    loadSuppliers, 
+  const {
+    suppliers,
+    purchaseOrders,
+    loading,
+    error,
+    loadSuppliers,
     loadPurchaseOrders,
-    clearError 
+    clearError
   } = useSuppliers();
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'suppliers' | 'purchase-orders'>('suppliers');
@@ -138,8 +138,8 @@ const Suppliers: React.FC = () => {
               Create PO
             </button>
           </div>
-          <PurchaseOrderList 
-            purchaseOrders={purchaseOrders} 
+          <PurchaseOrderList
+            purchaseOrders={purchaseOrders}
             onViewDetail={handleViewPODetail}
           />
         </div>

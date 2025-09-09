@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import BrowserTest from '../components/barcode/BrowserTest';
 import JsQrScanner from '../components/barcode/JsQrScanner';
 import SmartBarcodeScanner from '../components/barcode/SmartBarcodeScanner'; // Add this import
+import BatchProcessor from '../components/barcode/BatchProcessor';
 
 const ScannerDiagnostics: React.FC = () => {
   const [currentTest, setCurrentTest] = useState<string>('browser');
@@ -74,6 +75,12 @@ const ScannerDiagnostics: React.FC = () => {
           We're using a hybrid approach: QR code scanning with jsQR + manual entry for product barcodes.
           This provides 100% reliability without compatibility issues.
         </p>
+      </div>
+
+      {/* ADD BATCH PROCESSOR HERE */}
+      <div className="mt-6">
+        <h2 className="text-xl font-bold mb-4">Batch Processing</h2>
+        <BatchProcessor />
       </div>
 
       <div className="mt-4 p-4 bg-green-50 rounded">

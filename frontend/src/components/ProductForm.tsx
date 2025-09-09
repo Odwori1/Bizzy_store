@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product, ProductCreate } from '../types';
 import { useCurrency } from '../hooks/useCurrency';
 import SmartBarcodeScanner from './barcode/SmartBarcodeScanner';
-import { barcodeScannerService } from '../services/barcodeScannerService'; // Add this import
+import { barcodeScannerService } from '../services/barcodeScannerService';
 
 interface ProductFormProps {
   initialData?: Partial<Product>;
@@ -23,80 +23,82 @@ const ProductForm: React.FC<ProductFormProps> = ({
     name: '',
     description: '',
     price: 0,
+    cost_price: undefined, // NEW: Optional cost price field
     barcode: '',
     stock_quantity: 0,
     min_stock_level: 5
   });
   const [isScanning, setIsScanning] = useState(false);
-  const [isLookingUp, setIsLookingUp] = useState(false); // Add this state
-  const [lookupMessage, setLookupMessage] = useState(''); // Add this state
-  const { convertToUSD, convertAmount } = useCurrency();
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [lookupMessage, setLookupMessage] = useState('');
+  const { convertToUSD, convertToLocal } = useCurrency();
 
   useEffect(() => {
     if (initialData) {
-      // Convert the stored USD price to local currency for display when editing
-      const displayPrice = initialData.price ? convertAmount(initialData.price) : 0;
+      const displayPrice = initialData.price ? convertToLocal(initialData.price) : 0;
+      const displayCostPrice = initialData.cost_price ? convertToLocal(initialData.cost_price) : undefined; // NEW: Handle cost price conversion
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
         price: displayPrice,
+        cost_price: displayCostPrice, // NEW: Set cost price from initial data
         barcode: initialData.barcode || '',
         stock_quantity: initialData.stock_quantity || 0,
         min_stock_level: initialData.min_stock_level || 5
       });
     }
-  }, [initialData, convertAmount]);
+  }, [initialData, convertToLocal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Convert the local currency price BACK to USD before submitting
     const usdPrice = convertToUSD(formData.price);
-    const dataToSubmit = { ...formData, price: usdPrice };
+    const usdCostPrice = formData.cost_price ? convertToUSD(formData.cost_price) : undefined; // NEW: Convert cost price to USD
+    const dataToSubmit = { 
+      ...formData, 
+      price: usdPrice,
+      cost_price: usdCostPrice // NEW: Include converted cost price
+    };
 
     await onSubmit(dataToSubmit);
   };
 
-  // ENHANCED: Handle barcode scan with intelligence
   const handleBarcodeScan = async (scannedBarcode: string) => {
     console.log("Scanned barcode:", scannedBarcode);
-    
-    // First, populate the barcode field immediately
+
     setFormData(prev => ({ ...prev, barcode: scannedBarcode }));
     setIsScanning(false);
-    
-    // Then try to lookup product information (if it looks like a product barcode)
+
     if (scannedBarcode.length >= 6 && scannedBarcode.length <= 13 && /^\d+$/.test(scannedBarcode)) {
       setIsLookingUp(true);
       setLookupMessage('Looking up product information...');
-      
+
       try {
         const result = await barcodeScannerService.lookupBarcode(scannedBarcode);
-        
+
         if (result.success && result.product) {
-          // Product found in database! Auto-fill the form
           setFormData(prev => ({
             ...prev,
             name: result.product!.name,
-            price: convertAmount(result.product!.price), // Convert to local currency for display
+            price: convertToLocal(result.product!.price),
             stock_quantity: result.product!.stock_quantity
           }));
-          setLookupMessage(`✅ Found: ${result.product.name}`);
+          // Enhanced message for external products
+          const message = result.product.id
+            ? `✅ Found: ${result.product.name}`
+            : `✅ Found externally: ${result.product.name} (enter price & stock)`;
+          setLookupMessage(message);
         } else {
-          // Product not found, but barcode is populated
           setLookupMessage('ℹ️ New product - please enter details');
         }
       } catch (error) {
-        // Lookup failed, but barcode is still populated
         console.error('Barcode lookup failed:', error);
         setLookupMessage('⚠️ Lookup failed - enter details manually');
       } finally {
         setIsLookingUp(false);
-        // Clear the message after 3 seconds
         setTimeout(() => setLookupMessage(''), 3000);
       }
     } else if (scannedBarcode.startsWith('http')) {
-      // It's a URL from QR code - show appropriate message
       setLookupMessage('🌐 URL detected - enter product details');
       setTimeout(() => setLookupMessage(''), 3000);
     }
@@ -104,7 +106,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <>
-      {/* Scanner Modal */}
       {isScanning && (
         <SmartBarcodeScanner
           onScan={handleBarcodeScan}
@@ -115,7 +116,6 @@ const ProductForm: React.FC<ProductFormProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">{title}</h3>
 
-        {/* Lookup Status Message */}
         {lookupMessage && (
           <div className={`p-3 rounded-md ${
             lookupMessage.includes('✅') ? 'bg-green-100 text-green-800' :
@@ -135,6 +135,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Product Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Product Name *
@@ -149,6 +150,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             />
           </div>
 
+          {/* Barcode */}
           <div>
             <label htmlFor="barcode" className="block text-sm font-medium text-gray-700">
               Barcode *
@@ -174,9 +176,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </div>
           </div>
 
+          {/* Price */}
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-              Price *
+              Selling Price *
             </label>
             <input
               type="number"
@@ -190,6 +193,27 @@ const ProductForm: React.FC<ProductFormProps> = ({
             />
           </div>
 
+          {/* NEW: Cost Price */}
+          <div>
+            <label htmlFor="cost_price" className="block text-sm font-medium text-gray-700">
+              Cost Price
+            </label>
+            <input
+              type="number"
+              id="cost_price"
+              step="0.01"
+              min="0"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              value={formData.cost_price || ''}
+              onChange={(e) => setFormData({ 
+                ...formData, 
+                cost_price: e.target.value ? parseFloat(e.target.value) : undefined 
+              })}
+              placeholder="Optional - for profit calculation"
+            />
+          </div>
+
+          {/* Stock Quantity */}
           <div>
             <label htmlFor="stock_quantity" className="block text-sm font-medium text-gray-700">
               Stock Quantity *
@@ -205,6 +229,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             />
           </div>
 
+          {/* Min Stock Level */}
           <div>
             <label htmlFor="min_stock_level" className="block text-sm font-medium text-gray-700">
               Minimum Stock Level *
@@ -221,6 +246,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </div>
         </div>
 
+        {/* Description */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700">
             Description
@@ -234,6 +260,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           />
         </div>
 
+        {/* Buttons */}
         <div className="flex justify-end space-x-3 pt-4">
           <button
             type="button"

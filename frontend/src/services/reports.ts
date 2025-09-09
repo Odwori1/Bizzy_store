@@ -87,5 +87,17 @@ export const reportsService = {
 
     const response = await api.get<TopProduct[]>(`/api/reports/products/top?${params}`);
     return response.data;
-  }
+  }, // <-- THIS COMMA WAS MISSING
+
+  // Analytics - Daily scan statistics
+  getDailyScanStats: async (): Promise<{ success: boolean; data: Array<{ date: string; scan_count: number }> }> => {
+    const response = await api.get<{ success: boolean; data: Array<{ date: string; scan_count: number }> }>('/api/analytics/daily-scans');
+    return response.data;
+  },
+
+  // Analytics - User activity statistics
+  getUserActivityStats: async (): Promise<{ success: boolean; data: Array<{ user_id: number; username: string; scan_count: number }> }> => {
+    const response = await api.get<{ success: boolean; data: Array<{ user_id: number; username: string; scan_count: number }> }>('/api/analytics/user-activity');
+    return response.data;
+  },
 };

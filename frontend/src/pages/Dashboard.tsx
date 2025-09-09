@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../hooks/useAuth';
 import { useReports } from '../hooks/useReports';
+import { useActivity } from '../hooks/useActivity'; // Added import
 import SalesTrendChart from '../components/charts/SalesTrendChart';
 import TopProductsChart from '../components/charts/TopProductsChart';
 import SalesMetricsCards from '../components/SalesMetricsCards';
-import { CurrencyDisplay } from '../components/CurrencyDisplay'; // ADD THIS IMPORT
+import { CurrencyDisplay } from '../components/CurrencyDisplay';
+import './Dashboard.css'; // Ensure this file exists for custom styles if needed
 
 const Dashboard: React.FC = () => {
-  const { user, hasPermission } = useAuthStore(); // CHANGED: Added hasPermission
+  const { user, hasPermission } = useAuthStore();
   const {
     dashboardMetrics,
     salesTrends,
@@ -20,17 +22,42 @@ const Dashboard: React.FC = () => {
     error
   } = useReports();
 
-  const [currentTime, setCurrentTime] = useState(new Date());
+  // Step 1: Add activity hook
+  const { activities, loading: activitiesLoading, loadActivities } = useActivity();
 
-  // Load real data on component mount
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  // Remove the isRefreshing state since it's no longer used
+  // const [isRefreshing, setIsRefreshing] = useState(false);
+
   useEffect(() => {
+  // Initial load
     loadDashboardMetrics();
     loadSalesTrends();
     loadTopProducts();
+    loadActivities(); // Call it once on mount
+    setLastUpdated(new Date());
+
+    // Set up real-time updates every 30 seconds
+    const dataInterval = setInterval(() => {
+      loadDashboardMetrics();
+      loadSalesTrends();
+      loadTopProducts();
+      loadActivities(); // Call it on each interval
+      setLastUpdated(new Date());
+    }, 30000);
 
     // Update time every minute
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-    return () => clearInterval(timer);
+
+    // Cleanup function
+    return () => {
+      clearInterval(dataInterval);
+      clearInterval(timer);
+    };
+    // REMOVE loadActivities from the dependencies below.
+    // Only include the functions from useReports that are stable.
   }, [loadDashboardMetrics, loadSalesTrends, loadTopProducts]);
 
   if (loading) {
@@ -54,13 +81,27 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {/* Header with refresh status */}
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">
-            Welcome back, {user?.username}! • {currentTime.toLocaleTimeString()}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-gray-600">
+              Welcome back, {user?.username}! • {currentTime.toLocaleTimeString()}
+            </p>
+            {lastUpdated && (
+              <span className="text-sm text-gray-400">
+                • Updated {lastUpdated.toLocaleTimeString()}
+              </span>
+            )}
+            {/* Remove the refresh indicator block */}
+            {/* {isRefreshing && (
+              <span className="text-sm text-blue-500 flex items-center gap-1">
+                <span className="animate-spin">⟳</span>
+                Updating...
+              </span>
+            )} */}
+          </div>
         </div>
         <Link
           to="/reports"
@@ -70,7 +111,7 @@ const Dashboard: React.FC = () => {
         </Link>
       </div>
 
-      {/* Sales Metrics Cards */}
+      {/* Sales Metrics Cards with custom className */}
       {dashboardMetrics?.sales_today && (
         <SalesMetricsCards
           metrics={{
@@ -78,12 +119,12 @@ const Dashboard: React.FC = () => {
             daily_sales: dashboardMetrics.sales_today.total_sales,
             weekly_sales: dashboardMetrics.weekly_financial?.total_revenue
           }}
+          className="bg-white p-4 rounded-lg shadow dashboard-card"
         />
       )}
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Map salesTrends to the required chart data format */}
         <SalesTrendChart
           data={salesTrends.map((trend) => ({
             date: trend.date,
@@ -94,10 +135,10 @@ const Dashboard: React.FC = () => {
         <TopProductsChart data={topProducts} />
       </div>
 
-      {/* Quick Stats Grid */}
+      {/* Quick Stats Grid with custom className */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {/* Sales Today Card */}
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow dashboard-card">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">💰</span>
@@ -105,7 +146,7 @@ const Dashboard: React.FC = () => {
             <div>
               <h3 className="text-sm font-medium text-gray-600 mb-2">Sales Today</h3>
               <p className="text-2xl font-bold text-gray-900">
-                <CurrencyDisplay amount={dashboardMetrics?.sales_today?.total_sales || 0} /> {/* CHANGED */}
+                <CurrencyDisplay amount={dashboardMetrics?.sales_today?.total_sales || 0} />
               </p>
             </div>
           </div>
@@ -119,14 +160,14 @@ const Dashboard: React.FC = () => {
             <div>
               <span className="text-gray-600">Average: </span>
               <span className="font-semibold">
-                <CurrencyDisplay amount={dashboardMetrics?.sales_today?.average_transaction_value || 0} /> {/* CHANGED */}
+                <CurrencyDisplay amount={dashboardMetrics?.sales_today?.average_transaction_value || 0} />
               </span>
             </div>
           </div>
         </div>
 
         {/* Inventory Alerts Card */}
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow dashboard-card">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">⚠️</span>
@@ -149,7 +190,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Weekly Revenue Card */}
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow dashboard-card">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">📈</span>
@@ -157,7 +198,7 @@ const Dashboard: React.FC = () => {
             <div>
               <h3 className="text-sm font-medium text-gray-600 mb-2">Weekly Revenue</h3>
               <p className="text-2xl font-bold text-gray-900">
-                <CurrencyDisplay amount={dashboardMetrics?.weekly_financial?.total_revenue || 0} /> {/* CHANGED */}
+                <CurrencyDisplay amount={dashboardMetrics?.weekly_financial?.total_revenue || 0} />
               </p>
             </div>
           </div>
@@ -167,7 +208,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Gross Margin Card */}
-        <div className="bg-white p-4 rounded-lg shadow">
+        <div className="bg-white p-4 rounded-lg shadow dashboard-card">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
               <span className="text-2xl">📊</span>
@@ -185,7 +226,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Actions Card */}
+      {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -220,7 +261,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Role-based section now uses permission check */}
+      {/* Role-based section with permissions */}
       {(hasPermission('user:read') || hasPermission('report:view')) && (
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Admin Overview</h3>
@@ -256,10 +297,50 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Recent Activity Placeholder */}
+      {/* Recent Activity Section */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-        <p className="text-gray-500">Recent sales and inventory changes will appear here once we implement the activity feed.</p>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+          <button
+            onClick={() => loadActivities()}
+            className="text-sm text-indigo-600 hover:text-indigo-500"
+            disabled={activitiesLoading}
+          >
+            {activitiesLoading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
+
+        {activitiesLoading ? (
+          <div className="text-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="text-sm text-gray-600 mt-2">Loading activities...</p>
+          </div>
+        ) : activities.length > 0 ? (
+          <div className="space-y-3">
+            {activities.map((activity) => (
+              <div key={`${activity.type}-${activity.id}`} className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50">
+                <div className={`
+                  w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                  ${activity.type === 'sale' ? 'bg-green-100 text-green-600' : ''}
+                  ${activity.type === 'inventory' ? 'bg-blue-100 text-blue-600' : ''}
+                  ${activity.type === 'expense' ? 'bg-orange-100 text-orange-600' : ''}
+                `}>
+                  {activity.type === 'sale' && '💰'}
+                  {activity.type === 'inventory' && '📦'}
+                  {activity.type === 'expense' && '🧾'}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">{activity.description}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(activity.timestamp).toLocaleTimeString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-4">No recent activity</p>
+        )}
       </div>
     </div>
   );
