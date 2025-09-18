@@ -29,7 +29,11 @@ class Refund(RefundBase):
     id: int
     sale_id: int
     user_id: int
-    total_amount: float
+    total_amount: float  # USD amount
+    # NEW: Currency context fields for historical preservation
+    original_amount: float  # Local currency amount (PRESERVED)
+    original_currency: str  # Currency code at transaction time
+    exchange_rate_at_refund: float  # Rate used for conversion
     status: str
     created_at: datetime
     refund_items: List[RefundItem]

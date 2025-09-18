@@ -11,16 +11,6 @@ export interface User {
   role_name?: string;
 }
 
-// UPDATED: The backend likely now expects a role_name or role_id on creation, not a hardcoded string.
-// We need to check the backend schema for the correct field name.
-// This is a placeholder. The correct structure might be:
-// export interface UserCreate {
-//   email: string;
-//   username: string;
-//   password: string;
-//   role_name: string; // or role_id: number;
-// }
-// For now, we'll keep it simple until we confirm the create endpoint.
 export interface UserCreate {
   email: string;
   username: string;
@@ -34,18 +24,25 @@ export interface Product {
   name: string
   description?: string
   price: number
+  cost_price: number
   barcode: string
   stock_quantity: number
   min_stock_level: number
   created_at: string
   updated_at?: string
   last_restocked?: string
+  // NEW: Historical currency context fields
+  original_price?: number;         // Local currency amount (PRESERVED)
+  original_cost_price?: number;    // Local currency cost (PRESERVED)
+  original_currency_code?: string; // Currency code (e.g., "UGX")
+  exchange_rate_at_creation?: number; // Rate used for conversion
 }
 
 export interface ProductCreate {
   name: string
   description?: string
   price: number
+  cost_price: number  // Make sure this is included
   barcode: string
   stock_quantity: number
   min_stock_level: number
@@ -55,9 +52,13 @@ export interface ProductCreate {
 export interface CartItem {
   product_id: number;
   product_name: string;
+  product: Product; // Full product object
   quantity: number;
-  unit_price: number;
-  subtotal: number;
+  unit_price: number; // Local currency price for display
+  original_unit_price?: number; // Original local price for context
+  original_currency_code?: string; // Currency context
+  subtotal: number; // Local currency subtotal
+  exchange_rate_at_creation?: number; // ADD THIS LINE - Historical rate for conversion
 }
 
 export interface Cart {
@@ -96,6 +97,10 @@ export interface SaleItem {
   unit_price: number
   subtotal: number
   product_name?: string
+  // Add historical context fields
+  original_unit_price?: number    // Local currency amount (from backend)
+  original_subtotal?: number      // Local currency amount (from backend)
+  exchange_rate_at_creation?: number  // Historical exchange rate (from backend)
 }
 
 export interface Payment {
@@ -105,6 +110,11 @@ export interface Payment {
   transaction_id?: string
   status: 'pending' | 'completed' | 'failed'
   created_at: string
+
+  // ADD these fields to match backend reality:
+  original_amount?: number;    // Local currency amount (same as amount)
+  original_currency?: string;  // Currency code (e.g., "UGX")
+  exchange_rate_at_payment?: number; // Historical rate
 }
 
 export interface SaleCreate {
@@ -159,63 +169,45 @@ export interface InventoryAdjustment {
   reason?: string
 }
 
-// Report Types
-export interface SalesReport {
-  summary: {
-    total_sales: number
-    total_tax: number
-    total_transactions: number
-    average_transaction_value: number
-    payment_methods: Record<string, number>
-  }
-  top_products: Array<{
-    product_id: number
-    product_name: string
-    quantity_sold: number
-    total_revenue: number
-    profit_margin: number
-  }>
-  sales_trends: Array<{
-    date: string
-    daily_sales: number
-    transactions: number
-    average_order_value: number
-  }>
-  date_range: {
-    start_date: string
-    end_date: string
-  }
-}
-
-// Additional Report and Dashboard Types (Merged in)
+// Report Types - UPDATED FOR DUAL CURRENCY
 export interface SalesSummary {
-  total_sales: number;
+  total_sales: number;           // USD amount
+  total_sales_original: number;  // Local currency amount (PRESERVED)
   total_tax: number;
   total_transactions: number;
   average_transaction_value: number;
+  payment_methods: Record<string, number>;
+  primary_currency: string;
 }
 
 export interface TopProduct {
   product_id: number;
   product_name: string;
   quantity_sold: number;
-  total_revenue: number;
+  total_revenue: number;         // USD amount
+  total_revenue_original: number; // Local currency amount (PRESERVED)
   profit_margin: number;
 }
 
 export interface SalesTrend {
   date: string;
-  daily_sales: number;
+  daily_sales: number;           // USD amount
+  daily_sales_original: number;  // Local currency amount (PRESERVED)
   transactions: number;
   average_order_value: number;
 }
 
-export interface DateRange {
-  start_date: string;
-  end_date: string;
+export interface SalesReport {
+  summary: SalesSummary;
+  top_products: TopProduct[];
+  sales_trends: SalesTrend[];
+  date_range: {
+    start_date: string;
+    end_date: string;
+  };
 }
 
-// Ensure these interfaces exist and match the backend
+// Additional Report and Dashboard Types
 export interface DashboardMetrics {
   sales_today: SalesSummary;
   inventory_alerts: number;
@@ -229,8 +221,6 @@ export interface DashboardMetrics {
   };
   timestamp: string;
 }
-
-// Add to existing types...
 
 // Customer Types
 export interface Customer {
@@ -259,14 +249,28 @@ export interface CustomerUpdate {
   address?: string;
 }
 
+// Activity Types
+export interface Activity {
+  id: number;
+  type: 'sale' | 'inventory' | 'expense' | 'user' | 'system';
+  description: string;
+  amount?: number;                 // Local amount
+  currency_code?: string;          // Currency code
+  exchange_rate?: number;          // Historical rate
+  usd_amount?: number;             // USD amount
+  product_id?: number;
+  user_id?: number;
+  username?: string;
+  timestamp: string;
+  created_at: string;
+}
+
 export interface CustomerPurchaseHistory {
   sale_id: number;
   total_amount: number;
   created_at: string;
   items: string[];
 }
-
-// ... existing types ...
 
 // Refund Types
 export interface RefundItem {
@@ -297,8 +301,6 @@ export interface RefundItemCreate {
   sale_item_id: number;
   quantity: number;
 }
-
-// Add to existing types...
 
 // Supplier Types
 export interface Supplier {
@@ -366,7 +368,7 @@ export interface PurchaseOrderItemCreate {
   notes?: string;
 }
 
-// Add Currency types (add this anywhere in the file)
+// Currency types
 export interface Currency {
   id: number;
   code: string;
@@ -397,8 +399,7 @@ export interface CurrencyConversion {
   converted_amount: number;
 }
 
-// Add to existing types...
-
+// Expense Types
 export interface ExpenseCategory {
   id: number;
   name: string;

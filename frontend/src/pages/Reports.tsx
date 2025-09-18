@@ -6,6 +6,7 @@ import BackButton from '../components/BackButton';
 import { CurrencyDisplay } from '../components/CurrencyDisplay';
 import DailyScansChart from '../components/charts/DailyScansChart';
 import UserActivityChart from '../components/charts/UserActivityChart';
+import { useBusinessStore } from '../hooks/useBusiness'; // ADD THIS IMPORT
 
 interface LowStockAlert {
   product_name: string;
@@ -320,153 +321,133 @@ const Reports: React.FC = () => {
   );
 };
 
-// The report view components are unchanged, remain same as previous, omitted here for brevity.
-
+// SALES REPORT VIEW COMPONENT
 const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
   <div className="space-y-6">
     <div className="flex justify-between items-center mb-4">
       <h3 className="text-xl font-semibold text-gray-900">Sales Report</h3>
       <span className="text-sm text-gray-600">
-        {report.date_range.start_date} to {report.date_range.end_date}
+        {report.date_range?.start_date} to {report.date_range?.end_date}
       </span>
     </div>
-    {/* Summary Cards */}
+
+    {/* Sales Summary Cards */}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div className="bg-blue-50 p-4 rounded-lg">
         <p className="text-sm text-blue-600 mb-2">Total Sales</p>
         <p className="text-2xl font-bold text-blue-900">
-          <CurrencyDisplay amount={report.summary.total_sales} />
+          <CurrencyDisplay
+            amount={report.summary?.total_sales || 0}
+            originalAmount={report.summary?.total_sales_original || report.summary?.total_sales || 0}
+            originalCurrencyCode={report.summary?.primary_currency}
+            exchangeRateAtCreation={
+              report.summary?.total_sales && report.summary?.total_sales_original
+                ? report.summary.total_sales / report.summary.total_sales_original
+                : 1
+            }
+            preserveOriginal={true}
+          />
         </p>
       </div>
       <div className="bg-green-50 p-4 rounded-lg">
-        <p className="text-sm text-green-600 mb-2">Transactions</p>
-        <p className="text-2xl font-bold text-green-900">{report.summary.total_transactions}</p>
+        <p className="text-sm text-green-600 mb-2">Total Tax</p>
+        <p className="text-2xl font-bold text-green-900">
+          <CurrencyDisplay
+            amount={report.summary?.total_tax || 0}
+            originalAmount={report.summary?.total_tax_original || report.summary?.total_tax || 0}
+            originalCurrencyCode={report.summary?.primary_currency}
+            exchangeRateAtCreation={
+              report.summary?.total_sales && report.summary?.total_sales_original
+                ? report.summary.total_sales / report.summary.total_sales_original
+                : 1
+            }
+            preserveOriginal={true}
+          />
+        </p>
       </div>
       <div className="bg-purple-50 p-4 rounded-lg">
-        <p className="text-sm text-purple-600 mb-2">Average Order</p>
-        <p className="text-2xl font-bold text-purple-900">
-          <CurrencyDisplay amount={report.summary.average_transaction_value} />
-        </p>
+        <p className="text-sm text-purple-600 mb-2">Transactions</p>
+        <p className="text-2xl font-bold text-purple-900">{report.summary?.total_transactions || 0}</p>
       </div>
       <div className="bg-orange-50 p-4 rounded-lg">
-        <p className="text-sm text-orange-600 mb-2">Tax Collected</p>
+        <p className="text-sm text-orange-600 mb-2">Avg. Order Value</p>
         <p className="text-2xl font-bold text-orange-900">
-          <CurrencyDisplay amount={report.summary.total_tax} />
+          <CurrencyDisplay
+            amount={report.summary?.average_transaction_value || 0}
+            originalAmount={
+              report.summary?.total_sales_original && report.summary?.total_transactions
+                ? report.summary.total_sales_original / report.summary.total_transactions
+                : 0
+            }
+            originalCurrencyCode={report.summary?.primary_currency}
+            exchangeRateAtCreation={
+              report.summary?.total_sales && report.summary?.total_sales_original
+                ? report.summary.total_sales / report.summary.total_sales_original
+                : 1
+            }
+            preserveOriginal={true}
+          />
         </p>
       </div>
     </div>
-    {/* Top Products */}
-    <div>
-      <h4 className="text-lg font-medium text-gray-900 mb-4">Top Selling Products</h4>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity Sold</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Margin</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {report.top_products.map((product: any, index: number) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.product_name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.quantity_sold}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <CurrencyDisplay amount={product.total_revenue} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {product.profit_margin?.toFixed(1)}%
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    {/* Sales Trends */}
-    <div>
-      <h4 className="text-lg font-medium text-gray-900 mb-4">Sales Trends</h4>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Daily Sales</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transactions</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg. Order Value</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {report.sales_trends.map((trend: any, index: number) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trend.date}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <CurrencyDisplay amount={trend.daily_sales} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trend.transactions}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <CurrencyDisplay amount={trend.average_order_value} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-);
 
-// InventoryReportView component as previously defined (with added Low Stock Alerts, Stock Movements)
-const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
-  <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 mb-4">Inventory Report</h3>
-    {/* Summary Cards */}
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="text-sm text-blue-600 mb-2">Total Products</p>
-        <p className="text-2xl font-bold text-blue-900">{report.summary.total_products}</p>
-      </div>
-      <div className="bg-green-50 p-4 rounded-lg">
-        <p className="text-sm text-green-600 mb-2">Stock Value</p>
-        <p className="text-2xl font-bold text-green-900">
-          <CurrencyDisplay amount={report.summary.total_stock_value} />
-        </p>
-      </div>
-      <div className="bg-red-50 p-4 rounded-lg">
-        <p className="text-sm text-red-600 mb-2">Low Stock Items</p>
-        <p className="text-2xl font-bold text-red-900">{report.summary.low_stock_items}</p>
-      </div>
-      <div className="bg-orange-50 p-4 rounded-lg">
-        <p className="text-sm text-orange-600 mb-2">Out of Stock</p>
-        <p className="text-2xl font-bold text-orange-900">{report.summary.out_of_stock_items}</p>
-      </div>
-    </div>
-    {/* Low Stock Alerts */}
-    {report.low_stock_alerts.length > 0 && (
+    {/* Payment Methods */}
+    {report.summary?.payment_methods && Object.keys(report.summary.payment_methods).length > 0 && (
       <div>
-        <h4 className="text-lg font-medium text-gray-900 mb-4">Low Stock Alerts</h4>
-        <div className="bg-white rounded-lg shadow overflow-hidden min-w-full overflow-x-auto">
+        <h4 className="text-lg font-medium text-gray-900 mb-4">Payment Methods</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Object.entries(report.summary.payment_methods).map(([method, amount]: [string, any]) => (
+            <div key={method} className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 mb-2 capitalize">{method.replace('_', ' ')}</p>
+              <p className="text-xl font-bold text-gray-900">
+                <CurrencyDisplay
+                  amount={amount}
+                  originalAmount={amount}
+                  originalCurrencyCode={report.summary?.primary_currency}
+                  exchangeRateAtCreation={1}
+                  preserveOriginal={true}
+                />
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Top Products */}
+    {report.top_products && report.top_products.length > 0 && (
+      <div>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">Top Selling Products</h4>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-red-50">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-red-600 uppercase">Product</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-red-600 uppercase">Current Stock</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-red-600 uppercase">Minimum Level</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-red-600 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity Sold</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profit Margin</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {report.low_stock_alerts.map((alert: LowStockAlert, index: number) => (
-                <tr key={index} className="hover:bg-red-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{alert.product_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-bold">{alert.current_stock}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{alert.min_stock_level}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-bold bg-red-100 text-red-800 rounded-full">
-                      Needs Restock
-                    </span>
+              {report.top_products.map((product: any, index: number) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.product_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.quantity_sold}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <CurrencyDisplay
+                      amount={product.total_revenue || 0}
+                      originalAmount={product.total_revenue_original || product.total_revenue || 0}
+                      originalCurrencyCode={report.summary?.primary_currency}
+                      exchangeRateAtCreation={
+                        product.total_revenue && product.total_revenue_original
+                          ? product.total_revenue / product.total_revenue_original
+                          : 1
+                      }
+                      preserveOriginal={true}
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.profit_margin?.toFixed(1)}%
                   </td>
                 </tr>
               ))}
@@ -475,124 +456,354 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => (
         </div>
       </div>
     )}
-    {/* Stock Movements */}
-    <div>
-      <h4 className="text-lg font-medium text-gray-900 mb-4">Recent Stock Movements</h4>
-      <div className="bg-white rounded-lg shadow overflow-hidden min-w-full overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movement Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {report.stock_movements.map((movement: StockMovement, index: number) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{movement.product_name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span
-                    className={`px-2 py-1 text-xs font-bold rounded-full ${
-                      movement.movement_type === 'restock'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}
-                  >
-                    {movement.movement_type}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {movement.quantity > 0 ? '+' : ''}
-                  {movement.quantity}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <CurrencyDisplay amount={movement.value} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{movement.date}</td>
+
+    {/* Sales Trends */}
+    {report.sales_trends && report.sales_trends.length > 0 && (
+      <div>
+        <h4 className="text-lg font-medium text-gray-900 mb-4">Sales Trends</h4>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sales</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Transactions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg. Order Value</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {report.sales_trends.map((trend: any, index: number) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{trend.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <CurrencyDisplay
+                      amount={trend.daily_sales || 0}
+                      originalAmount={trend.daily_sales_original || trend.daily_sales || 0}
+                      originalCurrencyCode={report.summary?.primary_currency}
+                      exchangeRateAtCreation={
+                        trend.daily_sales && trend.daily_sales_original
+                          ? trend.daily_sales / trend.daily_sales_original
+                          : 1
+                      }
+                      preserveOriginal={true}
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trend.transactions}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <CurrencyDisplay
+                      amount={trend.average_order_value || 0}
+                      originalAmount={
+                        trend.daily_sales_original && trend.transactions
+                          ? trend.daily_sales_original / trend.transactions
+                          : 0
+                      }
+                      originalCurrencyCode={report.summary?.primary_currency}
+                      exchangeRateAtCreation={
+                        trend.daily_sales && trend.daily_sales_original
+                          ? trend.daily_sales / trend.daily_sales_original
+                          : 1
+                      }
+                      preserveOriginal={true}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    )}
   </div>
 );
 
-// FinancialReportView component as previously defined (unchanged)
-const FinancialReportView: React.FC<{ report: any }> = ({ report }) => (
-  <div className="space-y-6">
-    <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Report</h3>
-    {/* Financial Summary */}
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <p className="text-sm text-blue-600 mb-2">Total Revenue</p>
-        <p className="text-2xl font-bold text-blue-900">
-          <CurrencyDisplay amount={report.summary.total_revenue} />
-        </p>
+// InventoryReportView Component - PROPER FIX
+const InventoryReportView: React.FC<{ report: any }> = ({ report }) => {
+  const { business } = useBusinessStore();
+  const businessCurrency = business?.currency_code || 'USD';
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-semibold text-gray-900">Inventory Report</h3>
+        <span className="text-sm text-gray-600">As of {new Date().toLocaleDateString()}</span>
       </div>
-      <div className="bg-green-50 p-4 rounded-lg">
-        <p className="text-sm text-green-600 mb-2">Gross Profit</p>
-        <p className="text-2xl font-bold text-green-900">
-          <CurrencyDisplay amount={report.summary.gross_profit} />
-        </p>
+
+      {/* Inventory Summary Cards - FIXED */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <p className="text-sm text-blue-600 mb-2">Total Products</p>
+          <p className="text-2xl font-bold text-blue-900">{report.summary?.total_products || 0}</p>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg">
+          <p className="text-sm text-green-600 mb-2">Stock Value</p>
+          <p className="text-2xl font-bold text-green-900">
+            {/* FIX: Inventory data uses simple display without historical context */}
+            <CurrencyDisplay
+              amount={report.summary?.total_stock_value || 0}
+              currencyCode={businessCurrency}
+              preserveOriginal={false}
+            />
+          </p>
+        </div>
+        <div className="bg-orange-50 p-4 rounded-lg">
+          <p className="text-sm text-orange-600 mb-2">Low Stock Items</p>
+          <p className="text-2xl font-bold text-orange-900">{report.summary?.low_stock_items || 0}</p>
+        </div>
+        <div className="bg-red-50 p-4 rounded-lg">
+          <p className="text-sm text-red-600 mb-2">Out of Stock</p>
+          <p className="text-2xl font-bold text-red-900">{report.summary?.out_of_stock_items || 0}</p>
+        </div>
       </div>
-      <div className="bg-purple-50 p-4 rounded-lg">
-        <p className="text-sm text-purple-600 mb-2">Gross Margin</p>
-        <p className="text-2xl font-bold text-purple-900">
-          {(report.summary.gross_margin || 0).toFixed(1)}%
-        </p>
-      </div>
-      <div className="bg-orange-50 p-4 rounded-lg">
-        <p className="text-sm text-orange-600 mb-2">Operating Expenses</p>
-        <p className="text-2xl font-bold text-orange-900">
-          <CurrencyDisplay amount={report.summary.operating_expenses} />
-        </p>
-      </div>
-      <div className="bg-red-50 p-4 rounded-lg">
-        <p className="text-sm text-red-600 mb-2">Net Income</p>
-        <p className="text-2xl font-bold text-red-900">
-          <CurrencyDisplay amount={report.summary.net_income} />
-        </p>
-      </div>
-      <div className="bg-indigo-50 p-4 rounded-lg">
-        <p className="text-sm text-indigo-600 mb-2">Net Margin</p>
-        <p className="text-2xl font-bold text-indigo-900">
-          {(report.summary.net_margin || 0).toFixed(1)}%
-        </p>
-      </div>
+
+      {/* Stock Movements - FIXED */}
+      {report.stock_movements && report.stock_movements.length > 0 && (
+        <div>
+          <h4 className="text-lg font-medium text-gray-900 mb-4">Recent Stock Movements</h4>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Movement Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {report.stock_movements.map((movement: any, index: number) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{movement.product_name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{movement.movement_type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{movement.quantity}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {/* FIX: Inventory data uses simple display without historical context */}
+                      <CurrencyDisplay
+                        amount={movement.value}
+                        currencyCode={businessCurrency}
+                        preserveOriginal={false}
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(movement.date).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
-    {/* Expense Breakdown */}
-    <div>
-      <h4 className="text-lg font-medium text-gray-900 mb-4">Expense Breakdown</h4>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Percentage</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {report.expense_breakdown?.map((expense: any, index: number) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{expense.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <CurrencyDisplay amount={expense.amount} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {(expense.percentage || 0).toFixed(1)}%
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  );
+};
+
+// FinancialReportView Component - PROPER FIX
+const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
+  const { business } = useBusinessStore();
+  const businessCurrency = business?.currency_code || 'USD';
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-semibold text-gray-900">Financial Report</h3>
+        <span className="text-sm text-gray-600">
+          {report.date_range?.start_date} to {report.date_range?.end_date}
+        </span>
       </div>
+
+      {/* Financial Summary Cards - FIXED */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <p className="text-sm text-blue-600 mb-2">Total Revenue</p>
+          <p className="text-2xl font-bold text-blue-900">
+            {/* FIX: Financial data should use historical context like sales */}
+            <CurrencyDisplay
+              amount={report.summary?.total_revenue || 0}
+              originalAmount={report.summary?.total_revenue_original || report.summary?.total_revenue || 0}
+              originalCurrencyCode={businessCurrency}
+              exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+              preserveOriginal={true}
+            />
+          </p>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg">
+          <p className="text-sm text-green-600 mb-2">Gross Profit</p>
+          <p className="text-2xl font-bold text-green-900">
+            {/* FIX: Financial data should use historical context like sales */}
+            <CurrencyDisplay
+              amount={report.summary?.gross_profit || 0}
+              originalAmount={report.summary?.gross_profit_original || report.summary?.gross_profit || 0}
+              originalCurrencyCode={businessCurrency}
+              exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+              preserveOriginal={true}
+            />
+          </p>
+        </div>
+        <div className="bg-purple-50 p-4 rounded-lg">
+          <p className="text-sm text-purple-600 mb-2">Net Profit</p>
+          <p className="text-2xl font-bold text-purple-900">
+            {/* FIX: Financial data should use historical context like sales */}
+            <CurrencyDisplay
+              amount={report.summary?.net_profit || 0}
+              originalAmount={report.summary?.net_profit_original || report.summary?.net_profit || 0}
+              originalCurrencyCode={businessCurrency}
+              exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+              preserveOriginal={true}
+            />
+          </p>
+        </div>
+        <div className="bg-orange-50 p-4 rounded-lg">
+          <p className="text-sm text-orange-600 mb-2">Gross Margin</p>
+          <p className="text-2xl font-bold text-orange-900">{report.summary?.gross_margin?.toFixed(1) || 0}%</p>
+        </div>
+      </div>
+
+      {/* Profitability Analysis - FIXED */}
+      {report.profitability && report.profitability.length > 0 && (
+        <div>
+          <h4 className="text-lg font-medium text-gray-900 mb-4">Profitability by Product</h4>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cost</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profit</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Margin</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {report.profitability.map((item: any, index: number) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.product_name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {/* FIX: Financial data should use historical context like sales */}
+                      <CurrencyDisplay
+                        amount={item.revenue || 0}
+                        originalAmount={item.revenue || 0}
+                        originalCurrencyCode={businessCurrency}
+                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        preserveOriginal={true}
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {/* FIX: Financial data should use historical context like sales */}
+                      <CurrencyDisplay
+                        amount={item.cost || 0}
+                        originalAmount={item.cost || 0}
+                        originalCurrencyCode={businessCurrency}
+                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        preserveOriginal={true}
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {/* FIX: Financial data should use historical context like sales */}
+                      <CurrencyDisplay
+                        amount={item.profit || 0}
+                        originalAmount={item.profit || 0}
+                        originalCurrencyCode={businessCurrency}
+                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        preserveOriginal={true}
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {item.margin?.toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Cash Flow Summary - FIXED */}
+      {report.cash_flow && (
+        <div>
+          <h4 className="text-lg font-medium text-gray-900 mb-4">Cash Flow Summary</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-sm text-green-600 mb-2">Cash In</p>
+              <p className="text-2xl font-bold text-green-900">
+                {/* FIX: Financial data should use historical context like sales */}
+                <CurrencyDisplay
+                  amount={report.cash_flow.cash_in || 0}
+                  originalAmount={report.cash_flow.cash_in || 0}
+                  originalCurrencyCode={businessCurrency}
+                  exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                  preserveOriginal={true}
+                />
+              </p>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <p className="text-sm text-red-600 mb-2">Cash Out</p>
+              <p className="text-2xl font-bold text-red-900">
+                {/* FIX: Financial data should use historical context like sales */}
+                <CurrencyDisplay
+                  amount={report.cash_flow.cash_out || 0}
+                  originalAmount={report.cash_flow.cash_out || 0}
+                  originalCurrencyCode={businessCurrency}
+                  exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                  preserveOriginal={true}
+                />
+              </p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <p className="text-sm text-blue-600 mb-2">Net Cash Flow</p>
+              <p className="text-2xl font-bold text-blue-900">
+                {/* FIX: Financial data should use historical context like sales */}
+                <CurrencyDisplay
+                  amount={report.cash_flow.net_cash_flow || 0}
+                  originalAmount={report.cash_flow.net_cash_flow || 0}
+                  originalCurrencyCode={businessCurrency}
+                  exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                  preserveOriginal={true}
+                />
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expense Breakdown - FIXED */}
+      {report.expense_breakdown && report.expense_breakdown.length > 0 && (
+        <div>
+          <h4 className="text-lg font-medium text-gray-900 mb-4">Expense Breakdown</h4>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Percentage</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {report.expense_breakdown.map((expense: any, index: number) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{expense.category}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {/* FIX: Financial data should use historical context like sales */}
+                      <CurrencyDisplay
+                        amount={expense.amount || 0}
+                        originalAmount={expense.amount || 0}
+                        originalCurrencyCode={businessCurrency}
+                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        preserveOriginal={true}
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {expense.percentage?.toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export default Reports;

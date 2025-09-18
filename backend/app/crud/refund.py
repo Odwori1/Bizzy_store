@@ -23,7 +23,13 @@ def process_refund(db: Session, refund_data: RefundCreate, user_id: int):
         if not sale:
             raise ValueError(f"Sale with ID {refund_data.sale_id} not found.")
 
+        # NEW: Get the currency context from the original sale
+        # This is the key to the multi-currency fix for refunds
+        original_currency = sale.original_currency
+        exchange_rate = sale.exchange_rate_at_sale
+
         total_refund_amount = 0.0
+        total_original_refund_amount = 0.0 # NEW: Track the amount in the original local currency
         refund_items_to_create = []
 
         # Pre-fetch all sale items for this sale to avoid repeated queries
@@ -32,19 +38,24 @@ def process_refund(db: Session, refund_data: RefundCreate, user_id: int):
         # 2. VALIDATION: Validate each item in the refund request
         for item in refund_data.refund_items:
             sale_item = sale_items_map.get(item.sale_item_id)
-            
+
             # Check if the sale item exists and belongs to the correct sale
             if not sale_item:
                 raise ValueError(f"Sale item with ID {item.sale_item_id} not found in sale #{sale.id}.")
-            
+
             # Check if trying to refund more than was purchased
             total_possible_to_refund = sale_item.quantity - sale_item.refunded_quantity
             if item.quantity > total_possible_to_refund:
                 raise ValueError(f"Cannot refund {item.quantity} of '{sale_item.product.name}'. Only {total_possible_to_refund} units are eligible for refund.")
-            
+
             # Calculate the amount to refund for this item
-            item_refund_amount = item.quantity * sale_item.unit_price
+            # FIXED: Use the original unit price from the sale item (in local currency)
+            item_original_refund_amount = item.quantity * sale_item.unit_price
+            # FIXED: Convert the local amount to USD using the original sale's exchange rate
+            item_refund_amount = item_original_refund_amount * exchange_rate if exchange_rate != 0 else item_original_refund_amount
+
             total_refund_amount += item_refund_amount
+            total_original_refund_amount += item_original_refund_amount # NEW: Add to local total
 
             # Prepare data for RefundItem creation
             refund_items_to_create.append({
@@ -58,7 +69,11 @@ def process_refund(db: Session, refund_data: RefundCreate, user_id: int):
             sale_id=refund_data.sale_id,
             user_id=user_id,
             reason=refund_data.reason,
-            total_amount=total_refund_amount,
+            total_amount=total_refund_amount, # USD amount
+            # NEW: Store the currency context from the original sale
+            original_amount=total_original_refund_amount, # Local currency amount
+            original_currency=original_currency,
+            exchange_rate_at_refund=exchange_rate,
             status="processed"
         )
         db.add(db_refund)
@@ -68,7 +83,7 @@ def process_refund(db: Session, refund_data: RefundCreate, user_id: int):
         for item_data in refund_items_to_create:
             sale_item_id = item_data["sale_item_id"]
             quantity_to_refund = item_data["quantity"]
-            
+
             # Create RefundItem record
             db_refund_item = RefundItem(
                 refund_id=db_refund.id,
@@ -101,7 +116,7 @@ def process_refund(db: Session, refund_data: RefundCreate, user_id: int):
 
         # 5. OPTIONAL: Update sale payment_status if entire sale is refunded
         total_sale_refunded = all(
-            (sale_item.refunded_quantity == sale_item.quantity) 
+            (sale_item.refunded_quantity == sale_item.quantity)
             for sale_item in sale.sale_items
         )
         if total_sale_refunded:

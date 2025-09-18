@@ -2,50 +2,66 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 from app.models.expense import Expense
-from app.schemas.expense_schema import ExpenseCreate  # Import the schema to use its model
+from app.schemas.expense_schema import ExpenseCreate
 
-def create_expense(db: Session, expense_data: ExpenseCreate, user_id: int, usd_amount: float, exchange_rate: Optional[float] = None):
+# ADD imports at top
+from app.crud.business import get_business_by_user_id
+from app.services.currency_service import CurrencyService
+import asyncio
+
+from app.models.expense import ExpenseCategory
+from app.schemas.expense_schema import ExpenseCategoryCreate
+
+def create_expense(db: Session, expense_data, user_id: int, usd_amount: float, exchange_rate: Optional[float] = None):
     """
     Create a new expense with multi-currency support.
     Saves the original amount, original currency, and the calculated USD amount.
     """
-    db_expense = Expense(
-        # These are the calculated values for internal use
-        amount=usd_amount,  # The calculated USD amount
-        exchange_rate=exchange_rate, # The rate used for the conversion
+    try:
+        # ADD: Get business context for currency
+        business = get_business_by_user_id(db, user_id)
+        business_currency = business.currency_code if business else 'USD'
+        
+        db_expense = Expense(
+            # These are the calculated values for internal use
+            amount=usd_amount,  # The calculated USD amount
+            exchange_rate=exchange_rate, # The rate used for the conversion
 
-        # These are the original user inputs to preserve intent
-        original_amount=expense_data.original_amount,
-        original_currency_code=expense_data.original_currency_code,
+            # These are the original user inputs to preserve intent
+            original_amount=expense_data.original_amount,
+            original_currency_code=expense_data.original_currency_code,
 
-        # These are the other required fields
-        description=expense_data.description,
-        category_id=expense_data.category_id,
-        business_id=expense_data.business_id,
-        payment_method=getattr(expense_data, 'payment_method', 'cash'),
-        is_recurring=getattr(expense_data, 'is_recurring', False),
-        recurrence_interval=getattr(expense_data, 'recurrence_interval', None),
-        receipt_url=getattr(expense_data, 'receipt_url', None),
-        created_by=user_id
-    )
-    db.add(db_expense)
-    db.commit()
-    db.refresh(db_expense)
-    return db_expense
+            # These are the other required fields
+            description=expense_data.description,
+            category_id=expense_data.category_id,
+            business_id=expense_data.business_id,
+            payment_method=getattr(expense_data, 'payment_method', 'cash'),
+            is_recurring=getattr(expense_data, 'is_recurring', False),
+            recurrence_interval=getattr(expense_data, 'recurrence_interval', None),
+            receipt_url=getattr(expense_data, 'receipt_url', None),
+            created_by=user_id
+        )
+        db.add(db_expense)
+        db.commit()
+        db.refresh(db_expense)
+        return db_expense
+    except Exception as e:
+        db.rollback()
+        raise e
 
 def get_business_expenses(db: Session, business_id: int,
-                         start_date: Optional[datetime] = None,
-                         end_date: Optional[datetime] = None):
+                          start_date: Optional[datetime] = None,
+                          end_date: Optional[datetime] = None):
     """Get expenses for a business with optional date filtering"""
     # Updated query to join with ExpenseCategory and include category name
     query = db.query(
         Expense,
-        ExpenseCategory.name.label('category_name')  # Add category name
+        ExpenseCategory.name.label('category_name')
     ).join(
-        ExpenseCategory, Expense.category_id == ExpenseCategory.id  # Join with category table
+        ExpenseCategory, Expense.category_id == ExpenseCategory.id
     ).filter(
         Expense.business_id == business_id,
-        ExpenseCategory.is_active == True  # Only include active categories
+        ExpenseCategory.is_active == True
     )
 
     if start_date:
@@ -53,17 +69,14 @@ def get_business_expenses(db: Session, business_id: int,
     if end_date:
         query = query.filter(Expense.date <= end_date)
 
-    # Execute query and format results
     results = query.order_by(Expense.date.desc()).all()
-    
-    # Convert results to include category name in each expense object
+
     expenses_with_category = []
     for expense, category_name in results:
-        # Create a copy of the expense object and add category_name
         expense_with_category = expense
-        expense_with_category.category_name = category_name  # Add category name to expense object
+        expense_with_category.category_name = category_name
         expenses_with_category.append(expense_with_category)
-    
+
     return expenses_with_category
 
 def delete_expense(db: Session, expense_id: int):
@@ -74,20 +87,14 @@ def delete_expense(db: Session, expense_id: int):
         db.commit()
     return expense
 
-# ===== EXPENSE CATEGORY CRUD FUNCTIONS =====
-from app.models.expense import ExpenseCategory
-from app.schemas.expense_schema import ExpenseCategoryCreate
-
+# Expense Category CRUD functions remain the same
 def get_expense_categories(db: Session) -> List[ExpenseCategory]:
-    """Get all expense categories"""
     return db.query(ExpenseCategory).filter(ExpenseCategory.is_active == True).all()
 
 def get_expense_category(db: Session, category_id: int) -> Optional[ExpenseCategory]:
-    """Get a specific expense category by ID"""
     return db.query(ExpenseCategory).filter(ExpenseCategory.id == category_id).first()
 
 def create_expense_category(db: Session, category_data: ExpenseCategoryCreate) -> ExpenseCategory:
-    """Create a new expense category"""
     db_category = ExpenseCategory(
         name=category_data.name,
         description=category_data.description
@@ -98,7 +105,6 @@ def create_expense_category(db: Session, category_data: ExpenseCategoryCreate) -
     return db_category
 
 def update_expense_category(db: Session, category_id: int, category_data: ExpenseCategoryCreate) -> Optional[ExpenseCategory]:
-    """Update an existing expense category"""
     category = db.query(ExpenseCategory).filter(ExpenseCategory.id == category_id).first()
     if category:
         category.name = category_data.name
@@ -108,7 +114,6 @@ def update_expense_category(db: Session, category_id: int, category_data: Expens
     return category
 
 def delete_expense_category(db: Session, category_id: int) -> bool:
-    """Soft delete an expense category (set is_active to False)"""
     category = db.query(ExpenseCategory).filter(ExpenseCategory.id == category_id).first()
     if category:
         category.is_active = False

@@ -18,6 +18,11 @@ class SaleItem(SaleItemBase):
     sale_id: int
     refunded_quantity: int = 0  # Add this field to the response schema
 
+    # Add historical context fields (MUST match the model)
+    original_unit_price: Optional[float] = None
+    original_subtotal: Optional[float] = None
+    exchange_rate_at_creation: Optional[float] = None
+
     product_name: Optional[str] = None
     class Config:
         from_attributes = True
@@ -27,6 +32,12 @@ class PaymentBase(BaseModel):
     amount: float = Field(..., gt=0)
     payment_method: str = Field(..., pattern="^(cash|card|mobile_money)$")
     transaction_id: Optional[str] = None
+
+    # --- ADD THESE THREE LINES ---
+    original_amount: Optional[float] = None  # Local currency amount
+    original_currency_code: Optional[str] = None  # Currency code
+    exchange_rate_at_payment: Optional[float] = None # Conversion rate
+    # -----------------------------
 
 class PaymentCreate(PaymentBase):
     pass
@@ -51,8 +62,13 @@ class SaleCreate(SaleBase):
 
 class Sale(SaleBase):
     id: int
-    total_amount: float
-    tax_amount: float
+    total_amount: float              # USD amount
+    tax_amount: float                # USD tax amount
+    usd_amount: float                # USD amount (duplicate for consistency)
+    usd_tax_amount: float            # USD tax amount
+    original_amount: Optional[float] = None   # Local amount
+    original_currency: Optional[str] = None   # Currency code
+    exchange_rate_at_sale: Optional[float] = None # Conversion rate
     payment_status: str
     created_at: datetime
     sale_items: List[SaleItem]
@@ -69,6 +85,9 @@ class SaleSummary(BaseModel):
     payment_status: str
     created_at: datetime
     user_name: Optional[str] = None  # Make this optional
+    original_amount: Optional[float] = None
+    original_currency: Optional[str] = None
+    exchange_rate_at_sale: Optional[float] = None
 
     class Config:
         from_attributes = True

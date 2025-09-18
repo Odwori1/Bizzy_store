@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sale, SaleItem, RefundItemCreate } from '../types';
 import { useRefunds } from '../hooks/useRefunds';
-import { CurrencyDisplay } from './CurrencyDisplay'; // <--- ADD THIS IMPORT
+import { CurrencyDisplay } from './CurrencyDisplay';
 
 interface RefundModalProps {
   sale: Sale;
@@ -41,7 +41,8 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
 
     return refundItems.reduce((total, refundItem) => {
       const saleItem = sale.sale_items.find(item => item.id === refundItem.sale_item_id);
-      return total + (saleItem ? refundItem.quantity * saleItem.unit_price : 0);
+      // FIXED: Use original_unit_price instead of unit_price for local currency amount
+      return total + (saleItem ? refundItem.quantity * (saleItem.original_unit_price || saleItem.unit_price) : 0);
     }, 0);
   };
 
@@ -78,7 +79,7 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
       console.log('Calling createRefund...');
       const result = await createRefund(refundData);
       console.log('createRefund result:', result);
-      
+
       if (result) {
         console.log('Refund successful!');
         onRefundProcessed();
@@ -149,7 +150,16 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
                         Purchased: {saleItem.quantity} | Already refunded: {saleItem.refunded_quantity || 0} |
                         Available to refund: {maxRefundable}
                       </p>
-                      <p className="text-sm">Unit price: <CurrencyDisplay amount={saleItem.unit_price} /></p>
+                      <p className="text-sm">
+                        Unit price:{" "}
+                        <CurrencyDisplay
+                          amount={saleItem.unit_price} // USD amount
+                          originalAmount={saleItem.original_unit_price || saleItem.unit_price} // Local amount
+                          originalCurrencyCode={sale.original_currency}
+                          exchangeRateAtCreation={saleItem.exchange_rate_at_creation}
+                          preserveOriginal={true}
+                        />
+                      </p>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -172,7 +182,14 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
 
           <div className="bg-gray-50 p-4 rounded">
             <p className="text-lg font-semibold">
-              Total Refund Amount: <CurrencyDisplay amount={calculateTotalRefund()} />
+              Total Refund Amount:{" "}
+              <CurrencyDisplay
+                amount={calculateTotalRefund() * (sale.exchange_rate_at_sale || 1)} // USD amount
+                originalAmount={calculateTotalRefund()} // Local amount
+                originalCurrencyCode={sale.original_currency}
+                exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                preserveOriginal={true}
+              />
             </p>
           </div>
 
@@ -190,7 +207,15 @@ export default function RefundModal({ sale, isOpen, onClose, onRefundProcessed }
               className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:bg-red-400"
               disabled={loading || !hasRefundableItems()}
             >
-              {loading ? 'Processing...' : `Process Refund (`}<CurrencyDisplay amount={calculateTotalRefund()} />{`)`}
+              {loading ? 'Processing...' : `Process Refund (`}
+              <CurrencyDisplay
+                amount={calculateTotalRefund() * (sale.exchange_rate_at_sale || 1)} // USD amount
+                originalAmount={calculateTotalRefund()} // Local amount
+                originalCurrencyCode={sale.original_currency}
+                exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                preserveOriginal={true}
+              />
+              {`)`}
             </button>
           </div>
         </form>

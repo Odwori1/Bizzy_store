@@ -8,68 +8,104 @@ from app.schemas.sale_schema import SaleCreate
 from datetime import datetime, date
 from typing import List, Optional
 
+# ADD imports
+from app.crud.business import get_business_by_user_id
+from app.services.currency_service import CurrencyService
+import asyncio
+
 def create_sale(db: Session, sale_data: SaleCreate, user_id: int):
     """Create a new sale transaction with inventory updates"""
     try:
-        # Calculate totals
+        # ADD: Get business currency context
+        business = get_business_by_user_id(db, user_id)
+        currency_service = CurrencyService(db)
+
+        # Calculate totals (EXISTING CODE - unchanged)
         sale_items_data = []
         total_amount = 0.0
-        
+
         for item in sale_data.sale_items:
             # Get product and verify stock
             product = db.query(Product).filter(Product.id == item.product_id).first()
             if not product:
                 raise ValueError(f"Product with ID {item.product_id} not found")
-            
+
             if product.stock_quantity < item.quantity:
                 raise ValueError(f"Insufficient stock for product {product.name}")
-            
+
             # Calculate subtotal
             subtotal = item.quantity * item.unit_price
             total_amount += subtotal
-            
+
             sale_items_data.append({
                 "product_id": item.product_id,
                 "quantity": item.quantity,
                 "unit_price": item.unit_price,
                 "subtotal": subtotal
             })
-        
+
         # Calculate tax
         tax_amount = total_amount * (sale_data.tax_rate / 100)
         final_total = total_amount + tax_amount
-        
+
         # Verify payment amounts match total
         payment_total = sum(payment.amount for payment in sale_data.payments)
-        if abs(payment_total - final_total) > 0.01:  # Allow for floating point precision
+        if abs(payment_total - final_total) > 0.01:
             raise ValueError("Payment total does not match sale total")
-        
-        # Create sale transaction
+
+        # ADD: Get business currency for context (but DON'T convert amounts)
+        current_rate = 1.0
+        local_currency = 'USD'
+        if business and business.currency_code:
+            local_currency = business.currency_code
+            # Get rate for historical context only, not for conversion
+            if business.currency_code != 'USD':
+                try:
+                    current_rate = asyncio.run(currency_service.get_latest_exchange_rate(business.currency_code, 'USD')) or 1.0
+                except Exception as e:
+                    print(f"Warning: Could not get exchange rate: {e}")
+                    current_rate = 1.0
+
+        # Create sale transaction with currency context
+        final_total_usd = final_total * current_rate if current_rate != 0 else final_total
+        tax_amount_usd = tax_amount * current_rate if current_rate != 0 else tax_amount
         db_sale = Sale(
             user_id=user_id,
-            total_amount=final_total,
-            tax_amount=tax_amount,
+            total_amount=final_total_usd,        # USD amount for internal reporting
+            tax_amount=tax_amount_usd,           # USD tax amount
+            usd_amount=final_total_usd,          # USD amount (consistent naming)
+            usd_tax_amount=tax_amount_usd,       # USD tax amount
+            original_amount=final_total,         # Local amount (preserved)
+            original_currency=local_currency,
+            exchange_rate_at_sale=current_rate,
             payment_status="completed"
         )
         db.add(db_sale)
         db.flush()  # Get sale ID without committing
-        
-        # Create sale items
+
+        # Create sale items (with currency conversion and historical context)
         for item_data in sale_items_data:
+            # User provides local currency amounts - convert to USD for internal storage
+            unit_price_usd = item_data["unit_price"] * current_rate  # Local → USD
+            subtotal_usd = item_data["subtotal"] * current_rate      # Local → USD
+
             db_item = SaleItem(
                 sale_id=db_sale.id,
                 product_id=item_data["product_id"],
                 quantity=item_data["quantity"],
-                unit_price=item_data["unit_price"],
-                subtotal=item_data["subtotal"]
+                unit_price=unit_price_usd,           # Store USD amount (internal use)
+                subtotal=subtotal_usd,               # Store USD amount (internal use)
+                original_unit_price=item_data["unit_price"],  # Preserve local amount (user input)
+                original_subtotal=item_data["subtotal"],      # Preserve local amount (user input)
+                exchange_rate_at_creation=current_rate        # Preserve exchange rate used
             )
             db.add(db_item)
-            
+
             # Update product inventory
             product = db.query(Product).filter(Product.id == item_data["product_id"]).first()
             previous_quantity = product.stock_quantity
             product.stock_quantity -= item_data["quantity"]
-            
+
             # Record inventory history
             inventory_history = InventoryHistory(
                 product_id=product.id,
@@ -81,41 +117,53 @@ def create_sale(db: Session, sale_data: SaleCreate, user_id: int):
                 changed_by=user_id
             )
             db.add(inventory_history)
-        
-        # Create payments
+
+        # Create payments (with currency conversion and historical context)
         for payment in sale_data.payments:
+            # The amount from the frontend request is in LOCAL CURRENCY (e.g., 100000 UGX)
+            local_payment_amount = payment.amount
+
+            # Convert the local payment amount to USD using the sale's rate
+            usd_payment_amount = local_payment_amount * current_rate
+
             db_payment = Payment(
                 sale_id=db_sale.id,
-                amount=payment.amount,
+                amount=usd_payment_amount,           # Store the CONVERTED USD amount here
                 payment_method=payment.payment_method,
                 transaction_id=payment.transaction_id,
-                status="completed"
+                status="completed",
+                # Store the original local currency values for historical context
+                original_amount=local_payment_amount, # Store the LOCAL amount here
+                original_currency_code=local_currency,
+                exchange_rate_at_payment=current_rate
             )
             db.add(db_payment)
-        
+
         db.commit()
         db.refresh(db_sale)
         return db_sale
-        
+
     except (ValueError, IntegrityError) as e:
         db.rollback()
         raise e
 
+
+# The rest of the functions remain unchanged
 def get_sale(db: Session, sale_id: int):
     """Get a single sale by ID with product information"""
     sale = db.query(Sale).filter(Sale.id == sale_id).first()
-    
+
     if sale:
         # Eager load related data
         sale.sale_items = db.query(SaleItem).filter(SaleItem.sale_id == sale_id).all()
         sale.payments = db.query(Payment).filter(Payment.sale_id == sale_id).all()
-        
+
         # Add product names to sale items by joining with products table
         for item in sale.sale_items:
             product = db.query(Product).filter(Product.id == item.product_id).first()
             if product:
                 item.product_name = product.name
-    
+
     return sale
 
 def get_sales(
@@ -138,12 +186,12 @@ def get_sales(
         query = query.filter(Sale.created_at < next_day)
 
     sales = query.order_by(Sale.created_at.desc()).offset(skip).limit(limit).all()
-    
+
     # Eager load user relationship for user_name
     for sale in sales:
         if sale.user:
             sale.user_name = sale.user.username
-    
+
     return sales
 
 def get_daily_sales_report(db: Session, report_date: date):
@@ -151,23 +199,23 @@ def get_daily_sales_report(db: Session, report_date: date):
     next_day = datetime.combine(report_date, datetime.min.time()).replace(
         day=report_date.day + 1
     )
-    
+
     sales = db.query(Sale).filter(
         Sale.created_at >= report_date,
         Sale.created_at < next_day,
         Sale.payment_status == "completed"
     ).all()
-    
+
     total_sales = sum(sale.total_amount for sale in sales)
     total_tax = sum(sale.tax_amount for sale in sales)
-    
+
     # Count payment methods
     payment_methods = {}
     for sale in sales:
         for payment in sale.payments:
             method = payment.payment_method
             payment_methods[method] = payment_methods.get(method, 0) + 1
-    
+
     return {
         "date": report_date.isoformat(),
         "total_sales": total_sales,

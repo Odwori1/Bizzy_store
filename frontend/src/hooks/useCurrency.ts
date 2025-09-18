@@ -62,18 +62,67 @@ export const useCurrency = () => {
     return convertToLocal(amount);
   }, [convertToLocal]);
 
+  // NEW FUNCTION: Convert historical amounts using historical exchange rate context
+  const convertHistoricalAmount = useCallback((
+    originalAmount: number,
+    originalCurrency: string,
+    historicalRate: number, // Rate from original currency -> USD at transaction time
+    targetCurrencyCode?: string
+  ): { amount: number; currency: string } => {
+    const targetCurrency = targetCurrencyCode || businessCurrency;
+
+    console.log('Historical conversion DEBUG:', {
+      originalAmount,
+      originalCurrency,
+      historicalRate,
+      targetCurrency,
+      exchangeRate,
+      businessCurrency,
+      BASE_CURRENCY
+    });
+
+    // 1. If same currency, return original amount
+    if (targetCurrency === originalCurrency) {
+      return { amount: originalAmount, currency: targetCurrency };
+    }
+
+    // 2. Convert original amount to USD using historical rate
+    const amountInUSD = originalAmount * historicalRate;
+
+    // 3. If target is USD, return USD amount
+    if (targetCurrency === BASE_CURRENCY) {
+      return { amount: amountInUSD, currency: BASE_CURRENCY };
+    }
+
+    // 4. Convert USD to target currency using current rate
+    if (exchangeRate !== null) {
+      const amountInTarget = amountInUSD * exchangeRate;
+      return { amount: amountInTarget, currency: targetCurrency };
+    }
+
+    // 5. Fallback: return original amount
+    return { amount: originalAmount, currency: originalCurrency };
+  }, [exchangeRate, businessCurrency]);
+
   // Main function: Convert AND format an amount
-  const formatCurrency = (amount: number, currencyCode?: string): string => {
+  const formatCurrency = (amount: number, currencyCode?: string, isAmountInUSD: boolean = true): string => {
     const targetCurrencyCode = currencyCode || businessCurrency;
     let finalAmount = amount;
     let finalCurrencyCode = targetCurrencyCode;
 
-    // Only convert if the target currency is different from base AND we have a rate
-    if (targetCurrencyCode !== BASE_CURRENCY && exchangeRate !== null) {
+    // ONLY convert if the amount is in USD and we need to show it in another currency
+    if (isAmountInUSD && targetCurrencyCode !== BASE_CURRENCY && exchangeRate !== null) {
       finalAmount = convertToLocal(amount);
       finalCurrencyCode = targetCurrencyCode;
+    } else if (!isAmountInUSD && targetCurrencyCode === BASE_CURRENCY && exchangeRate !== null) {
+      // If amount is NOT in USD but we want to show USD, convert back
+      finalAmount = convertToUSD(amount);
+      finalCurrencyCode = BASE_CURRENCY;
+    } else if (!isAmountInUSD) {
+      // Amount is already in the target currency, no conversion needed
+      finalCurrencyCode = targetCurrencyCode;
     } else {
-      // If target is USD or rate isn't loaded, show USD amount
+      // Amount is in USD and target is USD, or rate isn't loaded
       finalCurrencyCode = BASE_CURRENCY;
     }
 
@@ -111,7 +160,8 @@ export const useCurrency = () => {
     getCurrencySymbol,
     convertToLocal,
     convertToUSD,
-    convertAmount, // Added missing function
+    convertAmount,
+    convertHistoricalAmount,
     exchangeRate,
     currencyCode: businessCurrency,
     baseCurrency: BASE_CURRENCY,

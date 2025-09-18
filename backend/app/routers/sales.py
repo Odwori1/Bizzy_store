@@ -59,7 +59,10 @@ def read_sales(
             "tax_amount": sale.tax_amount,
             "payment_status": sale.payment_status,
             "created_at": sale.created_at,
-            "user_name": sale.user.username if sale.user else "Unknown"
+            "user_name": sale.user.username if sale.user else "Unknown",
+            "original_amount": sale.original_amount,
+            "original_currency": sale.original_currency,
+            "exchange_rate_at_sale": sale.exchange_rate_at_sale
         })
 
     return result

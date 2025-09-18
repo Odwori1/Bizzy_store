@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Refund } from '../types';
 import { refundsService } from '../services/refunds';
-import { salesService } from '../services/sales'; // CORRECT IMPORT
+import { salesService } from '../services/sales';
 import { format } from 'date-fns';
 import BackButton from '../components/BackButton';
-import { useCurrency } from '../hooks/useCurrency'; // <--- ADD THIS LINE
+import { CurrencyDisplay } from '../components/CurrencyDisplay'; // <--- CHANGED: Use CurrencyDisplay instead of useCurrency
 
 export default function Refunds() {
   const [refunds, setRefunds] = useState<Refund[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { formatCurrency } = useCurrency(); // <--- ADD THIS LINE
 
   useEffect(() => {
     loadRefunds();
@@ -20,13 +19,13 @@ export default function Refunds() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const allRefunds: Refund[] = [];
-      
+
       try {
         // Get all sales using the sales service
         const sales = await salesService.getSales();
-        
+
         // Get refunds for each sale
         for (const sale of sales) {
           try {
@@ -36,8 +35,8 @@ export default function Refunds() {
             console.error(`Failed to get refunds for sale ${sale.id}:`, err);
           }
         }
-        
-        setRefunds(allRefunds.sort((a, b) => 
+
+        setRefunds(allRefunds.sort((a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         ));
       } catch (err: any) {
@@ -101,7 +100,14 @@ export default function Refunds() {
                     <tr key={refund.id} className="border-b hover:bg-gray-50">
                       <td className="p-3">#{refund.id}</td>
                       <td className="p-3">Sale #{refund.sale_id}</td>
-                      <td className="p-3">{formatCurrency(refund.total_amount)}</td>
+                      <td className="p-3">
+                        {/* CHANGED: Use CurrencyDisplay with historical context */}
+                        <CurrencyDisplay 
+                          amount={refund.total_amount} 
+                          originalAmount={refund.original_amount}
+                          originalCurrencyCode={refund.original_currency}
+                        />
+                      </td>
                       <td className="p-3">{refund.reason || 'N/A'}</td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${

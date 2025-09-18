@@ -6,7 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import BackButton from '../components/BackButton';
 import RefundModal from '../components/RefundModal';
-import { CurrencyDisplay } from '../components/CurrencyDisplay'; // ADD THIS IMPORT
+import { CurrencyDisplay } from '../components/CurrencyDisplay';
+// Import the business store hook
+import { useBusinessStore } from '../hooks/useBusiness';
 
 export default function Sales() {
   const [sales, setSales] = useState<SaleSummary[]>([]);
@@ -22,8 +24,17 @@ export default function Sales() {
   const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null);
   const navigate = useNavigate();
 
+  // Load business data
+  const { business } = useBusinessStore();
+
+  // Load sales data on component mount
   useEffect(() => {
     loadSales();
+  }, []);
+
+  // Load business data
+  useEffect(() => {
+    useBusinessStore.getState().loadBusiness();
   }, []);
 
   const loadSales = async () => {
@@ -50,6 +61,7 @@ export default function Sales() {
     }
   };
 
+  // Filter sales
   const filteredSales = sales.filter(sale => {
     const matchesSearch =
       searchTerm === '' ||
@@ -67,18 +79,49 @@ export default function Sales() {
     return matchesSearch && matchesStartDate && matchesEndDate && matchesPaymentStatus;
   });
 
-  const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
-  const totalTransactions = filteredSales.length;
+  // Calculate totals
+  const calculateTotals = () => {
+    let totalLocalRevenue = 0;
+    let primaryCurrency = 'UGX';
+
+    filteredSales.forEach(sale => {
+      if (sale.original_amount && sale.original_currency) {
+        totalLocalRevenue += sale.original_amount;
+        primaryCurrency = sale.original_currency;
+      } else {
+        totalLocalRevenue += sale.total_amount;
+      }
+    });
+
+    const totalTransactions = filteredSales.length;
+    const averageLocalSale =
+      totalTransactions > 0 ? totalLocalRevenue / totalTransactions : 0;
+
+    return {
+      totalLocalRevenue,
+      primaryCurrency,
+      totalTransactions,
+      averageLocalSale,
+    };
+  };
+
+  const {
+    totalLocalRevenue,
+    primaryCurrency,
+    totalTransactions,
+    averageLocalSale,
+  } = calculateTotals();
 
   const exportToCSV = () => {
-    const headers = ['Sale ID', 'Date', 'User', 'Total Amount', 'Tax', 'Payment Status'];
+    const headers = ['Sale ID', 'Date', 'User', 'Total Amount', 'Tax', 'Payment Status', 'Currency'];
     const csvData = filteredSales.map(sale => [
       sale.id,
       format(new Date(sale.created_at), 'yyyy-MM-dd HH:mm'),
       sale.user_name || 'Unknown',
-      sale.total_amount.toFixed(2),
-      sale.tax_amount.toFixed(2),
+      (sale.original_amount || sale.total_amount).toFixed(2),
+      (sale.tax_amount / (sale.exchange_rate_at_sale || 1)).toFixed(2),
       sale.payment_status,
+      sale.original_currency || business?.currency_code || 'UGX',
     ]);
     const csvContent = [headers.join(','), ...csvData.map(row => row.join(','))].join('\n');
 
@@ -93,14 +136,15 @@ export default function Sales() {
 
   const exportToExcel = () => {
     const worksheetData = [
-      ['Sale ID', 'Date', 'User', 'Total Amount', 'Tax', 'Payment Status'],
+      ['Sale ID', 'Date', 'User', 'Total Amount', 'Tax', 'Payment Status', 'Currency'],
       ...filteredSales.map(sale => [
         sale.id,
         format(new Date(sale.created_at), 'yyyy-MM-dd HH:mm'),
         sale.user_name || 'Unknown',
-        sale.total_amount,
-        sale.tax_amount,
+        sale.original_amount || sale.total_amount,
+        sale.tax_amount / (sale.exchange_rate_at_sale || 1),
         sale.payment_status,
+        sale.original_currency || business?.currency_code || 'UGX',
       ]),
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
@@ -118,15 +162,14 @@ export default function Sales() {
     }
   };
 
-  // Handler for refund button
   const handleRefundClick = async (saleId: number) => {
     try {
       const saleDetails = await salesService.getSale(saleId);
       setSelectedSaleForRefund(saleDetails);
       setRefundModalOpen(true);
     } catch (err: any) {
-      console.error('Error loading sale details:', err);
-      alert('Failed to load sale details for refund');
+      console.error('Error loading sale for refund:', err);
+      alert('Failed to load sale for refund');
     }
   };
 
@@ -156,10 +199,11 @@ export default function Sales() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      {/* Header */}
       <div className="mb-4">
         <BackButton />
       </div>
-      {/* Header */}
+      {/* Title and back button */}
       <div className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Sales History</h1>
@@ -173,7 +217,7 @@ export default function Sales() {
         </button>
       </div>
 
-      {/* Action Buttons */}
+      {/* Export buttons */}
       <div className="max-w-6xl mx-auto mb-6 flex justify-end gap-3">
         <button
           onClick={exportToCSV}
@@ -189,29 +233,48 @@ export default function Sales() {
         </button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats cards */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* Total Revenue */}
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Total Revenue</h3>
           <p className="text-2xl font-bold">
-            <CurrencyDisplay amount={totalRevenue} /> {/* CHANGED */}
+            <CurrencyDisplay
+              amount={filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0)}
+              originalAmount={filteredSales.reduce((sum, sale) => sum + (sale.original_amount || sale.total_amount), 0)}
+              originalCurrencyCode={filteredSales[0]?.original_currency || business?.currency_code}
+              exchangeRateAtCreation={filteredSales[0]?.exchange_rate_at_sale}
+            />
           </p>
         </div>
+        {/* Total Transactions */}
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Total Transactions</h3>
-          <p className="text-2xl font-bold">{totalTransactions}</p>
+          <p className="text-2xl font-bold">{filteredSales.length}</p>
         </div>
+        {/* Average Sale */}
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Average Sale</h3>
           <p className="text-2xl font-bold">
             <CurrencyDisplay
-              amount={totalTransactions > 0 ? totalRevenue / totalTransactions : 0}
-            /> {/* CHANGED */}
+              amount={
+                filteredSales.length > 0
+                  ? filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0) / filteredSales.length
+                  : 0
+              }
+              originalAmount={
+                filteredSales.length > 0
+                  ? filteredSales.reduce((sum, sale) => sum + (sale.original_amount || sale.total_amount), 0) / filteredSales.length
+                  : 0
+              }
+              originalCurrencyCode={filteredSales[0]?.original_currency || business?.currency_code}
+              exchangeRateAtCreation={filteredSales[0]?.exchange_rate_at_sale}
+            />
           </p>
         </div>
       </div>
 
-      {/* Sales Table */}
+      {/* Sales table */}
       <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow overflow-x-auto mb-8">
         <h3 className="text-lg font-bold mb-4">Sales Transactions</h3>
         <p className="text-gray-600 mb-4">{filteredSales.length} sales found</p>
@@ -221,8 +284,8 @@ export default function Sales() {
               <th className="p-2 text-left">Sale ID</th>
               <th className="p-2 text-left">Date & Time</th>
               <th className="p-2 text-left">User</th>
-              <th className="p-2 text-left">Amount</th> {/* CHANGED */}
-              <th className="p-2 text-left">Tax</th> {/* CHANGED */}
+              <th className="p-2 text-left">Amount</th>
+              <th className="p-2 text-left">Tax</th>
               <th className="p-2 text-left">Status</th>
               <th className="p-2 text-left">Actions</th>
             </tr>
@@ -240,9 +303,23 @@ export default function Sales() {
                   <td className="p-2 font-medium">#{sale.id}</td>
                   <td className="p-2">{format(new Date(sale.created_at), 'MMM dd, yyyy HH:mm')}</td>
                   <td className="p-2">{sale.user_name || 'Unknown'}</td>
-                  <td className="p-2"><CurrencyDisplay amount={sale.total_amount} /></td> {/* CHANGED */}
-                  <td className="p-2"><CurrencyDisplay amount={sale.tax_amount} /></td> {/* CHANGED */}
                   <td className="p-2">
+                    <CurrencyDisplay
+                      amount={sale.total_amount}
+                      originalAmount={sale.original_amount || sale.total_amount}
+                      originalCurrencyCode={sale.original_currency || business?.currency_code}
+                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                    />
+                  </td>
+                  <td className="p-2">
+                    <CurrencyDisplay
+                      amount={sale.tax_amount}
+                      originalAmount={sale.tax_amount / (sale.exchange_rate_at_sale || 1)}
+                      originalCurrencyCode={sale.original_currency || business?.currency_code}
+                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                    />
+                  </td>
+                  <td className={`p-2`}>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(sale.payment_status)}`}
                     >
@@ -308,14 +385,39 @@ export default function Sales() {
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Financial Summary</h3>
+                {/* Subtotal */}
                 <p>
-                  <strong>Subtotal:</strong> <CurrencyDisplay amount={selectedSale.total_amount - selectedSale.tax_amount} /> {/* CHANGED */}
+                  <strong>Subtotal:</strong>{' '}
+                  <CurrencyDisplay
+                    amount={selectedSale.total_amount - selectedSale.tax_amount}
+                    originalAmount={
+                      selectedSale.original_amount
+                        ? selectedSale.original_amount - (selectedSale.tax_amount / selectedSale.exchange_rate_at_sale)
+                        : selectedSale.total_amount - selectedSale.tax_amount
+                    }
+                    originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
+                    exchangeRateAtCreation={selectedSale.exchange_rate_at_sale}
+                  />
                 </p>
+                {/* Tax */}
                 <p>
-                  <strong>Tax:</strong> <CurrencyDisplay amount={selectedSale.tax_amount} /> {/* CHANGED */}
+                  <strong>Tax:</strong>{' '}
+                  <CurrencyDisplay
+                    amount={selectedSale.tax_amount}
+                    originalAmount={selectedSale.tax_amount / (selectedSale.exchange_rate_at_sale || 1)}
+                    originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
+                    exchangeRateAtCreation={selectedSale.exchange_rate_at_sale}
+                  />
                 </p>
+                {/* Total */}
                 <p>
-                  <strong>Total:</strong> <CurrencyDisplay amount={selectedSale.total_amount} /> {/* CHANGED */}
+                  <strong>Total:</strong>{' '}
+                  <CurrencyDisplay
+                    amount={selectedSale.total_amount}
+                    originalAmount={selectedSale.original_amount || selectedSale.total_amount}
+                    originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
+                    exchangeRateAtCreation={selectedSale.exchange_rate_at_sale}
+                  />
                 </p>
               </div>
             </div>
@@ -328,7 +430,9 @@ export default function Sales() {
                   <tr className="border-b bg-gray-50">
                     <th className="p-2 text-left">Product</th>
                     <th className="p-2 text-left">Quantity</th>
+                    {/* Fix for unit price: use item.unit_price with exchange rate */}
                     <th className="p-2 text-left">Unit Price</th>
+                    {/* Fix for subtotal: use item.subtotal with exchange rate */}
                     <th className="p-2 text-left">Subtotal</th>
                   </tr>
                 </thead>
@@ -337,8 +441,20 @@ export default function Sales() {
                     <tr key={index} className="border-b">
                       <td className="p-2">{item.product_name}</td>
                       <td className="p-2">{item.quantity}</td>
-                      <td className="p-2"><CurrencyDisplay amount={item.unit_price} /></td> {/* CHANGED */}
-                      <td className="p-2"><CurrencyDisplay amount={item.subtotal} /></td> {/* CHANGED */}
+                      {/* Fix for unit price: add exchangeRateAtCreation */}
+                      <CurrencyDisplay
+                        amount={item.unit_price}
+                        originalAmount={item.original_unit_price}
+                        originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
+                        exchangeRateAtCreation={item.exchange_rate_at_creation || selectedSale.exchange_rate_at_sale}
+                      />
+                      {/* Fix for subtotal: add exchangeRateAtCreation */}
+                      <CurrencyDisplay
+                        amount={item.subtotal}
+                        originalAmount={item.original_subtotal}
+                        originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
+                        exchangeRateAtCreation={item.exchange_rate_at_creation || selectedSale.exchange_rate_at_sale}
+                      />
                     </tr>
                   ))}
                 </tbody>
@@ -352,7 +468,7 @@ export default function Sales() {
                 <thead>
                   <tr className="border-b bg-gray-50">
                     <th className="p-2 text-left">Method</th>
-                    <th className="p-2 text-left">Amount</th> {/* CHANGED */}
+                    <th className="p-2 text-left">Amount</th>
                     <th className="p-2 text-left">Status</th>
                     <th className="p-2 text-left">Transaction ID</th>
                   </tr>
@@ -361,13 +477,17 @@ export default function Sales() {
                   {selectedSale.payments.map((payment, index) => (
                     <tr key={index} className="border-b">
                       <td className="p-2 capitalize">{payment.payment_method}</td>
-                      <td className="p-2"><CurrencyDisplay amount={payment.amount} /></td> {/* CHANGED */}
-                      <td className="p-2">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}
-                        >
-                          {payment.status}
-                        </span>
+                      {/* Fix: use exchange rate for original amount */}
+                      <CurrencyDisplay
+                        amount={payment.amount}
+                        originalAmount={payment.original_amount}
+                        originalCurrencyCode={payment.original_currency_code}
+                        exchangeRateAtCreation={payment.exchange_rate_at_payment}
+                        preserveOriginal={true}
+                      />
+                      {/* Payment status badge */}
+                      <td className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
+                        {payment.status}
                       </td>
                       <td className="p-2">{payment.transaction_id || 'N/A'}</td>
                     </tr>
@@ -389,7 +509,7 @@ export default function Sales() {
         </div>
       )}
 
-      {/* Add Refund Modal */}
+      {/* Refund Modal */}
       {selectedSaleForRefund && (
         <RefundModal
           sale={selectedSaleForRefund}
@@ -399,7 +519,7 @@ export default function Sales() {
             setSelectedSaleForRefund(null);
           }}
           onRefundProcessed={() => {
-            loadSales(); // Refresh the sales list
+            loadSales();
             setRefundModalOpen(false);
             setSelectedSaleForRefund(null);
           }}

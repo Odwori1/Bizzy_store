@@ -1,12 +1,18 @@
 import React from 'react';
 import { CurrencyDisplay } from "./CurrencyDisplay";
+import { useBusinessStore } from '../hooks/useBusiness';
 
 interface SalesMetrics {
   total_sales: number;
+  total_sales_original?: number;
   total_transactions: number;
   average_transaction_value: number;
+  average_transaction_value_original?: number;
   daily_sales?: number;
+  daily_sales_original?: number;
   weekly_sales?: number;
+  weekly_sales_original?: number;
+  primary_currency?: string;
 }
 
 interface SalesMetricsCardsProps {
@@ -14,24 +20,48 @@ interface SalesMetricsCardsProps {
 }
 
 const SalesMetricsCards: React.FC<SalesMetricsCardsProps> = ({ metrics }) => {
+  const { business } = useBusinessStore();
+  const businessCurrency = business?.currency_code || 'USD';
+
   const cards = [
     {
       title: 'Today\'s Sales',
-      value: <CurrencyDisplay amount={metrics.daily_sales || 0} />,
-      change: '+12%', // This would come from your API
+      value: (
+        <CurrencyDisplay
+          amount={metrics.daily_sales || metrics.total_sales || 0}
+          originalAmount={metrics.daily_sales_original || metrics.total_sales_original || 0}
+          originalCurrencyCode={metrics.primary_currency || businessCurrency}
+          preserveOriginal={true}
+        />
+      ),
+      change: '+12%',
       icon: '💰',
       color: 'bg-blue-50 text-blue-600'
     },
     {
       title: 'Weekly Revenue',
-      value: <CurrencyDisplay amount={metrics.weekly_sales || metrics.total_sales} />,
+      value: (
+        <CurrencyDisplay
+          amount={metrics.weekly_sales || metrics.total_sales || 0}
+          originalAmount={metrics.weekly_sales_original || metrics.total_sales_original || 0}
+          originalCurrencyCode={metrics.primary_currency || businessCurrency}
+          preserveOriginal={true}
+        />
+      ),
       change: '+8%',
       icon: '📈',
       color: 'bg-green-50 text-green-600'
     },
     {
       title: 'Avg. Transaction',
-      value: <CurrencyDisplay amount={metrics.average_transaction_value} />,
+      value: (
+        <CurrencyDisplay
+          amount={metrics.average_transaction_value || 0}
+          originalAmount={metrics.average_transaction_value_original || 0}
+          originalCurrencyCode={metrics.primary_currency || businessCurrency}
+          preserveOriginal={true}
+        />
+      ),
       change: '+5%',
       icon: '📊',
       color: 'bg-purple-50 text-purple-600'

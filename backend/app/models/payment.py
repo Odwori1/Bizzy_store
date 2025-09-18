@@ -14,5 +14,10 @@ class Payment(Base):
     status = Column(String(20), default="pending")  # pending, completed, failed
     created_at = Column(DateTime, default=func.now())
 
+    # --- ADD THESE THREE LINES FOR HISTORICAL CONTEXT ---
+    original_amount = Column(Float)  # Local currency amount (PRESERVED)
+    original_currency_code = Column(String(3), default='USD')  # Currency code
+    exchange_rate_at_payment = Column(Float, default=1.0)   # Rate used for conversion
+
     # Relationships
     sale = relationship("Sale", back_populates="payments")

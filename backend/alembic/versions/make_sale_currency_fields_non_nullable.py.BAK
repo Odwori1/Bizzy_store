@@ -1,0 +1,37 @@
+"""make_sale_currency_fields_non_nullable
+
+Revision ID: make_sale_currency_fields_non_nullable
+Revises: 9749a44864c1_add_local_currency_fields_to_sale
+Create Date: 2025-01-11 00:00:00.000000
+
+"""
+from alembic import op
+import sqlalchemy as sa
+
+# revision identifiers, used by Alembic.
+revision = 'make_sale_currency_fields_non_nullable'
+down_revision = '9749a44864c1_add_local_currency_fields_to_sale'
+branch_labels = None
+depends_on = None
+
+def upgrade():
+    # Set default values for existing records
+    op.execute("UPDATE sales SET original_amount = total_amount WHERE original_amount IS NULL")
+    op.execute("UPDATE sales SET original_currency = 'USD' WHERE original_currency IS NULL")
+    op.execute("UPDATE sales SET exchange_rate_at_sale = 1.0 WHERE exchange_rate_at_sale IS NULL")
+    
+    # Make columns not nullable
+    op.alter_column('sales', 'original_amount', nullable=False)
+    op.alter_column('sales', 'original_currency', nullable=False)
+    op.alter_column('sales', 'exchange_rate_at_sale', nullable=False)
+
+def downgrade():
+    # Make columns nullable again
+    op.alter_column('sales', 'exchange_rate_at_sale', nullable=True)
+    op.alter_column('sales', 'original_currency', nullable=True)
+    op.alter_column('sales', 'original_amount', nullable=True)
+    
+    # Clear the values (optional)
+    op.execute("UPDATE sales SET original_amount = NULL")
+    op.execute("UPDATE sales SET original_currency = NULL")
+    op.execute("UPDATE sales SET exchange_rate_at_sale = NULL")

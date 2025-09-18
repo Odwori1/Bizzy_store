@@ -82,7 +82,10 @@ def get_financial_analysis(
 ):
     """Get financial analysis report (requires report:view permission)"""
     try:
-        report_data = get_financial_report(db, start_date, end_date)
+        # FIX: Get business_id from current user and pass it to the report
+        business_id = current_user.get('business_id')
+
+        report_data = get_financial_report(db, start_date, end_date, business_id)
 
         if format == ReportFormat.EXCEL:
             filename = f"financial_report_{start_date}_{end_date}"
@@ -97,7 +100,9 @@ def get_financial_analysis(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Financial report generation failed: {str(e)}")
 
-# Get dashboard metrics - Requires report:view permission
+# File: ~/Bizzy_store/backend/app/routers/reports.py
+
+# In the dashboard endpoint, update line ~120:
 @router.get("/dashboard", dependencies=[Depends(requires_permission("report:view"))])
 def get_dashboard_metrics(
     db: Session = Depends(get_db),
@@ -112,9 +117,9 @@ def get_dashboard_metrics(
         # Inventory status
         inventory = get_inventory_report(db)
 
-        # Financial snapshot (last 7 days)
+        # Financial snapshot (last 7 days) - ADD business_id parameter
         week_ago = today - timedelta(days=7)
-        financial = get_financial_report(db, week_ago, today)
+        financial = get_financial_report(db, week_ago, today, current_user.get('business_id'))
 
         return {
             "sales_today": sales_today['summary'],
@@ -136,15 +141,20 @@ def get_sales_trends(
 ):
     """Get sales trends data for charts (requires report:view permission)"""
     try:
-        # Query sales data grouped by date
+        # Convert dates to datetime for proper comparison with Sale.created_at
+        start_dt = datetime.combine(start_date, datetime.min.time())
+        end_dt = datetime.combine(end_date, datetime.max.time())
+
+        # Query sales data grouped by date - INCLUDING ORIGINAL AMOUNTS
         sales_data = db.query(
             func.date(Sale.created_at).label('date'),
             func.sum(Sale.total_amount).label('daily_sales'),
+            func.sum(Sale.original_amount).label('daily_sales_original'),  # ADD THIS LINE
             func.count(Sale.id).label('transactions'),
             func.avg(Sale.total_amount).label('average_order_value')
         ).filter(
-            Sale.created_at >= start_date,
-            Sale.created_at <= end_date + timedelta(days=1),
+            Sale.created_at >= start_dt,
+            Sale.created_at <= end_dt,
             Sale.payment_status == 'completed'
         ).group_by(func.date(Sale.created_at)).order_by('date').all()
 
@@ -154,6 +164,7 @@ def get_sales_trends(
             trends.append({
                 "date": data.date,
                 "daily_sales": float(data.daily_sales or 0),
+                "daily_sales_original": float(data.daily_sales_original or 0),  # ADD THIS LINE
                 "transactions": data.transactions or 0,
                 "average_order_value": float(data.average_order_value or 0)
             })
@@ -174,18 +185,23 @@ def get_top_products(
 ):
     """Get top selling products (requires report:view permission)"""
     try:
-        # Query top products by revenue
+        # Convert dates to datetime for proper comparison with Sale.created_at
+        start_dt = datetime.combine(start_date, datetime.min.time())
+        end_dt = datetime.combine(end_date, datetime.max.time())
+
+        # Query top products by revenue - FIXED FIELD MAPPING
         top_products = db.query(
             Product.id.label('product_id'),
             Product.name.label('product_name'),
             func.sum(SaleItem.quantity).label('quantity_sold'),
-            func.sum(SaleItem.subtotal).label('total_revenue'),
+            func.sum(SaleItem.subtotal).label('total_revenue'),           # USD amount
+            func.sum(SaleItem.original_subtotal).label('total_revenue_original'),  # Local currency amount
             (func.avg(Product.price * 0.2)).label('profit_margin')  # 20% default margin
         ).join(SaleItem, SaleItem.product_id == Product.id
         ).join(Sale, Sale.id == SaleItem.sale_id
         ).filter(
-            Sale.created_at >= start_date,
-            Sale.created_at <= end_date + timedelta(days=1),
+            Sale.created_at >= start_dt,
+            Sale.created_at <= end_dt,
             Sale.payment_status == 'completed'
         ).group_by(Product.id, Product.name
         ).order_by(func.sum(SaleItem.subtotal).desc()
@@ -199,6 +215,7 @@ def get_top_products(
                 "product_name": product.product_name,
                 "quantity_sold": product.quantity_sold or 0,
                 "total_revenue": float(product.total_revenue or 0),
+                "total_revenue_original": float(product.total_revenue_original or 0),  # ADD THIS LINE
                 "profit_margin": float(product.profit_margin or 0)
             })
 

@@ -26,7 +26,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart, search
             <div className="text-center mb-3">
               <span className="text-3xl">📦</span>
             </div>
-            
+
             <div className="text-center mb-2">
               <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 h-10 overflow-hidden">
                 {product.name}
@@ -35,9 +35,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart, search
             </div>
 
             <div className="text-center mb-3">
-              {/* FIXED: Use CurrencyDisplay instead of hardcoded $ */}
+              {/* UPDATED: Use historical currency context when available */}
               <p className="text-lg font-bold text-green-700">
-                <CurrencyDisplay amount={product.price} />
+                <CurrencyDisplay
+                  amount={product.price}
+                  originalAmount={product.original_price}
+                  originalCurrencyCode={product.original_currency_code}
+                  exchangeRateAtCreation={product.exchange_rate_at_creation}
+                />
               </p>
             </div>
 

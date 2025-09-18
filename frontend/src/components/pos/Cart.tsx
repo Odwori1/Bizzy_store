@@ -7,8 +7,8 @@ interface CartProps {
   total: number;
   tax: number;
   grandTotal: number;
-  onUpdateQuantity: (productId: string, quantity: number) => void;
-  onRemoveItem: (productId: string) => void;
+  onUpdateQuantity: (productId: number, quantity: number) => void;
+  onRemoveItem: (productId: number) => void;
   onCheckout: () => void;
   onClearCart: () => void;
 }
@@ -23,6 +23,33 @@ const Cart: React.FC<CartProps> = ({
   onCheckout,
   onClearCart
 }) => {
+  // Get currency context from the first item
+  const currencyContext = items[0]?.original_currency_code ? {
+    originalAmount: items[0].original_unit_price,
+    originalCurrencyCode: items[0].original_currency_code,
+    exchangeRateAtCreation: items[0].product.exchange_rate_at_creation
+  } : undefined;
+
+  // DEBUG: Check what values are being passed to CurrencyDisplay
+  console.log('CART TOTALS DEBUG:', {
+    subtotal: total,
+    tax,
+    grandTotal,
+    currencyContext
+  });
+
+  // DEBUG: Check individual items
+  console.log('CART ITEMS DEBUG:', {
+    items: items.map(item => ({
+      name: item.product_name,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      original_unit_price: item.original_unit_price,
+      currency: item.original_currency_code,
+      exchange_rate: item.product.exchange_rate_at_creation
+    }))
+  });
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       {/* Cart Items */}
@@ -32,7 +59,12 @@ const Cart: React.FC<CartProps> = ({
             <div className="flex-1">
               <div className="font-medium">{item.product.name}</div>
               <div className="text-sm text-gray-500">
-                <CurrencyDisplay amount={item.product.price} />
+                <CurrencyDisplay
+                  amount={item.unit_price}
+                  originalAmount={item.original_unit_price}
+                  originalCurrencyCode={item.original_currency_code}
+                  exchangeRateAtCreation={item.product.exchange_rate_at_creation}
+                />
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -51,7 +83,12 @@ const Cart: React.FC<CartProps> = ({
                 +
               </button>
               <span className="w-16 text-right">
-                <CurrencyDisplay amount={item.product.price * item.quantity} />
+                <CurrencyDisplay
+                  amount={item.subtotal}
+                  originalAmount={item.original_unit_price ? item.original_unit_price * item.quantity : undefined}
+                  originalCurrencyCode={item.original_currency_code}
+                  exchangeRateAtCreation={item.product.exchange_rate_at_creation}
+                />
               </span>
               <button
                 onClick={() => onRemoveItem(item.product.id)}
@@ -68,15 +105,36 @@ const Cart: React.FC<CartProps> = ({
       <div className="mt-4 space-y-1">
         <div className="flex justify-between">
           <span>Subtotal:</span>
-          <span><CurrencyDisplay amount={total} /></span>
+          <span>
+            <CurrencyDisplay
+              amount={total}
+              originalAmount={total}
+              originalCurrencyCode={currencyContext?.originalCurrencyCode}
+              exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
+            />
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Tax:</span>
-          <span><CurrencyDisplay amount={tax} /></span>
+          <span>
+            <CurrencyDisplay
+              amount={tax}
+              originalAmount={tax}
+              originalCurrencyCode={currencyContext?.originalCurrencyCode}
+              exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
+            />
+          </span>
         </div>
         <div className="flex justify-between font-bold text-lg border-t pt-2">
           <span>Total:</span>
-          <span><CurrencyDisplay amount={grandTotal} /></span>
+          <span>
+            <CurrencyDisplay
+              amount={grandTotal}
+              originalAmount={grandTotal}
+              originalCurrencyCode={currencyContext?.originalCurrencyCode}
+              exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
+            />
+          </span>
         </div>
       </div>
 

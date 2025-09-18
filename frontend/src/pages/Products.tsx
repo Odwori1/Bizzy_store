@@ -4,7 +4,7 @@ import { productService } from '../services/products';
 import ProductForm from '../components/ProductForm';
 import { useAuthStore } from '../hooks/useAuth';
 import BackButton from '../components/BackButton';
-import { CurrencyDisplay } from '../components/CurrencyDisplay'; // ADD THIS IMPORT
+import { CurrencyDisplay } from '../components/CurrencyDisplay';
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -55,7 +55,7 @@ const Products: React.FC = () => {
     }
   };
 
-  const handleDeleteProduct = async (productId: number) => {
+  const handleDeleteProduct = async (productId: int) => {
     if (!window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
       return;
     }
@@ -139,6 +139,9 @@ const Products: React.FC = () => {
                   Price
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Cost Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Stock
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -164,7 +167,24 @@ const Products: React.FC = () => {
                     {product.barcode}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <CurrencyDisplay amount={product.price} /> {/* UPDATED */}
+                    {/* UPDATED: Show historical price when available */}
+                    <CurrencyDisplay
+                      amount={product.price}
+                      originalAmount={product.original_price}
+                      originalCurrencyCode={product.original_currency_code}
+                      exchangeRateAtCreation={product.exchange_rate_at_creation || 1}
+                      preserveOriginal={true}
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {/* UPDATED: Show historical cost price when available */}
+                    <CurrencyDisplay
+                      amount={product.cost_price || 0}
+                      originalAmount={product.original_cost_price || product.cost_price || 0}
+                      originalCurrencyCode={product.original_currency_code || 'UGX'}
+                      exchangeRateAtCreation={product.exchange_rate_at_creation || 1}
+                      preserveOriginal={true}
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.stock_quantity}

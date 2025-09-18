@@ -25,7 +25,7 @@ class Expense(Base):
     original_currency_code = Column(String(3), nullable=False)
     # The rate used for the conversion (for auditing)
     exchange_rate = Column(Numeric(10, 6))
-    
+
     description = Column(String(255))
     category_id = Column(Integer, ForeignKey('expense_categories.id'), nullable=False)
     date = Column(DateTime, default=func.now(), nullable=False)

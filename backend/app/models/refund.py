@@ -10,7 +10,11 @@ class Refund(Base):
     sale_id = Column(Integer, ForeignKey("sales.id"))
     user_id = Column(Integer, ForeignKey("users.id"))  # The staff who processed the refund
     reason = Column(Text, nullable=True)  # Reason for the refund
-    total_amount = Column(Float)  # Total amount refunded
+    total_amount = Column(Float)  # Total amount refunded (USD)
+    # NEW: Currency context fields for historical preservation
+    original_amount = Column(Float)  # Total amount refunded in the original local currency (PRESERVED)
+    original_currency = Column(String(3))  # Currency code at the time of the original sale (e.g., 'UGX')
+    exchange_rate_at_refund = Column(Float)  # Exchange rate used (Local -> USD)
     status = Column(String(20), default="processed")  # processed, failed, pending
     created_at = Column(DateTime, default=func.now())
 

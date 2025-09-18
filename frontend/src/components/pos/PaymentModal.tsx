@@ -6,20 +6,18 @@ import { useBusinessStore } from '../../hooks/useBusiness';
 import Receipt from './Receipt';
 import { useInventory } from '../../hooks/useInventory';
 import { CurrencyDisplay } from '../CurrencyDisplay';
-import { useCurrency } from '../../hooks/useCurrency';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onClearCart: () => void;
   cart: CartItem[];
-  total: number;
-  totalDisplay: number;
+  total: number; // This is already in local currency from POS.tsx
+  totalDisplay: number; // This should also be in local currency
   onPaymentSuccess: () => void;
 }
 
 export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total, totalDisplay, onPaymentSuccess }: PaymentModalProps) {
-  const { convertToUSD, convertToLocal, exchangeRate } = useCurrency();
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountReceived, setAmountReceived] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,18 +35,25 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
     onClose();
   };
 
-  // Calculate change using useMemo to avoid unnecessary recalculations
+  // Determine currency context from the cart with exchange rate
+  const currencyContext = cart[0]?.original_currency_code
+    ? {
+        originalAmount: totalDisplay,
+        originalCurrencyCode: cart[0].original_currency_code,
+        exchangeRateAtCreation: cart[0].product.exchange_rate_at_creation
+      }
+    : undefined;
+
+  // Calculate change with memoization
   const change = useMemo(() => {
     if (paymentMethod !== 'cash' || !amountReceived) return 0;
-    
+
     const received = parseFloat(amountReceived);
     if (isNaN(received)) return 0;
 
-    // CRITICAL FIX: Convert received amount to USD, calculate change in USD, then convert back to local
-    const receivedUSD = convertToUSD(received);
-    const changeUSD = receivedUSD - total;
-    return convertToLocal(changeUSD);
-  }, [amountReceived, paymentMethod, total, convertToUSD, convertToLocal]);
+    // Amounts are in local currency; no conversion needed
+    return received - totalDisplay;
+  }, [amountReceived, paymentMethod, totalDisplay]);
 
   const isValidPayment = paymentMethod === 'cash' ? change >= 0 : true;
 
@@ -59,7 +64,7 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
         business={business}
         payments={completedSale.payments}
         onClose={handleReceiptClose}
-        amountReceived={paymentMethod === 'cash' ? convertToUSD(parseFloat(amountReceived)) : total}
+        amountReceived={paymentMethod === 'cash' ? parseFloat(amountReceived) : totalDisplay}
       />
     );
   }
@@ -77,16 +82,16 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
     setError('');
 
     try {
-      // Prepare sale items
+      // Prepare sale items - send original local prices
       const saleItems: SaleItemCreate[] = cart.map(item => ({
         product_id: item.product_id,
         quantity: item.quantity,
-        unit_price: item.unit_price
+        unit_price: item.original_unit_price || item.unit_price // Send local price
       }));
 
       // Prepare payment
       const payments: PaymentCreate[] = [{
-        amount: total,
+        amount: total, // local currency amount
         payment_method: paymentMethod as 'cash' | 'card' | 'mobile_money',
         transaction_id: paymentMethod === 'cash' ? undefined : `txn_${Date.now()}`
       }];
@@ -137,7 +142,12 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
         {/* Total */}
         <div className="mb-4">
           <p className="text-lg font-semibold">
-            Total: <CurrencyDisplay amount={totalDisplay} />
+            Total: <CurrencyDisplay
+                     amount={totalDisplay}
+                     originalAmount={totalDisplay}
+                     originalCurrencyCode={currencyContext?.originalCurrencyCode}
+                     exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
+                   />
           </p>
         </div>
 
@@ -177,7 +187,12 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
               />
               {amountReceived && (
                 <p className="text-sm mt-1">
-                  Change: <CurrencyDisplay amount={change} />
+                  Change: <CurrencyDisplay
+                           amount={change}
+                           originalAmount={change}
+                           originalCurrencyCode={currencyContext?.originalCurrencyCode}
+                           exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
+                         />
                   {change < 0 && <span className="text-red-600 ml-2">Insufficient amount!</span>}
                 </p>
               )}

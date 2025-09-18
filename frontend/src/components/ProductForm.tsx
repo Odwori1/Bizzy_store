@@ -23,7 +23,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     name: '',
     description: '',
     price: 0,
-    cost_price: undefined, // NEW: Optional cost price field
+    cost_price: undefined,
     barcode: '',
     stock_quantity: 0,
     min_stock_level: 5
@@ -31,17 +31,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [lookupMessage, setLookupMessage] = useState('');
-  const { convertToUSD, convertToLocal } = useCurrency();
+  const { convertToLocal } = useCurrency();
 
   useEffect(() => {
     if (initialData) {
-      const displayPrice = initialData.price ? convertToLocal(initialData.price) : 0;
-      const displayCostPrice = initialData.cost_price ? convertToLocal(initialData.cost_price) : undefined; // NEW: Handle cost price conversion
+      // For editing existing products, convert USD amounts back to local for display
+      const displayPrice = initialData.original_price !== undefined ? initialData.original_price : (initialData.price ? convertToLocal(initialData.price) : 0);
+      const displayCostPrice = initialData.original_cost_price !== undefined ? initialData.original_cost_price : (initialData.cost_price ? convertToLocal(initialData.cost_price) : undefined);
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
         price: displayPrice,
-        cost_price: displayCostPrice, // NEW: Set cost price from initial data
+        cost_price: displayCostPrice,
         barcode: initialData.barcode || '',
         stock_quantity: initialData.stock_quantity || 0,
         min_stock_level: initialData.min_stock_level || 5
@@ -52,15 +53,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const usdPrice = convertToUSD(formData.price);
-    const usdCostPrice = formData.cost_price ? convertToUSD(formData.cost_price) : undefined; // NEW: Convert cost price to USD
-    const dataToSubmit = { 
-      ...formData, 
-      price: usdPrice,
-      cost_price: usdCostPrice // NEW: Include converted cost price
-    };
-
-    await onSubmit(dataToSubmit);
+    // Send the raw user input (local currency amounts) to backend
+    // Backend will handle conversion and preservation of historical context
+    await onSubmit(formData);
   };
 
   const handleBarcodeScan = async (scannedBarcode: string) => {
@@ -80,7 +75,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           setFormData(prev => ({
             ...prev,
             name: result.product!.name,
-            price: convertToLocal(result.product!.price),
+            price: result.product!.price, // Use raw price from lookup
             stock_quantity: result.product!.stock_quantity
           }));
           // Enhanced message for external products
@@ -179,7 +174,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           {/* Price */}
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-              Selling Price *
+              Selling Price (Local Currency) *
             </label>
             <input
               type="number"
@@ -193,10 +188,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
             />
           </div>
 
-          {/* NEW: Cost Price */}
+          {/* Cost Price */}
           <div>
             <label htmlFor="cost_price" className="block text-sm font-medium text-gray-700">
-              Cost Price
+              Cost Price (Local Currency)
             </label>
             <input
               type="number"
@@ -205,9 +200,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
               min="0"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               value={formData.cost_price || ''}
-              onChange={(e) => setFormData({ 
-                ...formData, 
-                cost_price: e.target.value ? parseFloat(e.target.value) : undefined 
+              onChange={(e) => setFormData({
+                ...formData,
+                cost_price: e.target.value ? parseFloat(e.target.value) : undefined
               })}
               placeholder="Optional - for profit calculation"
             />

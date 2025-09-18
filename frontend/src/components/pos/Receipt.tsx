@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useCurrency } from '../../hooks/useCurrency';
 import { Sale, Payment, Business, Product } from '../../types';
 import { productService } from '../../services/products';
+import { CurrencyDisplay } from '../CurrencyDisplay';
 
 interface ReceiptProps {
   sale: Sale;
@@ -12,8 +12,9 @@ interface ReceiptProps {
 }
 
 const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountReceived, onClose }) => {
-  const { formatCurrency } = useCurrency();
-  const change = amountReceived - sale.total_amount;
+  // Use sale.original_amount if available, otherwise fallback to total_amount
+  const originalTotal = sale.original_amount || sale.total_amount;
+  const change = amountReceived - originalTotal;
   const receiptDate = new Date(sale.created_at).toLocaleString();
 
   // State to hold product names
@@ -48,7 +49,7 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
   };
 
   const handleSave = () => {
-    const currencyCode = business?.currency_code || 'USD';
+    const currencyCode = sale.original_currency || business?.currency_code || 'USD';
 
     const receiptContent = `
       ${business?.name || 'Business Name'}
@@ -64,18 +65,18 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
         .map(
           (item) => `
         ${(productNames[item.product_id]) || `Product #${item.product_id}`} x${item.quantity}
-        ${formatCurrency(item.unit_price)} each
-        ${formatCurrency(item.subtotal)}
+        ${item.unit_price} ${currencyCode} each
+        ${item.subtotal} ${currencyCode}
       `
         )
         .join('')}
 
-      Subtotal: ${formatCurrency(sale.total_amount - sale.tax_amount)}
-      Tax: ${formatCurrency(sale.tax_amount)}
-      Total: ${formatCurrency(sale.total_amount)}
+      Subtotal: ${sale.original_amount - (sale.tax_amount / sale.exchange_rate_at_sale)} ${currencyCode}
+      Tax: ${sale.tax_amount / sale.exchange_rate_at_sale} ${currencyCode}
+      Total: ${sale.original_amount} ${currencyCode}
 
-      Payment: ${formatCurrency(amountReceived)}
-      Change: ${formatCurrency(change)}
+      Payment: ${amountReceived} ${currencyCode}
+      Change: ${change} ${currencyCode}
 
       Thank you for your business!
       Powered by Bizzy POS
@@ -131,15 +132,32 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
                     {(productNames[item.product_id]) || `Product #${item.product_id}`}
                   </span>
                   <span>
-                    {formatCurrency(item.subtotal)}
+                    <CurrencyDisplay
+                      amount={item.subtotal}
+                      originalAmount={item.subtotal}
+                      originalCurrencyCode={sale.original_currency || business?.currency_code}
+                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                    />
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>
-                    {item.quantity} x {formatCurrency(item.unit_price)}
+                    {item.quantity} x{' '}
+                    <CurrencyDisplay
+                      amount={item.unit_price}
+                      originalAmount={item.unit_price}
+                      originalCurrencyCode={sale.original_currency || business?.currency_code}
+                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                    />
                   </span>
                   <span>
-                    Subtotal: {formatCurrency(item.subtotal)}
+                    Subtotal:{' '}
+                    <CurrencyDisplay
+                      amount={item.subtotal}
+                      originalAmount={item.subtotal}
+                      originalCurrencyCode={sale.original_currency || business?.currency_code}
+                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                    />
                   </span>
                 </div>
               </div>
@@ -152,31 +170,56 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
           <div className="flex justify-between">
             <span>Subtotal:</span>
             <span>
-              {formatCurrency(sale.total_amount - sale.tax_amount)}
+              <CurrencyDisplay
+                amount={sale.total_amount - sale.tax_amount}
+                originalAmount={originalTotal - (sale.tax_amount / sale.exchange_rate_at_sale)}
+                originalCurrencyCode={sale.original_currency || business?.currency_code}
+                exchangeRateAtCreation={sale.exchange_rate_at_sale}
+              />
             </span>
           </div>
           <div className="flex justify-between">
             <span>Tax:</span>
             <span>
-              {formatCurrency(sale.tax_amount)}
+              <CurrencyDisplay
+                amount={sale.tax_amount}
+                originalAmount={sale.tax_amount / sale.exchange_rate_at_sale}
+                originalCurrencyCode={sale.original_currency || business?.currency_code}
+                exchangeRateAtCreation={sale.exchange_rate_at_sale}
+              />
             </span>
           </div>
           <div className="flex justify-between font-bold text-lg border-t border-gray-300 pt-2">
             <span>Total:</span>
             <span>
-              {formatCurrency(sale.total_amount)}
+              <CurrencyDisplay
+                amount={sale.total_amount}
+                originalAmount={originalTotal}
+                originalCurrencyCode={sale.original_currency || business?.currency_code}
+                exchangeRateAtCreation={sale.exchange_rate_at_sale}
+              />
             </span>
           </div>
           <div className="flex justify-between">
             <span>Amount Received:</span>
             <span>
-              {formatCurrency(amountReceived)}
+              <CurrencyDisplay
+                amount={amountReceived * sale.exchange_rate_at_sale}
+                originalAmount={amountReceived}
+                originalCurrencyCode={sale.original_currency || business?.currency_code}
+                exchangeRateAtCreation={sale.exchange_rate_at_sale}
+              />
             </span>
           </div>
           <div className="flex justify-between font-semibold border-t border-gray-300 pt-2">
             <span>Change:</span>
             <span>
-              {formatCurrency(change)}
+              <CurrencyDisplay
+                amount={change * sale.exchange_rate_at_sale}
+                originalAmount={change}
+                originalCurrencyCode={sale.original_currency || business?.currency_code}
+                exchangeRateAtCreation={sale.exchange_rate_at_sale}
+              />
             </span>
           </div>
         </div>

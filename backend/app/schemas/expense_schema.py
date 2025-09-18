@@ -39,6 +39,8 @@ class Expense(ExpenseBase):
     amount: float = Field(..., description="The calculated USD equivalent of the original_amount")
     exchange_rate: Optional[float] = Field(None, description="The rate used for the conversion")
     # Add nested category information for frontend display
+    original_amount: Optional[float] = None
+    original_currency: Optional[str] = None
     category: Optional[ExpenseCategory] = Field(None, description="Category details")
 
     class Config:
