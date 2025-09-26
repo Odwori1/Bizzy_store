@@ -134,9 +134,9 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
                   <span>
                     <CurrencyDisplay
                       amount={item.subtotal}
-                      originalAmount={item.subtotal}
+                      originalAmount={item.original_subtotal || item.subtotal}
                       originalCurrencyCode={sale.original_currency || business?.currency_code}
-                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                      exchangeRateAtCreation={item.exchange_rate_at_creation || sale.exchange_rate_at_sale}
                     />
                   </span>
                 </div>
@@ -145,18 +145,18 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
                     {item.quantity} x{' '}
                     <CurrencyDisplay
                       amount={item.unit_price}
-                      originalAmount={item.unit_price}
+                      originalAmount={item.original_unit_price || item.unit_price}
                       originalCurrencyCode={sale.original_currency || business?.currency_code}
-                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                      exchangeRateAtCreation={item.exchange_rate_at_creation || sale.exchange_rate_at_sale}
                     />
                   </span>
                   <span>
                     Subtotal:{' '}
                     <CurrencyDisplay
                       amount={item.subtotal}
-                      originalAmount={item.subtotal}
+                      originalAmount={item.original_subtotal || item.subtotal}
                       originalCurrencyCode={sale.original_currency || business?.currency_code}
-                      exchangeRateAtCreation={sale.exchange_rate_at_sale}
+                      exchangeRateAtCreation={item.exchange_rate_at_creation || sale.exchange_rate_at_sale}
                     />
                   </span>
                 </div>

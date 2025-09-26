@@ -29,6 +29,8 @@ class Refund(RefundBase):
     id: int
     sale_id: int
     user_id: int
+    business_id: int  # 🆕 ADD THIS
+    business_refund_number: int  # 🆕 ADD THIS
     total_amount: float  # USD amount
     # NEW: Currency context fields for historical preservation
     original_amount: float  # Local currency amount (PRESERVED)

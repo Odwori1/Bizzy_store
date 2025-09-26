@@ -24,14 +24,20 @@ router = APIRouter(
 def create_new_product(
     product: ProductCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user) # CHANGED: Type hint is now 'dict'
+    current_user: dict = Depends(get_current_user)
 ):
     """Create a product (requires product:create permission)"""
     db_product = get_product_by_barcode(db, barcode=product.barcode)
     if db_product:
         raise HTTPException(status_code=400, detail="Barcode already registered")
-    # FIXED: Access user ID from the dictionary
-    return create_product(db=db, product_data=product, user_id=current_user["id"])
+    
+    # EXTRACT BUSINESS_ID FROM CURRENT_USER
+    business_id = current_user.get("business_id")
+    if not business_id:
+        raise HTTPException(status_code=400, detail="Your account is not associated with a business")
+    
+    # PASS BUSINESS_ID TO CREATE_PRODUCT
+    return create_product(db=db, product_data=product, user_id=current_user["id"], business_id=business_id)
 
 # List all products with optional barcode filtering - Requires product:read permission
 @router.get("/", response_model=List[Product], dependencies=[Depends(requires_permission("product:read"))])
@@ -39,23 +45,38 @@ def read_products(
     skip: int = 0,
     limit: int = 100,
     barcode: Optional[str] = Query(None, description="Filter by barcode"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
-    """List all products with optional barcode filtering"""
+    """List all products from current user's business with optional barcode filtering"""
+    business_id = current_user.get("business_id")
+    if not business_id:
+        raise HTTPException(status_code=400, detail="Your account is not associated with a business")
+
     if barcode:
-        product = get_product_by_barcode(db, barcode=barcode)
+        product = get_product_by_barcode(db, barcode=barcode, business_id=business_id)
         return [product] if product else []
     else:
-        return get_products(db, skip=skip, limit=limit)
+        return get_products(db, skip=skip, limit=limit, business_id=business_id)
 
 # Get product details - Requires product:read permission
-@router.get("/{product_id}", response_model=Product, dependencies=[Depends(requires_permission("product:read"))])
-def read_product(product_id: int, db: Session = Depends(get_db)):
-    """Get product details (requires product:read permission)"""
-    db_product = get_product(db, product_id=product_id)
-    if db_product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return db_product
+@router.get("/{product_id}", response_model=Product)
+def read_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get product by ID with business isolation"""
+    # 🚨 CRITICAL FIX: Pass business_id to get_product
+    business_id = current_user.get("business_id")
+    product = get_product(db, product_id, business_id)
+    
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    return product
 
 # Update product details - Requires product:update permission
 @router.put("/{product_id}", response_model=Product, dependencies=[Depends(requires_permission("product:update"))])
@@ -63,10 +84,9 @@ def update_existing_product(
     product_id: int,
     product: ProductUpdate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user) # CHANGED: Type hint is now 'dict'
+    current_user: dict = Depends(get_current_user)
 ):
     """Update product details (requires product:update permission)"""
-    # FIXED: Access user ID from the dictionary
     return update_product(db=db, product_id=product_id, product=product, user_id=current_user["id"])
 
 # Delete a product - Requires product:delete permission

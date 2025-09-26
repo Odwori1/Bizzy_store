@@ -65,15 +65,7 @@ export default function Login() {
     }
   };
 
-  const useTestCredentials = () => {
-    setIdentifier('cashier1');
-    setPassword('cashier123');
-  };
 
-  const useTestEmailCredentials = () => {
-    setIdentifier('cashier@example.com');
-    setPassword('cashier123');
-  };
 
   // If 2FA is required, show the code input form
   if (requires2FA) {
@@ -154,20 +146,7 @@ export default function Login() {
             Use your email address or username
           </p>
 
-          <div className="mt-4 text-center space-x-4">
-            <button
-              onClick={useTestCredentials}
-              className="text-sm text-blue-600 hover:text-blue-500"
-            >
-              Use Test Username
-            </button>
-            <button
-              onClick={useTestEmailCredentials}
-              className="text-sm text-blue-600 hover:text-blue-500"
-            >
-              Use Test Email
-            </button>
-          </div>
+
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handlePasswordLogin}>

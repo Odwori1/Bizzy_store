@@ -25,6 +25,9 @@ class ProductUpdate(ProductBase):
 
 class Product(ProductBase):
     id: int
+    # 🎯 ADD VIRTUAL BUSINESS NUMBERING
+    business_product_number: Optional[int] = None  # Per-business sequence number
+    
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     last_restocked: Optional[datetime] = None

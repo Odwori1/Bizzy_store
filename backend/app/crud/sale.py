@@ -71,6 +71,7 @@ def create_sale(db: Session, sale_data: SaleCreate, user_id: int):
         tax_amount_usd = tax_amount * current_rate if current_rate != 0 else tax_amount
         db_sale = Sale(
             user_id=user_id,
+            business_id=business.id if business else None,  # Set business_id from the user's business
             total_amount=final_total_usd,        # USD amount for internal reporting
             tax_amount=tax_amount_usd,           # USD tax amount
             usd_amount=final_total_usd,          # USD amount (consistent naming)
@@ -147,34 +148,42 @@ def create_sale(db: Session, sale_data: SaleCreate, user_id: int):
         db.rollback()
         raise e
 
-
-# The rest of the functions remain unchanged
-def get_sale(db: Session, sale_id: int):
-    """Get a single sale by ID with product information"""
-    sale = db.query(Sale).filter(Sale.id == sale_id).first()
-
-    if sale:
-        # Eager load related data
-        sale.sale_items = db.query(SaleItem).filter(SaleItem.sale_id == sale_id).all()
-        sale.payments = db.query(Payment).filter(Payment.sale_id == sale_id).all()
-
-        # Add product names to sale items by joining with products table
-        for item in sale.sale_items:
-            product = db.query(Product).filter(Product.id == item.product_id).first()
-            if product:
-                item.product_name = product.name
-
+def get_sale(db: Session, sale_id: int, business_id: int = None):
+    """Get a specific sale by ID with virtual numbering"""
+    # First get the sale with business filtering
+    query = db.query(Sale)
+    if business_id is not None:
+        query = query.filter(Sale.business_id == business_id)
+    
+    sale = query.filter(Sale.id == sale_id).first()
+    
+    if sale and business_id is not None:
+        # Calculate virtual numbering for this sale
+        business_sales = db.query(Sale.id).filter(
+            Sale.business_id == business_id
+        ).order_by(Sale.created_at).all()
+        
+        # Create mapping of sale_id to sequence number
+        sale_id_to_number = {sale_id: idx + 1 for idx, (sale_id,) in enumerate(business_sales)}
+        sale.business_sale_number = sale_id_to_number.get(sale.id)
+    
     return sale
+
 
 def get_sales(
     db: Session,
     skip: int = 0,
     limit: int = 100,
     start_date: Optional[date] = None,
-    end_date: Optional[date] = None
+    end_date: Optional[date] = None,
+    business_id: Optional[int] = None
 ):
-    """Get multiple sales with optional date filtering"""
+    """Get multiple sales with optional date and business filtering"""
     query = db.query(Sale)
+
+    # ADD THIS FILTER
+    if business_id is not None:
+        query = query.filter(Sale.business_id == business_id)
 
     if start_date:
         query = query.filter(Sale.created_at >= start_date)
@@ -187,6 +196,19 @@ def get_sales(
 
     sales = query.order_by(Sale.created_at.desc()).offset(skip).limit(limit).all()
 
+    # 🎯 FIXED: Add virtual business sale numbers (always when business_id is provided)
+    if business_id is not None:
+        # Get all sales for this business to calculate sequence numbers
+        business_sales = db.query(Sale.id).filter(Sale.business_id == business_id).order_by(Sale.created_at).all()
+        sale_id_to_number = {sale_id: idx + 1 for idx, (sale_id,) in enumerate(business_sales)}
+        
+        for sale in sales:
+            sale.business_sale_number = sale_id_to_number.get(sale.id, sale.id)
+    else:
+        # If no business filter, use database ID as fallback
+        for sale in sales:
+            sale.business_sale_number = sale.id
+
     # Eager load user relationship for user_name
     for sale in sales:
         if sale.user:
@@ -194,17 +216,30 @@ def get_sales(
 
     return sales
 
-def get_daily_sales_report(db: Session, report_date: date):
-    """Generate daily sales report"""
+def get_daily_sales_report(db: Session, report_date: date, business_id: Optional[int] = None):
+    """Generate daily sales report for a specific business"""
     next_day = datetime.combine(report_date, datetime.min.time()).replace(
         day=report_date.day + 1
     )
 
-    sales = db.query(Sale).filter(
+    query = db.query(Sale).filter(
         Sale.created_at >= report_date,
         Sale.created_at < next_day,
         Sale.payment_status == "completed"
-    ).all()
+    )
+    # ADD THIS FILTER
+    if business_id is not None:
+        query = query.filter(Sale.business_id == business_id)
+
+    sales = query.all()
+    
+    # 🎯 NEW: Add virtual business sale numbers for report sales
+    if business_id is not None and sales:
+        business_sales = db.query(Sale.id).filter(Sale.business_id == business_id).order_by(Sale.created_at).all()
+        sale_id_to_number = {sale_id: idx + 1 for idx, (sale_id,) in enumerate(business_sales)}
+        
+        for sale in sales:
+            sale.business_sale_number = sale_id_to_number.get(sale.id, sale.id)
 
     total_sales = sum(sale.total_amount for sale in sales)
     total_tax = sum(sale.tax_amount for sale in sales)

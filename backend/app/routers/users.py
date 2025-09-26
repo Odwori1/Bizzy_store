@@ -9,6 +9,7 @@ from app.models.user import User as UserModel
 from app.models.permission import Role
 from app.crud.user import (
     create_user,
+    create_user_with_business,
     get_user,
     get_user_by_email,
     get_user_by_username,
@@ -33,22 +34,39 @@ def read_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
-    """
-    Retrieve all users (Requires user:read permission).
-    """
-    users = get_all_users(db, skip=skip, limit=limit)
-    return users
+    """List all users from current user's business (requires user:read permission)"""
+    business_id = current_user.get("business_id")
+    
+    if not business_id:
+        # If user has no business, only return themselves (security fallback)
+        return [db.query(UserModel).filter(UserModel.id == current_user["id"]).first()]
+    
+    # Return users from same business OR users with null business_id (temporary)
+    # This ensures backward compatibility during migration
+    return db.query(UserModel).filter(
+        (UserModel.business_id == business_id) | (UserModel.business_id.is_(None))
+    ).offset(skip).limit(limit).all()
 
-# Use UserSchema for response model
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED, dependencies=[Depends(requires_permission("user:create"))])
 def create_new_user(
     user: UserCreate,
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)  # <-- ADD this parameter
 ):
     """
     Create a new user (Requires user:create permission).
+    The new user will be associated with the same business as the user who created them.
     """
+    # Get the business_id from the user making the request
+    creator_business_id = current_user.get("business_id")
+    if not creator_business_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Your account is not associated with a business. You cannot create users."
+        )
+
     # Check if email already exists
     db_user_by_email = get_user_by_email(db, email=user.email)
     if db_user_by_email:
@@ -64,7 +82,15 @@ def create_new_user(
             detail="Username already taken"
         )
 
-    return create_user(db=db, user=user)
+    # USE THE NEW FUNCTION and pass the business_id
+    try:
+        return create_user_with_business(db=db, user=user, business_id=creator_business_id)
+    except ValueError as e:
+        # Catch errors from the new function and convert to HTTPException
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 # Use UserSchema for response model
 @router.put("/{user_id}", response_model=UserSchema, dependencies=[Depends(requires_permission("user:update"))])
@@ -95,10 +121,31 @@ def update_existing_user(
 def delete_existing_user(
     user_id: int,
     db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)  # Make sure this parameter exists
 ):
     """
     Delete a user (Requires user:delete permission).
+    Users can only delete users from their own business.
     """
+    # Get the target user
+    target_user = get_user(db, user_id)
+    if not target_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    # BUSINESS VALIDATION: Check if target user belongs to the same business
+    if target_user.business_id != current_user.get("business_id"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot delete users from other businesses"
+        )
+    
+    # Prevent users from deleting themselves
+    if user_id == current_user["id"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete your own account"
+        )
+    
     success = delete_user(db, user_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

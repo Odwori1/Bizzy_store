@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PurchaseOrderCreate, PurchaseOrderItemCreate, Supplier, Product } from '../../types';
 import { useSuppliers } from '../../hooks/useSuppliers';
+import { CurrencyDisplay } from "../CurrencyDisplay";  // 🎯 ADD THIS LINE
 
 interface PurchaseOrderFormProps {
   suppliers: Supplier[];

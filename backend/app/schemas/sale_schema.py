@@ -62,6 +62,9 @@ class SaleCreate(SaleBase):
 
 class Sale(SaleBase):
     id: int
+    # 🎯 ADD VIRTUAL BUSINESS NUMBERING
+    business_sale_number: Optional[int] = None  # Per-business sequence number
+    
     total_amount: float              # USD amount
     tax_amount: float                # USD tax amount
     usd_amount: float                # USD amount (duplicate for consistency)
@@ -80,6 +83,9 @@ class Sale(SaleBase):
 # Response Schemas
 class SaleSummary(BaseModel):
     id: int
+    # 🎯 ADD VIRTUAL BUSINESS NUMBERING
+    business_sale_number: Optional[int] = None  # Per-business sequence number
+    
     total_amount: float
     tax_amount: float
     payment_status: str

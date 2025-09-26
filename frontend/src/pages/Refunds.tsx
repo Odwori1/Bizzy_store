@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Refund } from '../types';
 import { refundsService } from '../services/refunds';
-import { salesService } from '../services/sales';
 import { format } from 'date-fns';
 import BackButton from '../components/BackButton';
-import { CurrencyDisplay } from '../components/CurrencyDisplay'; // <--- CHANGED: Use CurrencyDisplay instead of useCurrency
+import { CurrencyDisplay } from '../components/CurrencyDisplay';
 
 export default function Refunds() {
   const [refunds, setRefunds] = useState<Refund[]>([]);
@@ -19,30 +18,31 @@ export default function Refunds() {
     try {
       setLoading(true);
       setError(null);
+      
+      // Direct call to get all refunds for current business
+      const allRefunds = await refundsService.getRefunds();
+      console.log('📊 Loaded refunds directly:', allRefunds);
+      
+      // Apply amount swapping correction if needed
+      const correctedRefunds = allRefunds.map(refund => {
+        // Detect and fix swapped amounts (backend bug workaround)
+        const hasSwappedAmounts = refund.original_amount < 1 && refund.total_amount > 0.1;
 
-      const allRefunds: Refund[] = [];
-
-      try {
-        // Get all sales using the sales service
-        const sales = await salesService.getSales();
-
-        // Get refunds for each sale
-        for (const sale of sales) {
-          try {
-            const saleRefunds = await refundsService.getRefundsBySale(sale.id);
-            allRefunds.push(...saleRefunds);
-          } catch (err) {
-            console.error(`Failed to get refunds for sale ${sale.id}:`, err);
-          }
+        if (hasSwappedAmounts) {
+          console.log(`🔄 Fixing swapped amounts for refund ${refund.id}`);
+          return {
+            ...refund,
+            total_amount: refund.original_amount,
+            original_amount: refund.total_amount
+          };
         }
+        
+        return refund;
+      });
 
-        setRefunds(allRefunds.sort((a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        ));
-      } catch (err: any) {
-        setError('Failed to load sales data: ' + (err.message || 'Unknown error'));
-        console.error('Error loading sales:', err);
-      }
+      setRefunds(correctedRefunds.sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ));
     } catch (err: any) {
       setError(err.message || 'Failed to load refunds');
       console.error('Error loading refunds:', err);
@@ -98,14 +98,15 @@ export default function Refunds() {
                 <tbody>
                   {refunds.map((refund) => (
                     <tr key={refund.id} className="border-b hover:bg-gray-50">
-                      <td className="p-3">#{refund.id}</td>
+                      <td className="p-3">Refund #{refund.business_refund_number}</td>
                       <td className="p-3">Sale #{refund.sale_id}</td>
                       <td className="p-3">
-                        {/* CHANGED: Use CurrencyDisplay with historical context */}
-                        <CurrencyDisplay 
-                          amount={refund.total_amount} 
+                        <CurrencyDisplay
+                          amount={refund.total_amount}
                           originalAmount={refund.original_amount}
                           originalCurrencyCode={refund.original_currency}
+                          exchangeRateAtCreation={refund.exchange_rate_at_refund}
+                          preserveOriginal={true}
                         />
                       </td>
                       <td className="p-3">{refund.reason || 'N/A'}</td>

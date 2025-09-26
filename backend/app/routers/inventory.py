@@ -17,7 +17,6 @@ from app.schemas.inventory_schema import (
 )
 from app.database import get_db
 from app.core.auth import get_current_user
-# ADD THIS IMPORT
 from app.core.permissions import requires_permission
 
 router = APIRouter(
@@ -35,7 +34,13 @@ def read_inventory_history(
     current_user: dict = Depends(get_current_user)
 ):
     """Get inventory history, optionally filtered by product (requires inventory:read permission)"""
-    return get_inventory_history(db, product_id, skip, limit)
+    business_id = current_user.get("business_id")
+    if not business_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not associated with a business"
+        )
+    return get_inventory_history(db, product_id, skip, limit, business_id)
 
 # Adjust inventory - Requires inventory:update permission
 @router.post("/adjust", response_model=StockLevel, dependencies=[Depends(requires_permission("inventory:update"))])
@@ -53,14 +58,20 @@ def adjust_inventory_quantity(
             detail="Product not found"
         )
 
+    # Verify product belongs to user's business
+    if product.business_id != current_user.get("business_id"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot adjust inventory for products in other businesses"
+        )
+
     # Verify sufficient stock for negative adjustments
     if adjustment.quantity_change < 0 and product.stock_quantity + adjustment.quantity_change < 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Insufficient stock for this adjustment"
         )
-
-    updated_product = adjust_inventory(db, adjustment, current_user["id"])
+    updated_product = adjust_inventory(db, adjustment, current_user["id"], current_user.get("business_id"))
     if not updated_product:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -84,7 +95,13 @@ def get_low_stock_alerts(
     current_user: dict = Depends(get_current_user)
 ):
     """Get products with low stock levels (requires inventory:read permission)"""
-    low_stock_items = get_low_stock_items(db, threshold)
+    business_id = current_user.get("business_id")
+    if not business_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not associated with a business"
+        )
+    low_stock_items = get_low_stock_items(db, threshold, business_id)
     return [
         {
             "product_id": item.id,
@@ -104,4 +121,10 @@ def get_current_stock_levels(
     current_user: dict = Depends(get_current_user)
 ):
     """Get current stock levels for all products (requires inventory:read permission)"""
-    return get_stock_levels(db, skip, limit)
+    business_id = current_user.get("business_id")
+    if not business_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not associated with a business"
+        )
+    return get_stock_levels(db, skip, limit, business_id)

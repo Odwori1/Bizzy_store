@@ -8,9 +8,11 @@ from typing import Union
 from app.core.auth import create_access_token, verify_password, oauth2_scheme
 from app.crud.user import get_user_by_email_or_username, get_user_by_email, update_user
 from app.database import get_db
-from app.schemas.user_schema import Token, UserLogin, PasswordResetRequest, PasswordResetConfirm, TwoFactorRequiredResponse, TwoFactorVerifyRequest
+from app.schemas.user_schema import Token, UserLogin, PasswordResetRequest, PasswordResetConfirm, TwoFactorRequiredResponse, TwoFactorVerifyRequest, UserCreate
 from app.utils.email import send_password_reset_email
 from app.models.user import User
+from app.crud.business import create_business_with_owner
+from app.schemas.business_schema import BusinessCreate
 
 router = APIRouter(
     prefix="/api",
@@ -50,7 +52,12 @@ def login_for_token(login_data: UserLogin, db: Session = Depends(get_db)):
     # END NEW
     # END NEW
 
-    access_token = create_access_token(data={"sub": user.email})
+    # NEW CODE: Include business_id in the token data
+    token_data = {"sub": user.email}
+    if user.business_id:
+        token_data["business_id"] = user.business_id
+
+    access_token = create_access_token(data=token_data)
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/auth/login-oauth", response_model=Token)
@@ -62,7 +69,12 @@ def login_oauth(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
             detail="Incorrect email/username or password",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    access_token = create_access_token(data={"sub": user.email})
+    # NEW CODE: Include business_id in the token data
+    token_data = {"sub": user.email}
+    if user.business_id:
+        token_data["business_id"] = user.business_id
+
+    access_token = create_access_token(data=token_data)
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/auth/forgot-password")
@@ -178,6 +190,47 @@ async def verify_2fa_login(verify_request: TwoFactorVerifyRequest, db: Session =
         )
 
     # If code is valid, generate the final access token
-    access_token = create_access_token(data={"sub": user.email})
+    # NEW CODE: Include business_id in the token data
+    token_data = {"sub": user.email}
+    if user.business_id:
+        token_data["business_id"] = user.business_id
+
+    access_token = create_access_token(data=token_data)
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/auth/register/business", response_model=Token)
+async def register_new_business(
+    business_data: BusinessCreate,
+    owner_data: UserCreate,  # This will come from the request body
+    db: Session = Depends(get_db)
+):
+    """
+    Register a new business and its owner user.
+    This is for first-time users creating a completely new business.
+    """
+    try:
+        # Create business and owner in a single transaction
+        result = create_business_with_owner(db, business_data, owner_data)
+
+        # Generate JWT token for the new owner
+        token_data = {"sub": result["owner"].email}
+        if result["owner"].business_id:
+            token_data["business_id"] = result["owner"].business_id
+
+        access_token = create_access_token(data=token_data)
+
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    except ValueError as e:
+        # Handle validation errors (duplicate business name, email, etc.)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        # Handle any other errors
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not create business registration"
+        )
 # END NEW ENDPOINT

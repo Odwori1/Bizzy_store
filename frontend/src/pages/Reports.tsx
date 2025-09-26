@@ -7,6 +7,7 @@ import { CurrencyDisplay } from '../components/CurrencyDisplay';
 import DailyScansChart from '../components/charts/DailyScansChart';
 import UserActivityChart from '../components/charts/UserActivityChart';
 import { useBusinessStore } from '../hooks/useBusiness'; // ADD THIS IMPORT
+import { useCurrency } from '../hooks/useCurrency';
 
 interface LowStockAlert {
   product_name: string;
@@ -516,11 +517,8 @@ const SalesReportView: React.FC<{ report: any }> = ({ report }) => (
   </div>
 );
 
-// InventoryReportView Component - PROPER FIX
+// InventoryReportView Component - PROPER FIX WITH DUAL CURRENCY
 const InventoryReportView: React.FC<{ report: any }> = ({ report }) => {
-  const { business } = useBusinessStore();
-  const businessCurrency = business?.currency_code || 'USD';
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
@@ -528,7 +526,7 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => {
         <span className="text-sm text-gray-600">As of {new Date().toLocaleDateString()}</span>
       </div>
 
-      {/* Inventory Summary Cards - FIXED */}
+      {/* Inventory Summary Cards - FIXED WITH DUAL CURRENCY */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 p-4 rounded-lg">
           <p className="text-sm text-blue-600 mb-2">Total Products</p>
@@ -537,11 +535,17 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => {
         <div className="bg-green-50 p-4 rounded-lg">
           <p className="text-sm text-green-600 mb-2">Stock Value</p>
           <p className="text-2xl font-bold text-green-900">
-            {/* FIX: Inventory data uses simple display without historical context */}
+            {/* FIXED: Use exact same pattern as Sales Report */}
             <CurrencyDisplay
               amount={report.summary?.total_stock_value || 0}
-              currencyCode={businessCurrency}
-              preserveOriginal={false}
+              originalAmount={report.summary?.total_stock_value_original || report.summary?.total_stock_value || 0}
+              originalCurrencyCode={report.summary?.primary_currency}
+              exchangeRateAtCreation={
+                report.summary?.total_stock_value && report.summary?.total_stock_value_original
+                  ? report.summary.total_stock_value / report.summary.total_stock_value_original
+                  : 1
+              }
+              preserveOriginal={true}
             />
           </p>
         </div>
@@ -555,7 +559,7 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => {
         </div>
       </div>
 
-      {/* Stock Movements - FIXED */}
+      {/* Stock Movements - FIXED WITH DUAL CURRENCY */}
       {report.stock_movements && report.stock_movements.length > 0 && (
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-4">Recent Stock Movements</h4>
@@ -577,11 +581,13 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{movement.movement_type}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{movement.quantity}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {/* FIX: Inventory data uses simple display without historical context */}
+                      {/* FIXED: Use exact same pattern as Sales Report */}
                       <CurrencyDisplay
                         amount={movement.value}
-                        currencyCode={businessCurrency}
-                        preserveOriginal={false}
+                        originalAmount={movement.value_original || movement.value}
+                        originalCurrencyCode={movement.original_currency_code}
+                        exchangeRateAtCreation={movement.exchange_rate_at_creation}
+                        preserveOriginal={true}
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(movement.date).toLocaleDateString()}</td>
@@ -596,10 +602,10 @@ const InventoryReportView: React.FC<{ report: any }> = ({ report }) => {
   );
 };
 
-// FinancialReportView Component - PROPER FIX
+// FinancialReportView Component - CORRECTED FIELD NAMES
 const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
-  const { business } = useBusinessStore();
-  const businessCurrency = business?.currency_code || 'USD';
+  // Get primary currency from the financial report itself
+  const primaryCurrency = report.summary?.primary_currency || 'UGX';
 
   return (
     <div className="space-y-6">
@@ -610,16 +616,15 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
         </span>
       </div>
 
-      {/* Financial Summary Cards - FIXED */}
+      {/* Financial Summary Cards - CORRECTED */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 p-4 rounded-lg">
           <p className="text-sm text-blue-600 mb-2">Total Revenue</p>
           <p className="text-2xl font-bold text-blue-900">
-            {/* FIX: Financial data should use historical context like sales */}
             <CurrencyDisplay
               amount={report.summary?.total_revenue || 0}
-              originalAmount={report.summary?.total_revenue_original || report.summary?.total_revenue || 0}
-              originalCurrencyCode={businessCurrency}
+              originalAmount={report.summary?.total_revenue_original || 0}
+              originalCurrencyCode={primaryCurrency}
               exchangeRateAtCreation={report.summary?.exchange_rate || 1}
               preserveOriginal={true}
             />
@@ -628,11 +633,10 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
         <div className="bg-green-50 p-4 rounded-lg">
           <p className="text-sm text-green-600 mb-2">Gross Profit</p>
           <p className="text-2xl font-bold text-green-900">
-            {/* FIX: Financial data should use historical context like sales */}
             <CurrencyDisplay
               amount={report.summary?.gross_profit || 0}
-              originalAmount={report.summary?.gross_profit_original || report.summary?.gross_profit || 0}
-              originalCurrencyCode={businessCurrency}
+              originalAmount={report.summary?.gross_profit_original || 0}
+              originalCurrencyCode={primaryCurrency}
               exchangeRateAtCreation={report.summary?.exchange_rate || 1}
               preserveOriginal={true}
             />
@@ -641,11 +645,10 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
         <div className="bg-purple-50 p-4 rounded-lg">
           <p className="text-sm text-purple-600 mb-2">Net Profit</p>
           <p className="text-2xl font-bold text-purple-900">
-            {/* FIX: Financial data should use historical context like sales */}
             <CurrencyDisplay
               amount={report.summary?.net_profit || 0}
-              originalAmount={report.summary?.net_profit_original || report.summary?.net_profit || 0}
-              originalCurrencyCode={businessCurrency}
+              originalAmount={report.summary?.net_profit_original || 0}
+              originalCurrencyCode={primaryCurrency}
               exchangeRateAtCreation={report.summary?.exchange_rate || 1}
               preserveOriginal={true}
             />
@@ -653,11 +656,13 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
         </div>
         <div className="bg-orange-50 p-4 rounded-lg">
           <p className="text-sm text-orange-600 mb-2">Gross Margin</p>
-          <p className="text-2xl font-bold text-orange-900">{report.summary?.gross_margin?.toFixed(1) || 0}%</p>
+          <p className="text-2xl font-bold text-orange-900">
+            {report.summary?.gross_margin?.toFixed(1) || 0}%
+          </p>
         </div>
       </div>
 
-      {/* Profitability Analysis - FIXED */}
+      {/* Profitability Analysis - CORRECTED */}
       {report.profitability && report.profitability.length > 0 && (
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-4">Profitability by Product</h4>
@@ -677,32 +682,29 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.product_name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {/* FIX: Financial data should use historical context like sales */}
                       <CurrencyDisplay
                         amount={item.revenue || 0}
-                        originalAmount={item.revenue || 0}
-                        originalCurrencyCode={businessCurrency}
-                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        originalAmount={item.revenue_original || 0}
+                        originalCurrencyCode={primaryCurrency}
+                        exchangeRateAtCreation={item.exchange_rate_revenue || 1}
                         preserveOriginal={true}
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {/* FIX: Financial data should use historical context like sales */}
                       <CurrencyDisplay
                         amount={item.cost || 0}
-                        originalAmount={item.cost || 0}
-                        originalCurrencyCode={businessCurrency}
-                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        originalAmount={item.cost_original || 0}
+                        originalCurrencyCode={primaryCurrency}
+                        exchangeRateAtCreation={item.exchange_rate_cost || 1}
                         preserveOriginal={true}
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {/* FIX: Financial data should use historical context like sales */}
                       <CurrencyDisplay
                         amount={item.profit || 0}
-                        originalAmount={item.profit || 0}
-                        originalCurrencyCode={businessCurrency}
-                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        originalAmount={item.profit_original || 0}
+                        originalCurrencyCode={primaryCurrency}
+                        exchangeRateAtCreation={item.exchange_rate_profit || 1}
                         preserveOriginal={true}
                       />
                     </td>
@@ -717,7 +719,7 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
         </div>
       )}
 
-      {/* Cash Flow Summary - FIXED */}
+      {/* Cash Flow Summary - CORRECTED */}
       {report.cash_flow && (
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-4">Cash Flow Summary</h4>
@@ -725,12 +727,11 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
             <div className="bg-green-50 p-4 rounded-lg">
               <p className="text-sm text-green-600 mb-2">Cash In</p>
               <p className="text-2xl font-bold text-green-900">
-                {/* FIX: Financial data should use historical context like sales */}
                 <CurrencyDisplay
                   amount={report.cash_flow.cash_in || 0}
-                  originalAmount={report.cash_flow.cash_in || 0}
-                  originalCurrencyCode={businessCurrency}
-                  exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                  originalAmount={report.cash_flow.cash_in_original || 0}
+                  originalCurrencyCode={primaryCurrency}
+                  exchangeRateAtCreation={report.cash_flow.cash_in_exchange_rate || 1}
                   preserveOriginal={true}
                 />
               </p>
@@ -738,12 +739,11 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
             <div className="bg-red-50 p-4 rounded-lg">
               <p className="text-sm text-red-600 mb-2">Cash Out</p>
               <p className="text-2xl font-bold text-red-900">
-                {/* FIX: Financial data should use historical context like sales */}
                 <CurrencyDisplay
                   amount={report.cash_flow.cash_out || 0}
-                  originalAmount={report.cash_flow.cash_out || 0}
-                  originalCurrencyCode={businessCurrency}
-                  exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                  originalAmount={report.cash_flow.cash_out_original || 0}
+                  originalCurrencyCode={primaryCurrency}
+                  exchangeRateAtCreation={report.cash_flow.cash_out_exchange_rate || 1}
                   preserveOriginal={true}
                 />
               </p>
@@ -751,12 +751,11 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-600 mb-2">Net Cash Flow</p>
               <p className="text-2xl font-bold text-blue-900">
-                {/* FIX: Financial data should use historical context like sales */}
                 <CurrencyDisplay
                   amount={report.cash_flow.net_cash_flow || 0}
-                  originalAmount={report.cash_flow.net_cash_flow || 0}
-                  originalCurrencyCode={businessCurrency}
-                  exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                  originalAmount={report.cash_flow.net_cash_flow_original || 0}
+                  originalCurrencyCode={primaryCurrency}
+                  exchangeRateAtCreation={report.cash_flow.net_cash_flow_exchange_rate || 1}
                   preserveOriginal={true}
                 />
               </p>
@@ -765,7 +764,7 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
         </div>
       )}
 
-      {/* Expense Breakdown - FIXED */}
+      {/* Expense Breakdown - CORRECTED FIELD NAMES */}
       {report.expense_breakdown && report.expense_breakdown.length > 0 && (
         <div>
           <h4 className="text-lg font-medium text-gray-900 mb-4">Expense Breakdown</h4>
@@ -783,12 +782,11 @@ const FinancialReportView: React.FC<{ report: any }> = ({ report }) => {
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{expense.category}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {/* FIX: Financial data should use historical context like sales */}
                       <CurrencyDisplay
                         amount={expense.amount || 0}
-                        originalAmount={expense.amount || 0}
-                        originalCurrencyCode={businessCurrency}
-                        exchangeRateAtCreation={report.summary?.exchange_rate || 1}
+                        originalAmount={expense.amount_original || 0}
+                        originalCurrencyCode={primaryCurrency}
+                        exchangeRateAtCreation={expense.exchange_rate || 1}
                         preserveOriginal={true}
                       />
                     </td>

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .base import Base
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey  # ADD ForeignKey here
 
 class Product(Base):
     __tablename__ = "products"  # Must match exactly
@@ -23,6 +24,8 @@ class Product(Base):
     original_cost_price = Column(Float, nullable=True)  # NEW: Cost price in local currency at time of creation/update
     original_currency_code = Column(String(3), nullable=True)  # Currency code for original_price
     exchange_rate_at_creation = Column(Float, nullable=True)  # Rate used for conversion (Local -> USD)
+    # Add this line in the Product class definition (around line 20-30)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)
 
     # Relationships
     sale_items = relationship("SaleItem", back_populates="product")

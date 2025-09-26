@@ -80,13 +80,14 @@ export interface PaymentRequest {
 export interface Sale {
   id: number
   user_id: number
+  business_sale_number: number; // 🆕 ADD THIS
   total_amount: number
   tax_amount: number
   payment_status: 'pending' | 'completed' | 'refunded'
   created_at: string
   sale_items: SaleItem[]
   payments: Payment[]
-  user_name?: string
+  //user_name?: string
   refunds?: Refund[]; // Add optional refunds array
 }
 
@@ -101,6 +102,19 @@ export interface SaleItem {
   original_unit_price?: number    // Local currency amount (from backend)
   original_subtotal?: number      // Local currency amount (from backend)
   exchange_rate_at_creation?: number  // Historical exchange rate (from backend)
+}
+
+export interface SaleSummary {
+  id: number;
+  business_sale_number: number;
+  total_amount: number;
+  tax_amount: number;
+  payment_status: string;
+  created_at: string;
+  user_name?: string;
+  original_amount?: number;
+  original_currency?: string;
+  exchange_rate_at_sale?: number;
 }
 
 export interface Payment {
@@ -161,6 +175,8 @@ export interface InventoryHistory {
   changed_by: number
   changed_at: string
   product_name?: string
+  business_inventory_number?: number  // 🆕 ADD
+  business_id?: number                // 🆕 ADD
 }
 
 export interface InventoryAdjustment {
@@ -284,6 +300,8 @@ export interface Refund {
   id: number;
   sale_id: number;
   user_id: number;
+  business_id: number; // 🆕 ADD THIS
+  business_refund_number: number; // 🆕 ADD THIS
   reason: string | null;
   total_amount: number;
   status: string;

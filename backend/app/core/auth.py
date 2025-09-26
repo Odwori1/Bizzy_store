@@ -62,14 +62,25 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user_permissions = get_user_permissions(db, user.id)
     print(f"DEBUG: User permissions: {user_permissions}")
 
-    # RETURN USER OBJECT NOW INCLUDING PERMISSIONS
+    # FIXED: Convert business_id from JWT token to an integer
+    biz_id_int = None
+    business_id_from_token = payload.get("business_id")
+    if business_id_from_token is not None:
+        try:
+            biz_id_int = int(business_id_from_token)
+        except (ValueError, TypeError):
+            print(f"DEBUG: Could not convert business_id '{business_id_from_token}' to integer. Setting to None.")
+            biz_id_int = None
+
+    # RETURN USER DICTIONARY - MAINTAINS EXISTING STRUCTURE
     return {
         "id": user.id,
         "email": user.email,
         "username": user.username,
         "is_active": user.is_active,
         "created_at": user.created_at.isoformat() if user.created_at else None,
-        "permissions": user_permissions  # <-- ADD THIS LINE. This is the crucial change.
+        "permissions": user_permissions,
+        "business_id": biz_id_int  # <-- NOW THIS IS AN INTEGER (or None)
     }
 
 # This function MUST be defined AFTER get_current_user

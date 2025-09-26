@@ -9,17 +9,45 @@ from app.models.user import User
 from app.schemas.product_schema import ProductCreate, ProductUpdate
 from app.services.currency_service import CurrencyService
 
-def get_product(db: Session, product_id: int) -> Optional[Product]:
-    """Get a single product by ID"""
-    return db.query(Product).filter(Product.id == product_id).first()
+def get_product(db: Session, product_id: int, business_id: int = None) -> Optional[Product]:
+    """Get a single product by ID, filtered by business_id if provided"""
+    query = db.query(Product).filter(Product.id == product_id)
+    
+    # 🚨 CRITICAL FIX: Add business filtering
+    if business_id is not None:
+        query = query.filter(Product.business_id == business_id)
+        
+    return query.first()
 
-def get_products(db: Session, skip: int = 0, limit: int = 100) -> List[Product]:
-    """Get list of products with pagination"""
-    return db.query(Product).offset(skip).limit(limit).all()
+def get_products(db: Session, skip: int = 0, limit: int = 100, business_id: int = None) -> List[Product]:
+    query = db.query(Product)
 
-def get_product_by_barcode(db: Session, barcode: str) -> Optional[Product]:
-    """Get product by barcode"""
-    return db.query(Product).filter(Product.barcode == barcode).first()
+    # ADD BUSINESS FILTERING
+    if business_id is not None:
+        query = query.filter(Product.business_id == business_id)
+
+    products = query.offset(skip).limit(limit).all()
+    
+    # 🎯 NEW: Add virtual business product numbers
+    if business_id is not None:
+        # Get all products for this business to calculate sequence numbers
+        business_products = db.query(Product.id).filter(Product.business_id == business_id).order_by(Product.created_at).all()
+        product_id_to_number = {product_id: idx + 1 for idx, (product_id,) in enumerate(business_products)}
+        
+        for product in products:
+            product.business_product_number = product_id_to_number.get(product.id, product.id)
+
+    return products
+
+def get_product_by_barcode(db: Session, barcode: str, business_id: int = None) -> Optional[Product]:
+    """Get product by barcode, filtered by business_id if provided"""
+    query = db.query(Product).filter(Product.barcode == barcode)
+
+    # ADD BUSINESS FILTERING
+    if business_id is not None:
+        query = query.filter(Product.business_id == business_id)
+
+    return query.first()
 
 def get_business_by_user_id(db: Session, user_id: int) -> Optional[Business]:
     """Get business associated with a user"""
@@ -29,11 +57,11 @@ def get_business_by_user_id(db: Session, user_id: int) -> Optional[Business]:
         return user.business
     return None
 
-def create_product(db: Session, product_data: ProductCreate, user_id: int) -> Product:
+def create_product(db: Session, product_data: ProductCreate, user_id: int, business_id: int) -> Product:
     """Create a new product with proper currency conversion"""
     # Get the user's business to determine local currency
     business = get_business_by_user_id(db, user_id)
-    
+
     # Determine the business's local currency
     local_currency = 'USD'
     if business and business.currency_code:
@@ -75,7 +103,8 @@ def create_product(db: Session, product_data: ProductCreate, user_id: int) -> Pr
         original_price=local_price,             # Original local selling price
         original_cost_price=local_cost_price,   # Original local cost price
         original_currency_code=local_currency,
-        exchange_rate_at_creation=exchange_rate # Rate used (Local -> USD)
+        exchange_rate_at_creation=exchange_rate, # Rate used (Local -> USD)
+        business_id=business_id  # ← CRITICAL FIX: ADD BUSINESS_ID
     )
     db.add(db_product)
     db.commit()
@@ -137,15 +166,47 @@ def delete_product(db: Session, product_id: int):
         db.commit()
     return db_product
 
-def search_products(db: Session, query: str, skip: int = 0, limit: int = 100) -> List[Product]:
-    """Search products by name or description"""
-    return db.query(Product).filter(
+def search_products(db: Session, query: str, skip: int = 0, limit: int = 100, business_id: int = None) -> List[Product]:
+    """Search products by name or description, filtered by business_id if provided"""
+    base_query = db.query(Product).filter(
         (Product.name.ilike(f"%{query}%")) | (Product.description.ilike(f"%{query}%"))
-    ).offset(skip).limit(limit).all()
+    )
 
-def get_low_stock_products(db: Session) -> List[Product]:
-    """Get products that are below minimum stock level"""
-    return db.query(Product).filter(Product.stock_quantity <= Product.min_stock_level).all()
+    # ADD BUSINESS FILTERING
+    if business_id is not None:
+        base_query = base_query.filter(Product.business_id == business_id)
+
+    products = base_query.offset(skip).limit(limit).all()
+    
+    # 🎯 NEW: Add virtual business product numbers for search results
+    if business_id is not None and products:
+        business_products = db.query(Product.id).filter(Product.business_id == business_id).order_by(Product.created_at).all()
+        product_id_to_number = {product_id: idx + 1 for idx, (product_id,) in enumerate(business_products)}
+        
+        for product in products:
+            product.business_product_number = product_id_to_number.get(product.id, product.id)
+
+    return products
+
+def get_low_stock_products(db: Session, business_id: int = None) -> List[Product]:
+    """Get products that are below minimum stock level, filtered by business_id if provided"""
+    query = db.query(Product).filter(Product.stock_quantity <= Product.min_stock_level)
+
+    # ADD BUSINESS FILTERING
+    if business_id is not None:
+        query = query.filter(Product.business_id == business_id)
+
+    products = query.all()
+    
+    # 🎯 NEW: Add virtual business product numbers for low stock products
+    if business_id is not None and products:
+        business_products = db.query(Product.id).filter(Product.business_id == business_id).order_by(Product.created_at).all()
+        product_id_to_number = {product_id: idx + 1 for idx, (product_id,) in enumerate(business_products)}
+        
+        for product in products:
+            product.business_product_number = product_id_to_number.get(product.id, product.id)
+
+    return products
 
 def update_product_stock(db: Session, product_id: int, quantity_change: int) -> Optional[Product]:
     """Update product stock quantity"""

@@ -2,6 +2,7 @@ import React from 'react';
 import { PurchaseOrder } from '../../types';
 import { useSuppliers } from '../../hooks/useSuppliers';
 import { CurrencyDisplay } from '../CurrencyDisplay';
+import { useBusinessStore } from '../../hooks/useBusiness'; // ADD IMPORT
 
 interface PurchaseOrderListProps {
   purchaseOrders: PurchaseOrder[];
@@ -10,6 +11,18 @@ interface PurchaseOrderListProps {
 
 const PurchaseOrderList: React.FC<PurchaseOrderListProps> = ({ purchaseOrders, onViewDetail }) => {
   const { updatePoStatus } = useSuppliers();
+  const { business } = useBusinessStore(); // ADD BUSINESS STORE
+
+  // Get currency context from business store
+  const currencyContext = business?.currency_code ? {
+    originalAmount: 0,
+    originalCurrencyCode: business.currency_code,
+    exchangeRateAtCreation: 1
+  } : {
+    originalAmount: 0,
+    originalCurrencyCode: 'UGX', // Fallback currency
+    exchangeRateAtCreation: 1
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -97,7 +110,14 @@ const PurchaseOrderList: React.FC<PurchaseOrderListProps> = ({ purchaseOrders, o
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900"><CurrencyDisplay amount={po.total_amount} /></div>
+                <div className="text-sm text-gray-900">
+                  <CurrencyDisplay
+                    amount={po.total_amount}
+                    originalAmount={po.total_amount}
+                    originalCurrencyCode={currencyContext.originalCurrencyCode}
+                    exchangeRateAtCreation={currencyContext.exchangeRateAtCreation}
+                  />
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">

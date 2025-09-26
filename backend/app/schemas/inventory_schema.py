@@ -20,6 +20,8 @@ class InventoryHistory(InventoryHistoryBase):
     product_id: int
     product_name: str
     changed_by: int
+    business_inventory_number: Optional[int] = None                    # 🆕 ADD
+    business_id: Optional[int] = None                                  # 🆕 ADD
 
     class Config:
         from_attributes = True

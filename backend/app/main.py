@@ -61,3 +61,12 @@ async def startup_event():
 @app.get("/")
 def read_root():
     return {"message": "Bizzy POS System - Now with Advanced Analytics"}
+
+# Add a debug endpoint
+@app.get("/api/debug/report")
+def debug_report():
+    import inspect
+    from app.crud import report
+    # Get the source code of the function
+    source = inspect.getsource(report.get_financial_report)
+    return {"source": source}

@@ -9,6 +9,7 @@ class Sale(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)  # <-- ADD THIS
 
     # USD amounts for consistent internal reporting (REPURPOSED FIELDS)
     total_amount = Column(Float, default=0.0)          # USD amount
@@ -29,6 +30,7 @@ class Sale(Base):
     # Relationships (unchanged)
     user = relationship("User", back_populates="sales")
     customer = relationship("Customer", back_populates="sales")
+    business = relationship("Business", back_populates="sales")
     sale_items = relationship("SaleItem", back_populates="sale", cascade="all, delete-orphan")
     payments = relationship("Payment", back_populates="sale", cascade="all, delete-orphan")
     refunds = relationship("Refund", back_populates="sale")

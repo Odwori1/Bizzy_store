@@ -38,8 +38,8 @@ class Expense(Base):
 
     # Relationships
     category = relationship("ExpenseCategory")
-    user = relationship("User", backref="expenses")
-    business = relationship("Business")
+    user = relationship("User", backref="expenses", lazy="select")
+    business = relationship("Business", lazy="select")
 
     def __repr__(self):
         return f"<Expense {self.description}: {self.original_amount} {self.original_currency_code} >"

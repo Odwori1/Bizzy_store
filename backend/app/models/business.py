@@ -26,3 +26,4 @@ class Business(Base):
     currency = relationship("Currency")  # Relationship to Currency model
     # NEW 1:M relationship: A business has many users
     users = relationship("User", back_populates="business")
+    sales = relationship("Sale", back_populates="business")

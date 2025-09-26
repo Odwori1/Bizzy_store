@@ -1,0 +1,186 @@
+{
+    "summary": {
+        "total_products": 7,
+        "total_stock_value": 506.0916517787667,
+        "total_stock_value_original": 1357119.8,
+        "primary_currency": "USD",
+        "low_stock_items": 1,
+        "out_of_stock_items": 0,
+        "inventory_turnover": 2.5
+    },
+    "stock_movements": [
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "movement_type": "adjustment",
+            "quantity": -1,
+            "value": -1.421854642085183,
+            "value_original": -5000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366,
+            "date": "2025-09-16"
+        },
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "movement_type": "sale",
+            "quantity": -1,
+            "value": -1.421854642085183,
+            "value_original": -5000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366,
+            "date": "2025-09-16"
+        },
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "movement_type": "refund",
+            "quantity": 1,
+            "value": 1.421854642085183,
+            "value_original": 5000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366,
+            "date": "2025-09-16"
+        },
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "movement_type": "adjustment",
+            "quantity": -1,
+            "value": -1.421854642085183,
+            "value_original": -5000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366,
+            "date": "2025-09-16"
+        },
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "movement_type": "sale",
+            "quantity": -1,
+            "value": -1.421854642085183,
+            "value_original": -5000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366,
+            "date": "2025-09-16"
+        },
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "movement_type": "adjustment",
+            "quantity": -1,
+            "value": -1.421854642085183,
+            "value_original": -5000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366,
+            "date": "2025-09-15"
+        },
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "movement_type": "sale",
+            "quantity": -1,
+            "value": -1.421854642085183,
+            "value_original": -5000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366,
+            "date": "2025-09-15"
+        },
+        {
+            "product_id": 7,
+            "product_name": "cola cola",
+            "movement_type": "adjustment",
+            "quantity": -1,
+            "value": -0.28437,
+            "value_original": -1000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284,
+            "date": "2025-09-15"
+        },
+        {
+            "product_id": 7,
+            "product_name": "cola cola",
+            "movement_type": "sale",
+            "quantity": -1,
+            "value": -0.28437,
+            "value_original": -1000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284,
+            "date": "2025-09-15"
+        },
+        {
+            "product_id": 3,
+            "product_name": "Milk 1L",
+            "movement_type": "adjustment",
+            "quantity": -1,
+            "value": -2.14,
+            "value_original": -7500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285,
+            "date": "2025-09-15"
+        },
+        {
+            "product_id": 3,
+            "product_name": "Milk 1L",
+            "movement_type": "sale",
+            "quantity": -1,
+            "value": -2.14,
+            "value_original": -7500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285,
+            "date": "2025-09-15"
+        },
+        {
+            "product_id": 1,
+            "product_name": "Soda Can",
+            "movement_type": "adjustment",
+            "quantity": -1,
+            "value": -0.85,
+            "value_original": -3000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285,
+            "date": "2025-09-14"
+        },
+        {
+            "product_id": 1,
+            "product_name": "Soda Can",
+            "movement_type": "sale",
+            "quantity": -1,
+            "value": -0.85,
+            "value_original": -3000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285,
+            "date": "2025-09-14"
+        },
+        {
+            "product_id": 6,
+            "product_name": "Samsung Galaxy s24",
+            "movement_type": "adjustment",
+            "quantity": -1,
+            "value": -28.5,
+            "value_original": -100000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284590665256279,
+            "date": "2025-09-14"
+        },
+        {
+            "product_id": 6,
+            "product_name": "Samsung Galaxy s24",
+            "movement_type": "sale",
+            "quantity": -1,
+            "value": -28.5,
+            "value_original": -100000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284590665256279,
+            "date": "2025-09-14"
+        }
+    ],
+    "low_stock_alerts": [
+        {
+            "product_id": 10,
+            "product_name": "airpods",
+            "current_stock": 5,
+            "min_stock_level": 5
+        }
+    ]
+}

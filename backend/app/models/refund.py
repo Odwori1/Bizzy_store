@@ -9,6 +9,8 @@ class Refund(Base):
     id = Column(Integer, primary_key=True, index=True)
     sale_id = Column(Integer, ForeignKey("sales.id"))
     user_id = Column(Integer, ForeignKey("users.id"))  # The staff who processed the refund
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)  # 🆕 ADD THIS
+    business_refund_number = Column(Integer)  # 🆕 ADD THIS - per-business sequence
     reason = Column(Text, nullable=True)  # Reason for the refund
     total_amount = Column(Float)  # Total amount refunded (USD)
     # NEW: Currency context fields for historical preservation

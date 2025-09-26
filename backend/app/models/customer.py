@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, func
 from sqlalchemy.orm import relationship
 from .base import Base
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey  # ADD ForeignKey here
 
 class Customer(Base):
     __tablename__ = "customers"
@@ -14,6 +15,8 @@ class Customer(Base):
     total_spent = Column(Float, default=0.0)
     created_at = Column(DateTime, default=func.now())
     last_purchase = Column(DateTime, nullable=True)
+    # Add this line in the Customer class definition
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)
 
     # Relationships
     sales = relationship("Sale", back_populates="customer")

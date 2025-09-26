@@ -20,6 +20,26 @@ export interface TwoFactorRequiredResponse {
 // Create a union type for the login response
 export type LoginResponse = AuthResponse | TwoFactorRequiredResponse;
 
+// Interface for business registration
+export interface BusinessRegistrationData {
+  business_data: {
+    name: string;
+    currency_code: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    logo_url?: string;
+    tax_id?: string;
+    country?: string;
+    country_code?: string;
+  };
+  owner_data: {
+    email: string;
+    username: string;
+    password: string;
+  };
+}
+
 export const authService = {
   // Function returns the union type
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
@@ -37,6 +57,46 @@ export const authService = {
       return response.data;
     } catch (err) {
       console.error('Error during login:', err);
+      throw err;
+    }
+  },
+
+  // NEW: Token refresh method
+  refreshToken: async (): Promise<void> => {
+    const token = authService.getToken();
+    if (!token) {
+      throw new Error('No token available');
+    }
+    
+    try {
+      // Simple token validation - in a real app, you might call a refresh endpoint
+      // For now, we'll just validate the current token structure
+      const response = await api.get('/api/auth/verify-token');
+      console.log('Token refresh successful');
+      return response.data;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Business registration function
+  registerBusiness: async (businessData: { name: string; currency_code: string }, ownerData: { email: string; username: string; password: string }): Promise<AuthResponse> => {
+    console.log('authService.registerBusiness called with:', { businessData, ownerData });
+    try {
+      const response = await api.post<AuthResponse>('/api/auth/register/business', {
+        business_data: businessData,
+        owner_data: ownerData
+      });
+      console.log('Business registration response:', response.data);
+
+      // Store the token for immediate login
+      localStorage.setItem('auth_token', response.data.access_token);
+      console.log('Access token stored for new business owner');
+
+      return response.data;
+    } catch (err) {
+      console.error('Error during business registration:', err);
       throw err;
     }
   },

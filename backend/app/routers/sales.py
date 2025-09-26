@@ -37,7 +37,6 @@ def create_new_sale(
             detail="Failed to create sale"
         )
 
-# Get sales history - Requires sale:read permission
 @router.get("/", response_model=List[SaleSummary], dependencies=[Depends(requires_permission("sale:read"))])
 def read_sales(
     skip: int = 0,
@@ -48,26 +47,31 @@ def read_sales(
     current_user: dict = Depends(get_current_user)
 ):
     """Get sales history with optional date filtering (requires sale:read permission)"""
-    sales = get_sales(db, skip, limit, start_date, end_date)
+    # ADD THIS LINE to get business_id from the current user's token
+    business_id = current_user.get("business_id")
 
-    # Convert to summary format with user names
+    # UPDATE THIS LINE to pass business_id to get_sales
+    sales = get_sales(db, skip, limit, start_date, end_date, business_id)
+
+    # 🎯 FIX: Use the Sale objects directly (they already have virtual numbers from CRUD)
+    # Convert to summary format while preserving virtual numbers
     result = []
     for sale in sales:
-        result.append({
-            "id": sale.id,
-            "total_amount": sale.total_amount,
-            "tax_amount": sale.tax_amount,
-            "payment_status": sale.payment_status,
-            "created_at": sale.created_at,
-            "user_name": sale.user.username if sale.user else "Unknown",
-            "original_amount": sale.original_amount,
-            "original_currency": sale.original_currency,
-            "exchange_rate_at_sale": sale.exchange_rate_at_sale
-        })
+        result.append(SaleSummary(
+            id=sale.id,
+            business_sale_number=getattr(sale, 'business_sale_number', None),  # 🎯 PRESERVE VIRTUAL NUMBER
+            total_amount=sale.total_amount,
+            tax_amount=sale.tax_amount,
+            payment_status=sale.payment_status,
+            created_at=sale.created_at,
+            user_name=sale.user.username if sale.user else "Unknown",
+            original_amount=sale.original_amount,
+            original_currency=sale.original_currency,
+            exchange_rate_at_sale=sale.exchange_rate_at_sale
+        ))
 
     return result
 
-# Get detailed sale information - Requires sale:read permission
 @router.get("/{sale_id}", response_model=Sale, dependencies=[Depends(requires_permission("sale:read"))])
 def read_sale(
     sale_id: int,
@@ -75,7 +79,12 @@ def read_sale(
     current_user: dict = Depends(get_current_user)
 ):
     """Get detailed sale information (requires sale:read permission)"""
-    sale = get_sale(db, sale_id)
+    # ADD THIS LINE to get business_id from the current user's token
+    business_id = current_user.get("business_id")
+
+    # UPDATE THIS LINE to pass business_id to get_sale
+    sale = get_sale(db, sale_id, business_id)
+
     if not sale:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -83,7 +92,6 @@ def read_sale(
         )
     return sale
 
-# Get daily sales report - Requires sale:read permission (or report:view, but sale:read is more specific)
 @router.get("/reports/daily", response_model=DailySalesReport, dependencies=[Depends(requires_permission("sale:read"))])
 def get_daily_report(
     report_date: date = date.today(),
@@ -91,10 +99,13 @@ def get_daily_report(
     current_user: dict = Depends(get_current_user)
 ):
     """Get daily sales report (requires sale:read permission)"""
-    report = get_daily_sales_report(db, report_date)
+    # ADD THIS LINE to get business_id from the current user's token
+    business_id = current_user.get("business_id")
+    
+    # UPDATE THIS LINE to pass business_id to get_daily_sales_report
+    report = get_daily_sales_report(db, report_date, business_id)
     return report
 
-# Get sale with refunds - Requires sale:read permission
 @router.get("/{sale_id}/with-refunds", response_model=SaleWithRefunds, dependencies=[Depends(requires_permission("sale:read"))])
 def read_sale_with_refunds(
     sale_id: int,
@@ -102,7 +113,12 @@ def read_sale_with_refunds(
     current_user: dict = Depends(get_current_user)
 ):
     """Get detailed sale information including refund history (requires sale:read permission)"""
-    sale = get_sale(db, sale_id)
+    # ADD THIS LINE to get business_id from the current user's token
+    business_id = current_user.get("business_id")
+
+    # UPDATE THIS LINE to pass business_id to get_sale
+    sale = get_sale(db, sale_id, business_id)
+
     if not sale:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

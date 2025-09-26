@@ -5,9 +5,11 @@ from .base import Base
 
 class InventoryHistory(Base):
     __tablename__ = "inventory_history"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     product_id = Column(Integer, ForeignKey("products.id"))
+    business_id = Column(Integer, ForeignKey("businesses.id"))          # 🆕 ADD
+    business_inventory_number = Column(Integer)                         # 🆕 ADD
     change_type = Column(String(20))  # 'restock', 'sale', 'adjustment', 'damage'
     quantity_change = Column(Integer)  # Positive for restock, negative for sale
     previous_quantity = Column(Integer)
@@ -15,7 +17,8 @@ class InventoryHistory(Base):
     reason = Column(String(200), nullable=True)  # Optional reason for adjustment
     changed_by = Column(Integer, ForeignKey("users.id"))  # User who made the change
     changed_at = Column(DateTime, default=func.now())
-    
+
     # Relationships
     product = relationship("Product", backref="inventory_history")
     user = relationship("User")
+    business = relationship("Business")                                 # 🆕 ADD

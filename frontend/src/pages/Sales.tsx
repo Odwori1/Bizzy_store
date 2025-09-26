@@ -50,10 +50,21 @@ export default function Sales() {
     }
   };
 
+  // 🆕 FIXED: loadSaleDetails function - properly combine user name
   const loadSaleDetails = async (saleId: number) => {
     try {
+      // Get the sale from the current list to get user_name
+      const saleFromList = sales.find(s => s.id === saleId);
       const saleDetails = await salesService.getSale(saleId);
-      setSelectedSale(saleDetails);
+      
+      // 🆕 CRITICAL FIX: Properly combine data from both sources
+      const saleWithUser = {
+        ...saleDetails,
+        user_name: saleFromList?.user_name || 'Unknown', // Get from sales list
+        business_sale_number: saleFromList?.business_sale_number // Preserve virtual numbering
+      };
+      
+      setSelectedSale(saleWithUser);
       setShowDetailsModal(true);
     } catch (err: any) {
       console.error('Error loading sale details:', err);
@@ -162,10 +173,30 @@ export default function Sales() {
     }
   };
 
+  // Updated handleRefundClick function
   const handleRefundClick = async (saleId: number) => {
     try {
+      // Use the sale object directly from the loaded list to preserve virtual numbering
+      const saleFromList = sales.find(s => s.id === saleId);
+      if (!saleFromList) {
+        throw new Error('Sale not found in current list');
+      }
+
+      // Get minimal sale details needed for refund
       const saleDetails = await salesService.getSale(saleId);
-      setSelectedSaleForRefund(saleDetails);
+
+      // Combine virtual numbering with full details
+      const saleForRefund = {
+        ...saleDetails,
+        business_sale_number: saleFromList.business_sale_number,
+        // Ensure all required fields are present
+        sale_items: saleDetails.sale_items || [],
+        payments: saleDetails.payments || [],
+        original_currency: saleDetails.original_currency || saleFromList.original_currency,
+        exchange_rate_at_sale: saleDetails.exchange_rate_at_sale || saleFromList.exchange_rate_at_sale
+      };
+
+      setSelectedSaleForRefund(saleForRefund);
       setRefundModalOpen(true);
     } catch (err: any) {
       console.error('Error loading sale for refund:', err);
@@ -300,7 +331,9 @@ export default function Sales() {
             ) : (
               filteredSales.map((sale) => (
                 <tr key={sale.id} className="border-b hover:bg-gray-50">
-                  <td className="p-2 font-medium">#{sale.id}</td>
+                  <td className="p-2 font-medium">
+                    Sale #{sale.business_sale_number}  {/* 🎯 USE VIRTUAL NUMBER */}
+                  </td>
                   <td className="p-2">{format(new Date(sale.created_at), 'MMM dd, yyyy HH:mm')}</td>
                   <td className="p-2">{sale.user_name || 'Unknown'}</td>
                   <td className="p-2">
@@ -354,7 +387,10 @@ export default function Sales() {
           <div className="bg-white rounded-lg p-6 w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Sale Details #{selectedSale.id}</h2>
+              <h2 className="text-2xl font-bold">
+                {/* 🎯 USE VIRTUAL NUMBER */}
+                Sale Details #{selectedSale.business_sale_number}
+              </h2>
               <button
                 onClick={() => setShowDetailsModal(false)}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -372,7 +408,7 @@ export default function Sales() {
                   {format(new Date(selectedSale.created_at), 'PPP pp')}
                 </p>
                 <p>
-                  <strong>User:</strong> {selectedSale.user_name || 'Unknown'}
+                  <strong>User:</strong> {selectedSale.user_name || 'Unknown'} {/* 🆕 FIXED: Now shows correct user */}
                 </p>
                 <p>
                   <strong>Status:</strong>{' '}
@@ -430,9 +466,7 @@ export default function Sales() {
                   <tr className="border-b bg-gray-50">
                     <th className="p-2 text-left">Product</th>
                     <th className="p-2 text-left">Quantity</th>
-                    {/* Fix for unit price: use item.unit_price with exchange rate */}
                     <th className="p-2 text-left">Unit Price</th>
-                    {/* Fix for subtotal: use item.subtotal with exchange rate */}
                     <th className="p-2 text-left">Subtotal</th>
                   </tr>
                 </thead>
@@ -441,20 +475,22 @@ export default function Sales() {
                     <tr key={index} className="border-b">
                       <td className="p-2">{item.product_name}</td>
                       <td className="p-2">{item.quantity}</td>
-                      {/* Fix for unit price: add exchangeRateAtCreation */}
-                      <CurrencyDisplay
-                        amount={item.unit_price}
-                        originalAmount={item.original_unit_price}
-                        originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
-                        exchangeRateAtCreation={item.exchange_rate_at_creation || selectedSale.exchange_rate_at_sale}
-                      />
-                      {/* Fix for subtotal: add exchangeRateAtCreation */}
-                      <CurrencyDisplay
-                        amount={item.subtotal}
-                        originalAmount={item.original_subtotal}
-                        originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
-                        exchangeRateAtCreation={item.exchange_rate_at_creation || selectedSale.exchange_rate_at_sale}
-                      />
+                      <td className="p-2">
+                        <CurrencyDisplay
+                          amount={item.unit_price}
+                          originalAmount={item.original_unit_price}
+                          originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
+                          exchangeRateAtCreation={item.exchange_rate_at_creation || selectedSale.exchange_rate_at_sale}
+                        />
+                      </td>
+                      <td className="p-2">
+                        <CurrencyDisplay
+                          amount={item.subtotal}
+                          originalAmount={item.original_subtotal}
+                          originalCurrencyCode={selectedSale.original_currency || business?.currency_code}
+                          exchangeRateAtCreation={item.exchange_rate_at_creation || selectedSale.exchange_rate_at_sale}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -477,17 +513,19 @@ export default function Sales() {
                   {selectedSale.payments.map((payment, index) => (
                     <tr key={index} className="border-b">
                       <td className="p-2 capitalize">{payment.payment_method}</td>
-                      {/* Fix: use exchange rate for original amount */}
-                      <CurrencyDisplay
-                        amount={payment.amount}
-                        originalAmount={payment.original_amount}
-                        originalCurrencyCode={payment.original_currency_code}
-                        exchangeRateAtCreation={payment.exchange_rate_at_payment}
-                        preserveOriginal={true}
-                      />
-                      {/* Payment status badge */}
-                      <td className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
-                        {payment.status}
+                      <td className="p-2">
+                        <CurrencyDisplay
+                          amount={payment.amount}
+                          originalAmount={payment.original_amount}
+                          originalCurrencyCode={payment.original_currency_code}
+                          exchangeRateAtCreation={payment.exchange_rate_at_payment}
+                          preserveOriginal={true}
+                        />
+                      </td>
+                      <td className="p-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
+                          {payment.status}
+                        </span>
                       </td>
                       <td className="p-2">{payment.transaction_id || 'N/A'}</td>
                     </tr>

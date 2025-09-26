@@ -1,7 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useInventory } from '../hooks/useInventory';
-import { InventoryAdjustment } from '../types';
+import { InventoryAdjustment, InventoryHistory } from '../types';
 import BackButton from '../components/BackButton';
+
+// 🆕 CORRECTED function to get display number for inventory history
+const getInventoryDisplayNumber = (history: InventoryHistory) => {
+  // For MANUAL adjustments/restocks with virtual numbers, show "Adjustment #X"
+  if ((history.change_type === 'adjustment' || history.change_type === 'restock') && 
+      history.business_inventory_number) {
+    return `Adjustment #${history.business_inventory_number}`;
+  }
+  // For everything else (sales, refunds, old records), show global ID
+  return `#${history.id}`;
+};
+
+// 🆕 CORRECTED function to format reason - extract and display proper sale/refund numbers
+const formatReason = (history: InventoryHistory) => {
+  if (!history.reason) return '-';
+  
+  // Clean double ## patterns first
+  let formattedReason = history.reason.replace(/#\s*#/g, '#');
+  
+  // Extract sale/refund numbers from the reason text and format properly
+  const saleMatch = formattedReason.match(/Sale\s*#?\s*(\d+)/);
+  const refundMatch = formattedReason.match(/Refund\s*#?\s*(\d+)/);
+  
+  if (saleMatch) {
+    // Replace with properly formatted "Sale #X"
+    formattedReason = formattedReason.replace(/Sale\s*#?\s*\d+/, `Sale #${saleMatch[1]}`);
+  }
+  
+  if (refundMatch) {
+    // Replace with properly formatted "Refund #X" 
+    formattedReason = formattedReason.replace(/Refund\s*#?\s*\d+/, `Refund #${refundMatch[1]}`);
+  }
+  
+  return formattedReason;
+};
 
 export default function Inventory() {
   const {
@@ -113,8 +148,8 @@ export default function Inventory() {
               </thead>
               <tbody>
                 {stockLevels.map(item => (
-                  <tr 
-                    key={item.product_id} 
+                  <tr
+                    key={item.product_id}
                     className="border-b hover:bg-gray-50 cursor-pointer"
                     onClick={() => handleProductFilter(item.product_id)}
                   >
@@ -123,8 +158,8 @@ export default function Inventory() {
                     <td className="px-4 py-2">{item.min_stock_level}</td>
                     <td className="px-4 py-2">
                       <span className={`px-2 py-1 rounded text-xs ${
-                        item.needs_restock 
-                          ? 'bg-red-100 text-red-800' 
+                        item.needs_restock
+                          ? 'bg-red-100 text-red-800'
                           : 'bg-green-100 text-green-800'
                       }`}>
                         {item.needs_restock ? 'Needs Restock' : 'OK'}
@@ -224,6 +259,7 @@ export default function Inventory() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-2 text-left">Adjustment #</th>
                 <th className="px-4 py-2 text-left">Product</th>
                 <th className="px-4 py-2 text-left">Type</th>
                 <th className="px-4 py-2 text-left">Change</th>
@@ -236,13 +272,18 @@ export default function Inventory() {
             <tbody>
               {inventoryHistory.map(history => (
                 <tr key={history.id} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-2 font-mono text-sm">
+                    {getInventoryDisplayNumber(history)}
+                  </td>
                   <td className="px-4 py-2">{history.product_name || `Product ${history.product_id}`}</td>
                   <td className="px-4 py-2">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      history.change_type === 'restock' 
+                      history.change_type === 'restock'
                         ? 'bg-green-100 text-green-800'
                         : history.change_type === 'sale'
                         ? 'bg-blue-100 text-blue-800'
+                        : history.change_type === 'refund'
+                        ? 'bg-purple-100 text-purple-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
                       {history.change_type}
@@ -255,7 +296,7 @@ export default function Inventory() {
                   </td>
                   <td className="px-4 py-2">{history.previous_quantity}</td>
                   <td className="px-4 py-2">{history.new_quantity}</td>
-                  <td className="px-4 py-2">{history.reason || '-'}</td>
+                  <td className="px-4 py-2">{formatReason(history)}</td>
                   <td className="px-4 py-2">
                     {new Date(history.changed_at).toLocaleString()}
                   </td>

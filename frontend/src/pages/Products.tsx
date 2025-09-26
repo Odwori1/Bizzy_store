@@ -55,7 +55,7 @@ const Products: React.FC = () => {
     }
   };
 
-  const handleDeleteProduct = async (productId: int) => {
+  const handleDeleteProduct = async (productId: number) => {
     if (!window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
       return;
     }
@@ -157,7 +157,9 @@ const Products: React.FC = () => {
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        #{product.business_product_number || product.id} - {product.name} {/* 🎯 USE VIRTUAL NUMBER */}
+                      </div>
                       {product.description && (
                         <div className="text-sm text-gray-500">{product.description}</div>
                       )}

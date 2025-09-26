@@ -33,10 +33,44 @@ def create_user(db: Session, user: UserCreate):
     db.refresh(db_user)
     return db_user
 
-def get_all_users(db: Session, skip: int = 0, limit: int = 100):
-    """Get all users from the database, eager loading their roles."""
-    # Eager load the roles relationship to access the role_name property
-    return db.query(User).options(joinedload(User.roles)).offset(skip).limit(limit).all()
+def create_user_with_business(db: Session, user: UserCreate, business_id: int):
+    """
+    Create a new user and associate them with a business.
+    This is the function that should be used when an existing user creates a new user.
+    """
+    # Check if email already exists (keep existing validation)
+    db_user_by_email = get_user_by_email(db, email=user.email)
+    if db_user_by_email:
+        raise ValueError("Email already registered") # We'll let the route handle the HTTPException
+
+    # Check if username already exists (keep existing validation)
+    db_user_by_username = get_user_by_username(db, username=user.username)
+    if db_user_by_username:
+        raise ValueError("Username already taken") # We'll let the route handle the HTTPException
+
+    hashed_password = pwd_context.hash(user.password)
+    # CREATE THE USER WITH THE business_id
+    db_user = User(
+        email=user.email,
+        username=user.username,
+        hashed_password=hashed_password,
+        is_active=True,
+        business_id=business_id  # <-- THIS IS THE CRITICAL LINE
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def get_all_users(db: Session, skip: int = 0, limit: int = 100, business_id: int = None):
+    """Get all users from the database, filtered by business_id if provided"""
+    query = db.query(User).options(joinedload(User.roles))
+    
+    # ADD BUSINESS FILTERING - Only return users from the specified business
+    if business_id is not None:
+        query = query.filter(User.business_id == business_id)
+    
+    return query.offset(skip).limit(limit).all()
 
 def update_user(db: Session, user_id: int, user_update):
     """
@@ -96,7 +130,7 @@ def delete_user(db: Session, user_id: int):
         synchronize_session=False
     )
 
-    db.query(Business).filter(Business.user_id == user_id).delete()
+    # db.query(Business).filter(Business.user_id == user_id).delete()
     db.delete(db_user)
     db.commit()
     return True

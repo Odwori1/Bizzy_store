@@ -7,6 +7,7 @@ import BackButton from '../components/BackButton';
 import { twoFactorService, TwoFactorStatusResponse } from '../services/twoFactor';
 import TwoFactorSetupModal from '../components/TwoFactorSetupModal';
 // NEW: Import roles service and types
+import UserForm from "../components/UserForm";
 import { rolesService, Role } from '../services/roles';
 // END NEW
 

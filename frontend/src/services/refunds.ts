@@ -8,6 +8,12 @@ export const refundsService = {
     return response.data;
   },
 
+  // Get all refunds for current business - NEW METHOD
+  getRefunds: async (): Promise<Refund[]> => {
+    const response = await api.get<Refund[]>('/api/refunds/');
+    return response.data;
+  },
+
   // Get refunds for a specific sale
   getRefundsBySale: async (saleId: number): Promise<Refund[]> => {
     const response = await api.get<Refund[]>(`/api/refunds/sale/${saleId}`);
