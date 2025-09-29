@@ -15,7 +15,7 @@ import { rolesService, Role } from '../services/roles';
 
 // Main Page Component
 const UserManagement: React.FC = () => {
-  const { users, isLoading, error, fetchUsers, createUser, deleteUser, toggleUserStatus, clearError } = useUsersStore();
+  const { users, isLoading, error, fetchUsers, createUser, deleteUser, clearError } = useUsersStore();
   const { user: currentUser, hasPermission } = useAuthStore();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
@@ -74,7 +74,8 @@ const UserManagement: React.FC = () => {
 
   const handleToggleStatus = (user: User) => {
     if (window.confirm(`Are you sure you want to ${user.is_active ? 'disable' : 'enable'} user "${user.username}"?`)) {
-      toggleUserStatus(user.id).catch(console.error);
+// TODO: Implement toggleUserStatus function\n//      // TODO: Implement toggleUserStatus function
+        // toggleUserStatus(user.id).catch(console.error);
     }
   };
 

@@ -1,3 +1,0 @@
-[alembic]
-script_location = /home/odwori/Bizzy_store/backend/alembic
-sqlalchemy.url = postgresql://pos_user:0791486006@localhost/bizzy_pos_db

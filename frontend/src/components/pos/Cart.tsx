@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CartItem } from '../../types';
 import { CurrencyDisplay } from '../CurrencyDisplay';
 
@@ -23,136 +23,165 @@ const Cart: React.FC<CartProps> = ({
   onCheckout,
   onClearCart
 }) => {
+  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+  
   // Get currency context from the first item
   const currencyContext = items[0]?.original_currency_code ? {
     originalAmount: items[0].original_unit_price,
     originalCurrencyCode: items[0].original_currency_code,
-    exchangeRateAtCreation: items[0].product.exchange_rate_at_creation
+    exchangeRateAtCreation: items[0].product?.exchange_rate_at_creation
   } : undefined;
 
-  // DEBUG: Check what values are being passed to CurrencyDisplay
-  console.log('CART TOTALS DEBUG:', {
-    subtotal: total,
-    tax,
-    grandTotal,
-    currencyContext
-  });
-
-  // DEBUG: Check individual items
-  console.log('CART ITEMS DEBUG:', {
-    items: items.map(item => ({
-      name: item.product_name,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      original_unit_price: item.original_unit_price,
-      currency: item.original_currency_code,
-      exchange_rate: item.product.exchange_rate_at_creation
-    }))
-  });
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      {/* Cart Items */}
-      <div className="space-y-2">
-        {items.map((item) => (
-          <div key={item.product.id} className="flex justify-between items-center border-b pb-2">
-            <div className="flex-1">
-              <div className="font-medium">{item.product.name}</div>
-              <div className="text-sm text-gray-500">
-                <CurrencyDisplay
-                  amount={item.unit_price}
-                  originalAmount={item.original_unit_price}
-                  originalCurrencyCode={item.original_currency_code}
-                  exchangeRateAtCreation={item.product.exchange_rate_at_creation}
-                />
+    <div className="bg-white rounded-lg shadow-md p-4 max-h-[80vh] overflow-y-auto">
+      {/* Cart Items with professional layout */}
+      <div className="space-y-3 max-w-full">
+        {items.map((item) => {
+          const productName = item.product?.name || item.product_name || 'Unknown Product';
+          const isHovered = hoveredProduct === item.product_id;
+          
+          return (
+            <div 
+              key={item.product.id} 
+              className="flex justify-between items-start gap-2 border-b pb-3 min-w-0"
+              onMouseEnter={() => setHoveredProduct(item.product_id)}
+              onMouseLeave={() => setHoveredProduct(null)}
+            >
+              {/* Product Info - Professional truncation with tooltip */}
+              <div className="flex-1 min-w-0 max-w-[140px]">
+                <div className="relative group">
+                  {/* Truncated product name */}
+                  <div 
+                    className="font-medium text-sm truncate text-gray-900"
+                  >
+                    {productName}
+                  </div>
+                  
+                  {/* Tooltip on hover */}
+                  {isHovered && (
+                    <div className="absolute z-10 left-0 top-full mt-1 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+                      {productName}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Unit price - always visible */}
+                <div className="text-xs text-gray-500 truncate mt-1">
+                  <CurrencyDisplay
+                    amount={item.unit_price}
+                    originalAmount={item.original_unit_price}
+                    originalCurrencyCode={item.original_currency_code}
+                    exchangeRateAtCreation={item.product?.exchange_rate_at_creation}
+                  />
+                </div>
+              </div>
+
+              {/* Quantity Controls and Price - Optimized spacing */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {/* Quantity Controls */}
+                <div className="flex items-center gap-1 mr-2">
+                  <button
+                    onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
+                    className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded text-xs hover:bg-gray-300 disabled:opacity-50"
+                    disabled={item.quantity <= 1}
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
+                    className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded text-xs hover:bg-gray-300"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Price - Ensure it doesn't overflow */}
+                <span className="text-sm font-medium min-w-[85px] text-right whitespace-nowrap">
+                  <CurrencyDisplay
+                    amount={item.subtotal}
+                    originalAmount={item.original_unit_price ? item.original_unit_price * item.quantity : undefined}
+                    originalCurrencyCode={item.original_currency_code}
+                    exchangeRateAtCreation={item.product?.exchange_rate_at_creation}
+                  />
+                </span>
+
+                {/* Remove Button */}
+                <button
+                  onClick={() => onRemoveItem(item.product.id)}
+                  className="w-6 h-6 flex items-center justify-center bg-red-100 text-red-600 rounded text-sm hover:bg-red-200 ml-1"
+                  title="Remove item"
+                >
+                  ×
+                </button>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
-                className="px-2 py-1 bg-gray-200 rounded"
-                disabled={item.quantity <= 1}
-              >
-                -
-              </button>
-              <span className="w-8 text-center">{item.quantity}</span>
-              <button
-                onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
-                className="px-2 py-1 bg-gray-200 rounded"
-              >
-                +
-              </button>
-              <span className="w-16 text-right">
+          );
+        })}
+      </div>
+
+      {/* Totals Section - unchanged */}
+      {items.length > 0 && (
+        <>
+          <div className="mt-4 space-y-2 pt-2 border-t">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal:</span>
+              <span className="font-medium whitespace-nowrap min-w-[100px] text-right">
                 <CurrencyDisplay
-                  amount={item.subtotal}
-                  originalAmount={item.original_unit_price ? item.original_unit_price * item.quantity : undefined}
-                  originalCurrencyCode={item.original_currency_code}
-                  exchangeRateAtCreation={item.product.exchange_rate_at_creation}
+                  amount={total}
+                  originalAmount={total}
+                  originalCurrencyCode={currencyContext?.originalCurrencyCode}
+                  exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
                 />
               </span>
-              <button
-                onClick={() => onRemoveItem(item.product.id)}
-                className="px-2 py-1 bg-red-500 text-white rounded"
-              >
-                ×
-              </button>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Tax:</span>
+              <span className="font-medium whitespace-nowrap min-w-[100px] text-right">
+                <CurrencyDisplay
+                  amount={tax}
+                  originalAmount={tax}
+                  originalCurrencyCode={currencyContext?.originalCurrencyCode}
+                  exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
+                />
+              </span>
+            </div>
+            <div className="flex justify-between font-bold text-lg border-t pt-2">
+              <span>Total:</span>
+              <span className="whitespace-nowrap min-w-[100px] text-right">
+                <CurrencyDisplay
+                  amount={grandTotal}
+                  originalAmount={grandTotal}
+                  originalCurrencyCode={currencyContext?.originalCurrencyCode}
+                  exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
+                />
+              </span>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Totals */}
-      <div className="mt-4 space-y-1">
-        <div className="flex justify-between">
-          <span>Subtotal:</span>
-          <span>
-            <CurrencyDisplay
-              amount={total}
-              originalAmount={total}
-              originalCurrencyCode={currencyContext?.originalCurrencyCode}
-              exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
-            />
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span>Tax:</span>
-          <span>
-            <CurrencyDisplay
-              amount={tax}
-              originalAmount={tax}
-              originalCurrencyCode={currencyContext?.originalCurrencyCode}
-              exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
-            />
-          </span>
-        </div>
-        <div className="flex justify-between font-bold text-lg border-t pt-2">
-          <span>Total:</span>
-          <span>
-            <CurrencyDisplay
-              amount={grandTotal}
-              originalAmount={grandTotal}
-              originalCurrencyCode={currencyContext?.originalCurrencyCode}
-              exchangeRateAtCreation={currencyContext?.exchangeRateAtCreation}
-            />
-          </span>
-        </div>
-      </div>
+          {/* Action Buttons */}
+          <div className="mt-4 space-y-2">
+            <button
+              onClick={onCheckout}
+              className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 text-sm font-medium"
+            >
+              Process Sale
+            </button>
+            <button
+              onClick={onClearCart}
+              className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 text-sm font-medium"
+            >
+              Clear Cart
+            </button>
+          </div>
+        </>
+      )}
 
-      {/* Action Buttons */}
-      {items.length > 0 && (
-        <div className="mt-4 space-y-2">
-          <button
-            onClick={onCheckout}
-            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
-          >
-            Process Sale
-          </button>
-          <button
-            onClick={onClearCart}
-            className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
-          >
-            Clear Cart
-          </button>
+      {/* Empty State */}
+      {items.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <div className="text-4xl mb-2">🛒</div>
+          <p className="text-sm">Your cart is empty</p>
         </div>
       )}
     </div>

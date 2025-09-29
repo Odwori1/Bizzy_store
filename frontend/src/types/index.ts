@@ -3,62 +3,65 @@ export interface User {
   id: number;
   email: string;
   username: string;
-  // REMOVED: role: 'admin' | 'manager' | 'cashier';
-  // ADDED: The new permissions array from the backend
   permissions: string[];
   is_active: boolean;
   created_at: string;
   role_name?: string;
+  business_id?: number;
 }
 
 export interface UserCreate {
   email: string;
   username: string;
   password: string;
-  role: string; // This will likely need to change based on backend API
+  role: string;
 }
 
 // Product Types
 export interface Product {
-  id: number
-  name: string
-  description?: string
-  price: number
-  cost_price: number
-  barcode: string
-  stock_quantity: number
-  min_stock_level: number
-  created_at: string
-  updated_at?: string
-  last_restocked?: string
-  // NEW: Historical currency context fields
-  original_price?: number;         // Local currency amount (PRESERVED)
-  original_cost_price?: number;    // Local currency cost (PRESERVED)
-  original_currency_code?: string; // Currency code (e.g., "UGX")
-  exchange_rate_at_creation?: number; // Rate used for conversion
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  cost_price: number;
+  barcode: string;
+  stock_quantity: number;
+  min_stock_level: number;
+  created_at: string;
+  updated_at?: string;
+  last_restocked?: string;
+  business_id: number;
+  business_product_number?: number;
+  
+  // Historical currency context fields
+  original_price?: number;
+  original_cost_price?: number;
+  original_currency_code?: string;
+  exchange_rate_at_creation?: number;
 }
 
 export interface ProductCreate {
-  name: string
-  description?: string
-  price: number
-  cost_price: number  // Make sure this is included
-  barcode: string
-  stock_quantity: number
-  min_stock_level: number
+  name: string;
+  description?: string;
+  price: number;
+  cost_price: number;
+  barcode: string;
+  stock_quantity: number;
+  min_stock_level: number;
+  business_id: number;
 }
 
 // POS Cart Types
 export interface CartItem {
   product_id: number;
   product_name: string;
-  product: Product; // Full product object
+  product: Product;
   quantity: number;
-  unit_price: number; // Local currency price for display
-  original_unit_price?: number; // Original local price for context
-  original_currency_code?: string; // Currency context
-  subtotal: number; // Local currency subtotal
-  exchange_rate_at_creation?: number; // ADD THIS LINE - Historical rate for conversion
+  unit_price: number;
+  original_unit_price?: number;
+  original_currency_code?: string;
+  subtotal: number;
+  exchange_rate_at_creation?: number;
 }
 
 export interface Cart {
@@ -76,32 +79,48 @@ export interface PaymentRequest {
   transaction_id?: string;
 }
 
-// Sale Types
+// Sale Types - CORRECTED TO MATCH BACKEND
 export interface Sale {
-  id: number
-  user_id: number
-  business_sale_number: number; // 🆕 ADD THIS
-  total_amount: number
-  tax_amount: number
-  payment_status: 'pending' | 'completed' | 'refunded'
-  created_at: string
-  sale_items: SaleItem[]
-  payments: Payment[]
-  //user_name?: string
-  refunds?: Refund[]; // Add optional refunds array
+  id: number;
+  user_id: number;
+  business_id: number;
+  business_sale_number: number;
+  total_amount: number;
+  tax_amount: number;
+  payment_status: 'pending' | 'completed' | 'refunded';
+  created_at: string;
+  
+  // Local currency context (MISSING PROPERTIES ADDED)
+  original_amount: number;
+  original_currency: string;
+  exchange_rate_at_sale: number;
+  usd_amount: number;
+  usd_tax_amount: number;
+  customer_id?: number;
+  
+  // Relationships
+  sale_items: SaleItem[];
+  payments: Payment[];
+  refunds?: Refund[];
+  user_name?: string;
 }
 
 export interface SaleItem {
-  id: number
-  product_id: number
-  quantity: number
-  unit_price: number
-  subtotal: number
-  product_name?: string
-  // Add historical context fields
-  original_unit_price?: number    // Local currency amount (from backend)
-  original_subtotal?: number      // Local currency amount (from backend)
-  exchange_rate_at_creation?: number  // Historical exchange rate (from backend)
+  id: number;
+  sale_id: number;
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  
+  // Local currency context (MISSING PROPERTIES ADDED)
+  refunded_quantity: number;
+  original_unit_price: number;
+  original_subtotal: number;
+  exchange_rate_at_creation: number;
+  
+  product_name?: string;
+  product: Product;
 }
 
 export interface SaleSummary {
@@ -118,36 +137,34 @@ export interface SaleSummary {
 }
 
 export interface Payment {
-  id: number
-  amount: number
-  payment_method: 'cash' | 'card' | 'mobile_money'
-  transaction_id?: string
-  status: 'pending' | 'completed' | 'failed'
-  created_at: string
-
-  // ADD these fields to match backend reality:
-  original_amount?: number;    // Local currency amount (same as amount)
-  original_currency?: string;  // Currency code (e.g., "UGX")
-  exchange_rate_at_payment?: number; // Historical rate
+  id: number;
+  amount: number;
+  payment_method: 'cash' | 'card' | 'mobile_money';
+  transaction_id?: string;
+  status: 'pending' | 'completed' | 'failed';
+  created_at: string;
+  original_amount?: number;
+  original_currency?: string;
+  exchange_rate_at_payment?: number;
 }
 
 export interface SaleCreate {
-  user_id: number
-  sale_items: SaleItemCreate[]
-  payments: PaymentCreate[]
-  tax_rate: number
+  user_id: number;
+  sale_items: SaleItemCreate[];
+  payments: PaymentCreate[];
+  tax_rate: number;
 }
 
 export interface SaleItemCreate {
-  product_id: number
-  quantity: number
-  unit_price: number
+  product_id: number;
+  quantity: number;
+  unit_price: number;
 }
 
 export interface PaymentCreate {
-  amount: number
-  payment_method: 'cash' | 'card' | 'mobile_money'
-  transaction_id?: string
+  amount: number;
+  payment_method: 'cash' | 'card' | 'mobile_money';
+  transaction_id?: string;
 }
 
 export interface Business {
@@ -158,37 +175,53 @@ export interface Business {
   email?: string;
   tax_id?: string;
   logo_url?: string;
-  currency_code?: string; // NEW
-  country?: string; // NEW
-  country_code?: string; // NEW
+  currency_code?: string;
+  country?: string;
+  country_code?: string;
 }
 
 // Inventory Types
 export interface InventoryHistory {
-  id: number
-  product_id: number
-  change_type: string
-  quantity_change: number
-  previous_quantity: number
-  new_quantity: number
-  reason?: string
-  changed_by: number
-  changed_at: string
-  product_name?: string
-  business_inventory_number?: number  // 🆕 ADD
-  business_id?: number                // 🆕 ADD
+  id: number;
+  product_id: number;
+  change_type: string;
+  quantity_change: number;
+  previous_quantity: number;
+  new_quantity: number;
+  reason?: string;
+  changed_by: number;
+  changed_at: string;
+  product_name?: string;
+  business_inventory_number?: number;
+  business_id?: number;
 }
 
 export interface InventoryAdjustment {
-  product_id: number
-  quantity_change: number
-  reason?: string
+  product_id: number;
+  quantity_change: number;
+  reason?: string;
+}
+
+// MISSING TYPES ADDED
+export interface LowStockAlert {
+  product_id: number;
+  product_name: string;
+  current_stock: number;
+  min_stock_level: number;
+}
+
+export interface StockLevel {
+  product_id: number;
+  product_name: string;
+  current_stock: number;
+  min_stock_level: number;
+  needs_restock: boolean;
 }
 
 // Report Types - UPDATED FOR DUAL CURRENCY
 export interface SalesSummary {
-  total_sales: number;           // USD amount
-  total_sales_original: number;  // Local currency amount (PRESERVED)
+  total_sales: number;
+  total_sales_original: number;
   total_tax: number;
   total_transactions: number;
   average_transaction_value: number;
@@ -200,15 +233,15 @@ export interface TopProduct {
   product_id: number;
   product_name: string;
   quantity_sold: number;
-  total_revenue: number;         // USD amount
-  total_revenue_original: number; // Local currency amount (PRESERVED)
+  total_revenue: number;
+  total_revenue_original: number;
   profit_margin: number;
 }
 
 export interface SalesTrend {
   date: string;
-  daily_sales: number;           // USD amount
-  daily_sales_original: number;  // Local currency amount (PRESERVED)
+  daily_sales: number;
+  daily_sales_original: number;
   transactions: number;
   average_order_value: number;
 }
@@ -223,6 +256,24 @@ export interface SalesReport {
   };
 }
 
+// MISSING REPORT TYPES ADDED
+export interface InventoryReport {
+  // Define based on your backend needs
+  summary: any;
+  low_stock_items: LowStockAlert[];
+}
+
+export interface FinancialReport {
+  // Define based on your backend needs
+  revenue: number;
+  expenses: number;
+  profit: number;
+}
+
+//export interface ReportFormat {
+  //format: 'pdf' | 'excel' | 'csv';
+//}
+
 // Additional Report and Dashboard Types
 export interface DashboardMetrics {
   sales_today: SalesSummary;
@@ -234,6 +285,8 @@ export interface DashboardMetrics {
     gross_margin: number;
     tax_collected: number;
     net_profit: number;
+    total_revenue_original?: number;
+    exchange_rate?: number;
   };
   timestamp: string;
 }
@@ -270,10 +323,10 @@ export interface Activity {
   id: number;
   type: 'sale' | 'inventory' | 'expense' | 'user' | 'system';
   description: string;
-  amount?: number;                 // Local amount
-  currency_code?: string;          // Currency code
-  exchange_rate?: number;          // Historical rate
-  usd_amount?: number;             // USD amount
+  amount?: number;
+  currency_code?: string;
+  exchange_rate?: number;
+  usd_amount?: number;
   product_id?: number;
   user_id?: number;
   username?: string;
@@ -288,7 +341,7 @@ export interface CustomerPurchaseHistory {
   items: string[];
 }
 
-// Refund Types
+// Refund Types - CORRECTED TO MATCH BACKEND
 export interface RefundItem {
   id: number;
   sale_item_id: number;
@@ -300,10 +353,16 @@ export interface Refund {
   id: number;
   sale_id: number;
   user_id: number;
-  business_id: number; // 🆕 ADD THIS
-  business_refund_number: number; // 🆕 ADD THIS
+  business_id: number;
+  business_refund_number: number;
   reason: string | null;
   total_amount: number;
+  
+  // MISSING PROPERTIES ADDED
+  original_amount: number;
+  original_currency: string;
+  exchange_rate_at_refund: number;
+  
   status: string;
   created_at: string;
   refund_items: RefundItem[];
@@ -417,7 +476,7 @@ export interface CurrencyConversion {
   converted_amount: number;
 }
 
-// Expense Types
+// Expense Types - CORRECTED TO MATCH BACKEND
 export interface ExpenseCategory {
   id: number;
   name: string;
@@ -428,7 +487,12 @@ export interface ExpenseCategory {
 export interface Expense {
   id: number;
   amount: number;
-  currency_code: string;
+  
+  // MISSING PROPERTIES ADDED
+  original_amount: number;
+  original_currency_code: string;
+  exchange_rate: number;
+  
   description: string;
   category_id: number;
   business_id: number;
@@ -451,9 +515,49 @@ export interface ExpenseCreate {
   is_recurring?: boolean;
   recurrence_interval?: string;
   receipt_url?: string;
+  
+  // MISSING PROPERTIES ADDED
+  original_amount: number;
+  original_currency_code: string;
 }
 
 export interface ExpenseCategoryCreate {
   name: string;
   description?: string;
+}
+
+// MISSING TYPES FOR SERVICES
+export interface BusinessCreate {
+  name: string;
+  currency_code: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  logo_url?: string;
+  tax_id?: string;
+  country?: string;
+  country_code?: string;
+}
+
+// Barcode scanning types
+export interface BarcodeScanResult {
+  code: string;
+  format: string;
+  timestamp: number;
+}
+
+export interface BarcodeLookupResult {
+  product?: Product;
+  exists: boolean;
+  message: string;
+}
+
+export interface BusinessCreate {
+  name: string;
+  currency_code: string;
+  timezone?: string;
+}
+
+export interface BusinessUpdate extends Partial<BusinessCreate> {
+  id: number;
 }

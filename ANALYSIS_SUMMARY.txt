@@ -1,0 +1,32 @@
+BIZZY POS APPLICATION ANALYSIS SUMMARY
+Generated: Sun Sep 28 09:54:58 +04 2025
+
+PROJECT STRUCTURE:
+- Backend: FastAPI Python application
+- Frontend: React TypeScript application
+- Database: PostgreSQL
+
+KEY FEATURES DETECTED:
+- Point of Sale (POS) System
+- Inventory Management
+- Multi-currency Support
+- Analytics Dashboard
+- Barcode Scanning
+- JWT Authentication
+- Role-Based Access Control
+
+TECH STACK:
+Frontend: React, TypeScript, Vite, Tailwind CSS, Recharts, Axios, Zustand
+Backend: FastAPI, SQLAlchemy, PostgreSQL, JWT, Python-Jose
+
+BUILD COMMANDS:
+Backend: uvicorn main:app --reload
+Frontend: npm run dev / npm run build
+
+DEPLOYMENT:
+- Docker support: No
+- Mobile app: Capacitor
+
+STATISTICS:
+- Backend files: 4360
+- Frontend files: 94

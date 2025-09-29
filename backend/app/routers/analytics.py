@@ -19,17 +19,14 @@ async def get_daily_scan_stats(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Get daily scan statistics.
+    Get daily scan statistics for the current user's business.
     Returns data for building charts on the analytics dashboard.
     """
     try:
-        logger.info(f"📈 Fetching daily scan stats for user: {current_user['id']}")
+        logger.info(f"📈 Fetching daily scan stats for user: {current_user['id']}, business: {current_user['business_id']}")
 
-        # Get the statistics from the service
-        daily_stats = analytics_service.get_daily_scan_stats(db)
+        daily_stats = analytics_service.get_daily_scan_stats(db, business_id=current_user["business_id"])
 
-        # Format the data for the frontend response
-        # The service returns a list of tuples: [(date, count), ...]
         stats_list = [
             {"date": str(stat[0]), "scan_count": stat[1]}
             for stat in daily_stats
@@ -37,9 +34,9 @@ async def get_daily_scan_stats(
 
         return {"success": True, "data": stats_list}
 
-    except Exception as e:  # <--- THIS WAS MISSING
-        logger.error(f"Unexpected error in analytics endpoint: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while fetching analytics")
+    except Exception as e:
+        logger.error(f"❌ Error fetching daily scan stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch scan statistics")
 
 @router.get("/user-activity", dependencies=[Depends(requires_permission("report:view"))])
 async def get_user_activity_stats(
@@ -47,17 +44,14 @@ async def get_user_activity_stats(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Get user activity statistics.
+    Get user activity statistics for the current user's business.
     Returns data showing which users are performing the most scans.
     """
     try:
-        logger.info(f"📊 Fetching user activity stats for user: {current_user['id']}")
+        logger.info(f"📊 Fetching user activity stats for business: {current_user['business_id']}")
 
-        # Get the statistics from the service
-        user_stats = analytics_service.get_user_activity_stats(db)
+        user_stats = analytics_service.get_user_activity_stats(db, business_id=current_user["business_id"])
 
-        # Format the data for the frontend response
-        # The service returns a list of tuples: [(user_id, username, scan_count), ...]
         stats_list = [
             {"user_id": stat[0], "username": stat[1], "scan_count": stat[2]}
             for stat in user_stats
@@ -66,5 +60,5 @@ async def get_user_activity_stats(
         return {"success": True, "data": stats_list}
 
     except Exception as e:
-        logger.error(f"Unexpected error in user activity endpoint: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while fetching user activity")
+        logger.error(f"❌ Error fetching user activity stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch user activity statistics")

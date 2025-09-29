@@ -55,8 +55,7 @@ const ProfileSettings: React.FC = () => {
         // In a real app, you'd also verify currentPassword here
       }
 
-      const updatedUser = await updateUser(currentUser!.id, updateData);
-      setUser(updatedUser);
+        await updateUser(currentUser!.id, updateData);
       setSuccess('Profile updated successfully!');
 
       // Clear password fields
@@ -212,7 +211,7 @@ const ProfileSettings: React.FC = () => {
         <dl className="grid grid-cols-1 gap-4">
           <div>
             <dt className="text-sm font-medium text-gray-500">Role</dt>
-            <dd className="mt-1 text-sm text-gray-900 capitalize">{currentUser.role}</dd>
+            <dd className="mt-1 text-sm text-gray-900 capitalize">{currentUser.role_name || 'No role assigned'}</dd>
           </div>
           <div>
             <dt className="text-sm font-medium text-gray-500">Account Created</dt>

@@ -23,10 +23,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
     name: '',
     description: '',
     price: 0,
-    cost_price: undefined,
+    cost_price: 0,
     barcode: '',
     stock_quantity: 0,
-    min_stock_level: 5
+    min_stock_level: 5,
+    business_id: 0
   });
   const [isScanning, setIsScanning] = useState(false);
   const [isLookingUp, setIsLookingUp] = useState(false);
@@ -37,7 +38,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     if (initialData) {
       // For editing existing products, convert USD amounts back to local for display
       const displayPrice = initialData.original_price !== undefined ? initialData.original_price : (initialData.price ? convertToLocal(initialData.price) : 0);
-      const displayCostPrice = initialData.original_cost_price !== undefined ? initialData.original_cost_price : (initialData.cost_price ? convertToLocal(initialData.cost_price) : undefined);
+      const displayCostPrice = initialData.original_cost_price !== undefined ? initialData.original_cost_price : (initialData.cost_price ? convertToLocal(initialData.cost_price) : 0);
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
@@ -45,7 +46,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
         cost_price: displayCostPrice,
         barcode: initialData.barcode || '',
         stock_quantity: initialData.stock_quantity || 0,
-        min_stock_level: initialData.min_stock_level || 5
+        min_stock_level: initialData.min_stock_level || 5,
+        business_id: initialData.business_id || 0
       });
     }
   }, [initialData, convertToLocal]);

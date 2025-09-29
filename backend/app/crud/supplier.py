@@ -16,15 +16,23 @@ def generate_po_number():
     random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
     return f"PO-{date_part}-{random_part}"
 
-def create_supplier(db: Session, supplier_data: SupplierCreate):
-    """Create a new supplier"""
+def create_supplier(db: Session, supplier_data: SupplierCreate, business_id: int = None):
+    """Create a new supplier with business context"""
     try:
-        # Check for existing supplier with same name
-        existing = db.query(Supplier).filter(Supplier.name == supplier_data.name).first()
+        # Check for existing supplier with same name in the same business
+        existing = db.query(Supplier).filter(
+            Supplier.name == supplier_data.name,
+            Supplier.business_id == business_id
+        ).first()
         if existing:
-            raise ValueError("Supplier with this name already exists")
+            raise ValueError("Supplier with this name already exists in your business")
 
-        db_supplier = Supplier(**supplier_data.dict())
+        supplier_dict = supplier_data.dict()
+        # 🚨 CRITICAL FIX: Add business_id to the supplier
+        if business_id is not None:
+            supplier_dict['business_id'] = business_id
+            
+        db_supplier = Supplier(**supplier_dict)
         db.add(db_supplier)
         db.commit()
         db.refresh(db_supplier)
@@ -33,13 +41,26 @@ def create_supplier(db: Session, supplier_data: SupplierCreate):
         db.rollback()
         raise ValueError("Supplier with this name already exists")
 
-def get_suppliers(db: Session, skip: int = 0, limit: int = 100):
-    """Get all suppliers"""
-    return db.query(Supplier).order_by(Supplier.name).offset(skip).limit(limit).all()
+def get_suppliers(db: Session, skip: int = 0, limit: int = 100, business_id: int = None):
+    """Get all suppliers for a specific business"""
+    query = db.query(Supplier)
+    
+    # 🚨 CRITICAL FIX: Add business filtering
+    if business_id is not None:
+        query = query.filter(Supplier.business_id == business_id)
+    
+    return query.order_by(Supplier.name).offset(skip).limit(limit).all()
 
-def get_supplier(db: Session, supplier_id: int):
-    """Get a single supplier by ID"""
-    return db.query(Supplier).filter(Supplier.id == supplier_id).first()
+def get_supplier(db: Session, supplier_id: int, business_id: int = None):
+    """Get a single supplier by ID, filtered by business_id"""
+    query = db.query(Supplier).filter(Supplier.id == supplier_id)
+    
+    # 🚨 CRITICAL FIX: Add business filtering
+    if business_id is not None:
+        query = query.filter(Supplier.business_id == business_id)
+    
+    return query.first()
+
 
 def update_supplier(db: Session, supplier_id: int, supplier_data: dict):
     """Update a supplier"""
@@ -64,8 +85,8 @@ def delete_supplier(db: Session, supplier_id: int):
         db.commit()
     return supplier
 
-def create_purchase_order(db: Session, po_data: PurchaseOrderCreate, user_id: int):
-    """Create a new purchase order"""
+def create_purchase_order(db: Session, po_data: PurchaseOrderCreate, user_id: int, business_id: int = None):
+    """Create a new purchase order with business context"""
     try:
         # Generate PO number
         po_number = generate_po_number()
@@ -75,30 +96,36 @@ def create_purchase_order(db: Session, po_data: PurchaseOrderCreate, user_id: in
 
         # Create PO
         db_po = PurchaseOrder(
-            **po_data.dict(exclude={'items'}),
+            supplier_id=po_data.supplier_id,
             po_number=po_number,
             total_amount=total_amount,
+            expected_delivery=po_data.expected_delivery,
+            notes=po_data.notes,
             created_by=user_id,
-            status="draft"
+            business_id=business_id  # 🚨 CRITICAL FIX: Add business_id
         )
+
         db.add(db_po)
-        db.flush()  # Get PO ID without committing
+        db.commit()
+        db.refresh(db_po)
 
         # Create PO items
         for item in po_data.items:
             db_item = PurchaseOrderItem(
                 po_id=db_po.id,
-                **item.dict()
+                product_id=item.product_id,
+                quantity=item.quantity,
+                unit_cost=item.unit_cost,
+                notes=item.notes
             )
             db.add(db_item)
 
         db.commit()
         db.refresh(db_po)
-        return db_po
-
-    except IntegrityError as e:
+        return _purchase_order_to_dict(db_po)
+    except Exception as e:
         db.rollback()
-        raise ValueError(f"Failed to create purchase order: {str(e)}")
+        raise e
 
 # FIXED FUNCTION: This was broken with bad indentation and duplicate code.
 def _purchase_order_to_dict(po: PurchaseOrder) -> Dict[str, Any]:
@@ -134,34 +161,47 @@ def _purchase_order_to_dict(po: PurchaseOrder) -> Dict[str, Any]:
 
     return po_dict
 
-def get_purchase_orders(db: Session, skip: int = 0, limit: int = 100):
-    """Get all purchase orders with items eagerly loaded"""
-    pos = db.query(PurchaseOrder).options(
+def get_purchase_orders(db: Session, skip: int = 0, limit: int = 100, business_id: int = None):
+    """Get all purchase orders for a specific business"""
+    query = db.query(PurchaseOrder).options(
         joinedload(PurchaseOrder.po_items)
-    ).order_by(PurchaseOrder.created_at.desc()).offset(skip).limit(limit).all()
-
+    )
+    
+    # 🚨 CRITICAL FIX: Add business filtering
+    if business_id is not None:
+        query = query.filter(PurchaseOrder.business_id == business_id)
+    
+    pos = query.order_by(PurchaseOrder.created_at.desc()).offset(skip).limit(limit).all()
     return [_purchase_order_to_dict(po) for po in pos]
 
-def get_purchase_order(db: Session, po_id: int):
-    """Get a single purchase order by ID with items eagerly loaded"""
-    po = db.query(PurchaseOrder).options(
+def get_purchase_order(db: Session, po_id: int, business_id: int = None):
+    """Get a single purchase order by ID, filtered by business"""
+    query = db.query(PurchaseOrder).options(
         joinedload(PurchaseOrder.po_items)
-    ).filter(PurchaseOrder.id == po_id).first()
-
+    ).filter(PurchaseOrder.id == po_id)
+    
+    # 🚨 CRITICAL FIX: Add business filtering
+    if business_id is not None:
+        query = query.filter(PurchaseOrder.business_id == business_id)
+    
+    po = query.first()
     if po:
         return _purchase_order_to_dict(po)
     return None
 
-def get_purchase_orders_by_supplier(db: Session, supplier_id: int):
-    """Get all purchase orders for a specific supplier with items eagerly loaded"""
-    # Query all POs for the given supplier_id and eagerly load the items
-    pos = db.query(PurchaseOrder).options(
+def get_purchase_orders_by_supplier(db: Session, supplier_id: int, business_id: int = None):
+    """Get all purchase orders for a specific supplier, filtered by business"""
+    query = db.query(PurchaseOrder).options(
         joinedload(PurchaseOrder.po_items)
     ).filter(
         PurchaseOrder.supplier_id == supplier_id
-    ).order_by(PurchaseOrder.created_at.desc()).all()
-
-    # Convert each ORM object to a dictionary using our fixed function
+    )
+    
+    # 🚨 CRITICAL FIX: Add business filtering
+    if business_id is not None:
+        query = query.filter(PurchaseOrder.business_id == business_id)
+    
+    pos = query.order_by(PurchaseOrder.created_at.desc()).all()
     return [_purchase_order_to_dict(po) for po in pos]
 
 def update_po_status(db: Session, po_id: int, status: str):

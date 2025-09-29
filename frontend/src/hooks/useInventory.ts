@@ -14,7 +14,7 @@ interface InventoryState {
   loadStockLevels: () => Promise<void>;
   loadLowStockAlerts: () => Promise<void>;
   loadInventoryHistory: (productId?: number) => Promise<void>;
-  adjustInventory: (adjustment: InventoryAdjustment) => Promise<void>;
+  adjustInventory: (adjustment: InventoryAdjustment) => Promise<StockLevel>;
   clearError: () => void;
 }
 

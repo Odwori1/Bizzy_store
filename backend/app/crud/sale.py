@@ -12,6 +12,7 @@ from typing import List, Optional
 from app.crud.business import get_business_by_user_id
 from app.services.currency_service import CurrencyService
 import asyncio
+from sqlalchemy.orm import joinedload  # Add this import
 
 def create_sale(db: Session, sale_data: SaleCreate, user_id: int):
     """Create a new sale transaction with inventory updates"""
@@ -150,25 +151,26 @@ def create_sale(db: Session, sale_data: SaleCreate, user_id: int):
 
 def get_sale(db: Session, sale_id: int, business_id: int = None):
     """Get a specific sale by ID with virtual numbering"""
-    # First get the sale with business filtering
-    query = db.query(Sale)
+    # First get the sale with business filtering and eager load relationships
+    query = db.query(Sale).options(
+        joinedload(Sale.sale_items).joinedload(SaleItem.product)
+    )
     if business_id is not None:
         query = query.filter(Sale.business_id == business_id)
-    
+
     sale = query.filter(Sale.id == sale_id).first()
-    
+
     if sale and business_id is not None:
         # Calculate virtual numbering for this sale
         business_sales = db.query(Sale.id).filter(
             Sale.business_id == business_id
         ).order_by(Sale.created_at).all()
-        
+
         # Create mapping of sale_id to sequence number
         sale_id_to_number = {sale_id: idx + 1 for idx, (sale_id,) in enumerate(business_sales)}
         sale.business_sale_number = sale_id_to_number.get(sale.id)
-    
-    return sale
 
+    return sale
 
 def get_sales(
     db: Session,

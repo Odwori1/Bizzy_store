@@ -154,10 +154,10 @@ const POS: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 bg-gray-100">
-        {/* Product Grid - 2/3 width */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow">
+      {/* Main Content - BALANCED GRID LAYOUT */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 p-4 bg-gray-100 min-h-0">
+        {/* Product Grid - 3/5 width (60%) */}
+        <div className="lg:col-span-3 bg-white rounded-lg shadow overflow-hidden">
           <ProductGrid
             products={products}
             onAddToCart={addToCart}
@@ -165,8 +165,8 @@ const POS: React.FC = () => {
           />
         </div>
 
-        {/* Cart - 1/3 width */}
-        <div className="lg:col-span-1">
+        {/* Cart - 2/5 width (40%) - MORE SPACE */}
+        <div className="lg:col-span-2 min-w-0">
           <Cart
             items={cartItems}
             total={subtotal}
@@ -180,14 +180,14 @@ const POS: React.FC = () => {
         </div>
       </div>
 
-      {/* Payment Modal with onClearCart prop */}
+      {/* Payment Modal - unchanged */}
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onClearCart={handleClearCartFromModal}
         cart={cartItems}
-        total={grandTotal} // Local currency total for backend processing
-        totalDisplay={grandTotal} // Local currency total for display (FIXED: same as total)
+        total={grandTotal}
+        totalDisplay={grandTotal}
         onPaymentSuccess={handlePaymentComplete}
       />
     </div>

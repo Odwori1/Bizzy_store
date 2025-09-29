@@ -6,6 +6,7 @@ import { useBusinessStore } from '../../hooks/useBusiness';
 import Receipt from './Receipt';
 import { useInventory } from '../../hooks/useInventory';
 import { CurrencyDisplay } from '../CurrencyDisplay';
+import { SaleCreate } from '../../types'; // Add this import
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -97,10 +98,11 @@ export default function PaymentModal({ isOpen, onClose, onClearCart, cart, total
       }];
 
       // Prepare sale data
-      const saleData = {
+      const saleData: SaleCreate = {
         user_id: user.id,
         sale_items: saleItems,
         payments: payments,
+        tax_rate: 0 // Temporary - no tax for now
       };
 
       const createdSale = await salesService.createSale(saleData);

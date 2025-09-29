@@ -517,7 +517,7 @@ export default function Sales() {
                         <CurrencyDisplay
                           amount={payment.amount}
                           originalAmount={payment.original_amount}
-                          originalCurrencyCode={payment.original_currency_code}
+                          originalCurrencyCode={payment.original_currency}
                           exchangeRateAtCreation={payment.exchange_rate_at_payment}
                           preserveOriginal={true}
                         />

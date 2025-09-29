@@ -16,14 +16,16 @@ class SaleItem(SaleItemBase):
     id: int
     subtotal: float
     sale_id: int
-    refunded_quantity: int = 0  # Add this field to the response schema
+    refunded_quantity: int = 0
 
     # Add historical context fields (MUST match the model)
     original_unit_price: Optional[float] = None
     original_subtotal: Optional[float] = None
     exchange_rate_at_creation: Optional[float] = None
 
+    # Keep product_name field - it will be populated by the model property
     product_name: Optional[str] = None
+
     class Config:
         from_attributes = True
 
@@ -64,7 +66,7 @@ class Sale(SaleBase):
     id: int
     # 🎯 ADD VIRTUAL BUSINESS NUMBERING
     business_sale_number: Optional[int] = None  # Per-business sequence number
-    
+
     total_amount: float              # USD amount
     tax_amount: float                # USD tax amount
     usd_amount: float                # USD amount (duplicate for consistency)
@@ -85,7 +87,7 @@ class SaleSummary(BaseModel):
     id: int
     # 🎯 ADD VIRTUAL BUSINESS NUMBERING
     business_sale_number: Optional[int] = None  # Per-business sequence number
-    
+
     total_amount: float
     tax_amount: float
     payment_status: str

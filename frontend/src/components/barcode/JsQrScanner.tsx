@@ -97,7 +97,7 @@ const JsQrScanner: React.FC<JsQrScannerProps> = ({ onScan, onCancel }) => {
     setStatus('Camera ready - point at a barcode');
   };
 
-  const handleUserMediaError = (err: string | MediaStreamError) => {
+  const handleUserMediaError = (err: string | Error) => {
     setError(`Camera error: ${typeof err === 'string' ? err : err.message}`);
     setStatus('❌ Camera error');
   };

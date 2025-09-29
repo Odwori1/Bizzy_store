@@ -48,7 +48,7 @@ const SalesTrendChart: React.FC<SalesTrendChartProps> = ({ data }) => {
               textAnchor="end"
               height={60}
             />
-            <YAxis 
+            <YAxis
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
             />

@@ -1,0 +1,4 @@
+./tsconfig.json.backup
+./src/components/suppliers/PurchaseOrderForm.tsx.backup
+./src/components/pos/ProductGrid.tsx.backup
+./src/hooks/useCurrency.ts.backup

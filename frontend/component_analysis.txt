@@ -1,0 +1,138 @@
+COMPONENT USAGE ANALYSIS REPORT
+===============================
+
+=== JsQrScanner ===
+IMPORT STATEMENTS:
+src/components/barcode/SmartBarcodeScanner.tsx:import JsQrScanner from './JsQrScanner';
+src/pages/ScannerDiagnostics.tsx:import JsQrScanner from '../components/barcode/JsQrScanner';
+JSX USAGE:
+src/components/barcode/JsQrScanner.tsx:const JsQrScanner: React.FC<JsQrScannerProps> = ({ onScan, onCancel }) => {
+src/components/barcode/SmartBarcodeScanner.tsx:    return <JsQrScanner onScan={handleQrScan} onCancel={() => setActiveMode(null)} />;
+src/pages/ScannerDiagnostics.tsx:        <JsQrScanner
+OTHER REFERENCES:
+src/components/barcode/JsQrScanner.tsx:interface JsQrScannerProps {
+src/components/barcode/JsQrScanner.tsx:const JsQrScanner: React.FC<JsQrScannerProps> = ({ onScan, onCancel }) => {
+src/components/barcode/JsQrScanner.tsx:export default JsQrScanner;
+src/components/barcode/SmartBarcodeScanner.tsx:    return <JsQrScanner onScan={handleQrScan} onCancel={() => setActiveMode(null)} />;
+src/pages/ScannerDiagnostics.tsx:        <JsQrScanner
+
+=== BatchProcessor ===
+IMPORT STATEMENTS:
+src/pages/ScannerDiagnostics.tsx:import BatchProcessor from '../components/barcode/BatchProcessor';
+JSX USAGE:
+src/pages/ScannerDiagnostics.tsx:        <BatchProcessor />
+OTHER REFERENCES:
+src/components/barcode/BatchProcessor.tsx:const BatchProcessor: React.FC = () => {
+src/components/barcode/BatchProcessor.tsx:export default BatchProcessor;
+src/pages/ScannerDiagnostics.tsx:        <BatchProcessor />
+
+=== ModernBarcodeScanner ===
+IMPORT STATEMENTS:
+  None
+JSX USAGE:
+src/components/barcode/ModernBarcodeScanner.tsx:const ModernBarcodeScanner: React.FC<ModernBarcodeScannerProps> = ({ onScan, onCancel }) => {
+OTHER REFERENCES:
+src/components/barcode/ModernBarcodeScanner.tsx:interface ModernBarcodeScannerProps {
+src/components/barcode/ModernBarcodeScanner.tsx:const ModernBarcodeScanner: React.FC<ModernBarcodeScannerProps> = ({ onScan, onCancel }) => {
+src/components/barcode/ModernBarcodeScanner.tsx:export default ModernBarcodeScanner;
+
+=== WebcamTest ===
+IMPORT STATEMENTS:
+  None
+JSX USAGE:
+  None
+OTHER REFERENCES:
+src/components/barcode/WebcamTest.tsx:const WebcamTest: React.FC = () => {
+src/components/barcode/WebcamTest.tsx:export default WebcamTest;
+
+=== WebBarcodeScanner ===
+IMPORT STATEMENTS:
+  None
+JSX USAGE:
+src/components/barcode/WebBarcodeScanner.tsx:const WebBarcodeScanner: React.FC<WebBarcodeScannerProps> = ({ onScan, onCancel }) => {
+OTHER REFERENCES:
+src/components/barcode/WebBarcodeScanner.tsx:interface WebBarcodeScannerProps {
+src/components/barcode/WebBarcodeScanner.tsx:const WebBarcodeScanner: React.FC<WebBarcodeScannerProps> = ({ onScan, onCancel }) => {
+src/components/barcode/WebBarcodeScanner.tsx:export default WebBarcodeScanner;
+
+=== QuaggaMinimalTest ===
+IMPORT STATEMENTS:
+  None
+JSX USAGE:
+  None
+OTHER REFERENCES:
+src/components/barcode/QuaggaMinimalTest.tsx:const QuaggaMinimalTest: React.FC = () => {
+src/components/barcode/QuaggaMinimalTest.tsx:export default QuaggaMinimalTest;
+
+=== BrowserTest ===
+IMPORT STATEMENTS:
+src/pages/ScannerDiagnostics.tsx:import BrowserTest from '../components/barcode/BrowserTest';
+JSX USAGE:
+src/pages/ScannerDiagnostics.tsx:      {currentTest === 'browser' && <BrowserTest />}
+OTHER REFERENCES:
+src/components/barcode/BrowserTest.tsx:const BrowserTest: React.FC = () => {
+src/components/barcode/BrowserTest.tsx:export default BrowserTest;
+src/pages/ScannerDiagnostics.tsx:      {currentTest === 'browser' && <BrowserTest />}
+
+=== SmartBarcodeScanner ===
+IMPORT STATEMENTS:
+src/components/ProductForm.tsx:import SmartBarcodeScanner from './barcode/SmartBarcodeScanner';
+src/pages/ScannerDiagnostics.tsx:import SmartBarcodeScanner from '../components/barcode/SmartBarcodeScanner'; // Add this import
+JSX USAGE:
+src/components/ProductForm.tsx:        <SmartBarcodeScanner
+src/components/barcode/SmartBarcodeScanner.tsx:const SmartBarcodeScanner: React.FC<SmartBarcodeScannerProps> = ({ onScan, onCancel }) => {
+src/pages/ScannerDiagnostics.tsx:        <SmartBarcodeScanner
+OTHER REFERENCES:
+src/components/ProductForm.tsx:        <SmartBarcodeScanner
+src/components/barcode/SmartBarcodeScanner.tsx:interface SmartBarcodeScannerProps {
+src/components/barcode/SmartBarcodeScanner.tsx:const SmartBarcodeScanner: React.FC<SmartBarcodeScannerProps> = ({ onScan, onCancel }) => {
+src/components/barcode/SmartBarcodeScanner.tsx:export default SmartBarcodeScanner;
+src/pages/ScannerDiagnostics.tsx:        <SmartBarcodeScanner
+
+=== TopProductsChart ===
+IMPORT STATEMENTS:
+src/pages/Dashboard.tsx:import TopProductsChart from '../components/charts/TopProductsChart';
+JSX USAGE:
+src/components/charts/TopProductsChart.tsx:const TopProductsChart: React.FC<TopProductsChartProps> = ({ data }) => {
+src/pages/Dashboard.tsx:        <TopProductsChart data={topProducts} />
+OTHER REFERENCES:
+src/components/charts/TopProductsChart.tsx:interface TopProductsChartProps {
+src/components/charts/TopProductsChart.tsx:const TopProductsChart: React.FC<TopProductsChartProps> = ({ data }) => {
+src/components/charts/TopProductsChart.tsx:export default TopProductsChart;
+src/pages/Dashboard.tsx:        <TopProductsChart data={topProducts} />
+
+=== UserActivityChart ===
+IMPORT STATEMENTS:
+src/pages/Reports.tsx:import UserActivityChart from '../components/charts/UserActivityChart';
+JSX USAGE:
+src/components/charts/UserActivityChart.tsx:const UserActivityChart: React.FC<UserActivityChartProps> = ({ data }) => {
+src/pages/Reports.tsx:              <UserActivityChart data={analyticsData.userActivity} />
+OTHER REFERENCES:
+src/components/charts/UserActivityChart.tsx:interface UserActivityChartProps {
+src/components/charts/UserActivityChart.tsx:const UserActivityChart: React.FC<UserActivityChartProps> = ({ data }) => {
+src/components/charts/UserActivityChart.tsx:export default UserActivityChart;
+src/pages/Reports.tsx:              <UserActivityChart data={analyticsData.userActivity} />
+
+=== SalesTrendChart ===
+IMPORT STATEMENTS:
+src/pages/Dashboard.tsx:import SalesTrendChart from '../components/charts/SalesTrendChart';
+JSX USAGE:
+src/components/charts/SalesTrendChart.tsx:const SalesTrendChart: React.FC<SalesTrendChartProps> = ({ data }) => {
+src/pages/Dashboard.tsx:        <SalesTrendChart
+OTHER REFERENCES:
+src/components/charts/SalesTrendChart.tsx:interface SalesTrendChartProps {
+src/components/charts/SalesTrendChart.tsx:const SalesTrendChart: React.FC<SalesTrendChartProps> = ({ data }) => {
+src/components/charts/SalesTrendChart.tsx:export default SalesTrendChart;
+src/pages/Dashboard.tsx:        <SalesTrendChart
+
+=== DailyScansChart ===
+IMPORT STATEMENTS:
+src/pages/Reports.tsx:import DailyScansChart from '../components/charts/DailyScansChart';
+JSX USAGE:
+src/components/charts/DailyScansChart.tsx:const DailyScansChart: React.FC<DailyScansChartProps> = ({ data }) => {
+src/pages/Reports.tsx:              <DailyScansChart data={analyticsData.dailyScans} />
+OTHER REFERENCES:
+src/components/charts/DailyScansChart.tsx:interface DailyScansChartProps {
+src/components/charts/DailyScansChart.tsx:const DailyScansChart: React.FC<DailyScansChartProps> = ({ data }) => {
+src/components/charts/DailyScansChart.tsx:export default DailyScansChart;
+src/pages/Reports.tsx:              <DailyScansChart data={analyticsData.dailyScans} />

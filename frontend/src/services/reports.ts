@@ -1,5 +1,7 @@
 import { api } from './api';
-import { SalesReport, DashboardMetrics, InventoryReport, FinancialReport, ReportFormat } from '../types';
+import { SalesReport, DashboardMetrics, InventoryReport, FinancialReport } from '../types';
+import { ReportFormat } from '../types/reports';
+import { SalesTrend, TopProduct } from '../hooks/useReports';
 
 // Sales report
 export const reportsService = {
@@ -69,7 +71,7 @@ export const reportsService = {
     return response.data;
   },
 
-  // Sales trends report
+  // Sales trends report - CORRECT ENDPOINT
   getSalesTrends: async (startDate?: string, endDate?: string): Promise<SalesTrend[]> => {
     const params = new URLSearchParams();
     if (startDate) params.append('start_date', startDate);
@@ -79,7 +81,7 @@ export const reportsService = {
     return response.data;
   },
 
-  // Top products report
+  // Top products report - CORRECT ENDPOINT
   getTopProducts: async (startDate?: string, endDate?: string): Promise<TopProduct[]> => {
     const params = new URLSearchParams();
     if (startDate) params.append('start_date', startDate);
@@ -87,7 +89,7 @@ export const reportsService = {
 
     const response = await api.get<TopProduct[]>(`/api/reports/products/top?${params}`);
     return response.data;
-  }, // <-- THIS COMMA WAS MISSING
+  },
 
   // Analytics - Daily scan statistics
   getDailyScanStats: async (): Promise<{ success: boolean; data: Array<{ date: string; scan_count: number }> }> => {

@@ -211,7 +211,7 @@ const Dashboard: React.FC = () => {
         <SalesTrendChart
           data={salesTrends.map((trend) => ({
             date: trend.date,
-            sales: trend.daily_sales,
+            sales: trend.sales,
             transactions: trend.transactions,
           }))}
         />

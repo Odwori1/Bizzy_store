@@ -47,7 +47,7 @@ def get_sales_report(db: Session, start_date: date, end_date: date, business_id:
         Sale.created_at <= end_dt,
         Sale.payment_status == 'completed',
         Sale.original_currency.isnot(None),
-        business_filter  # ← CRITICAL SECURITY FIX: ADD BUSINESS FILTER
+        business_filter  # 🚨 CRITICAL FIX: ADD MISSING BUSINESS FILTER
     ).group_by(Sale.original_currency)\
      .order_by(desc(func.count(Sale.id)))\
      .first()
@@ -94,51 +94,51 @@ def get_sales_report(db: Session, start_date: date, end_date: date, business_id:
         func.coalesce(func.sum(Sale.total_amount), 0).label('daily_sales'),          # USD daily sales
         func.coalesce(func.sum(Sale.original_amount), 0).label('daily_sales_original'), # Local currency daily sales
         func.count(Sale.id).label('transactions'),
-        func.coalesce(func.avg(Sale.total_amount), 0).label('avg_order_value')       # USD average
+        func.coalesce(func.avg(Sale.total_amount), 0).label('avg_order_value')       # USD average order value
     ).filter(
         Sale.created_at >= start_dt,
         Sale.created_at <= end_dt,
         Sale.payment_status == 'completed',
-        business_filter  # ← CRITICAL SECURITY FIX: ADD BUSINESS FILTER
+        business_filter  # 🚨 CRITICAL FIX: ADD MISSING BUSINESS FILTER
     ).group_by(func.date(Sale.created_at))\
-     .order_by(func.date(Sale.created_at)).all()
+     .order_by(func.date(Sale.created_at))\
+     .all()
 
+    # Format the response
     return {
-        'summary': {
-            'total_sales': float(sales_data.total_sales),
-            'total_sales_original': float(sales_data.total_sales_original),
-            'total_tax': float(sales_data.total_tax),
-            'total_transactions': sales_data.total_transactions,
-            'average_transaction_value': float(sales_data.avg_transaction),
-            'payment_methods': payment_methods,
-            'primary_currency': primary_currency
+        "summary": {
+            "total_sales": float(sales_data.total_sales),
+            "total_sales_original": float(sales_data.total_sales_original),
+            "total_tax": float(sales_data.total_tax),
+            "total_transactions": sales_data.total_transactions,
+            "average_transaction_value": float(sales_data.avg_transaction),
+            "payment_methods": payment_methods,
+            "primary_currency": primary_currency
         },
-        'top_products': [
+        "top_products": [
             {
-                'product_id': p[0],
-                'product_name': p[1],
-                'quantity_sold': p[2],
-                'total_revenue': float(p[3]),
-                'total_revenue_original': float(p[4]),
-                # FIXED: Calculate margin using USD values for consistency
-                # Revenue (USD) - Cost (USD) = Profit (USD)
-                # Profit / Revenue * 100 = Margin %
-                # Cost = Quantity Sold * Average Cost Price (USD)
-                'profit_margin': float((p[3] - (p[2] * p[6])) / p[3] * 100) if p[3] > 0 else 0
-            } for p in top_products
+                "product_id": product[0],
+                "product_name": product[1],
+                "quantity_sold": product[2],
+                "total_revenue": float(product[3]),
+                "total_revenue_original": float(product[4]),
+                "profit_margin": float(((product[3] - (product[2] * product[6])) / product[3]) * 100) if product[3] > 0 else 0
+            }
+            for product in top_products
         ],
-        'sales_trends': [
+        "sales_trends": [
             {
-                'date': trend[0],
-                'daily_sales': float(trend[1]),
-                'daily_sales_original': float(trend[2]),
-                'transactions': trend[3],
-                'average_order_value': float(trend[4])
-            } for trend in sales_trends
+                "date": str(trend[0]),
+                "daily_sales": float(trend[1]),
+                "daily_sales_original": float(trend[2]),
+                "transactions": trend[3],
+                "average_order_value": float(trend[4])
+            }
+            for trend in sales_trends
         ],
-        'date_range': {
-            'start_date': start_date,
-            'end_date': end_date
+        "date_range": {
+            "start_date": str(start_date),
+            "end_date": str(end_date)
         }
     }
 

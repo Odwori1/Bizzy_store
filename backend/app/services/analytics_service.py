@@ -19,7 +19,8 @@ class AnalyticsService:
         success: bool,
         source: str,
         user_id: Optional[int] = None,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
+        business_id: Optional[int] = None
     ):
         """
         Track a barcode scan event for analytics.
@@ -32,35 +33,38 @@ class AnalyticsService:
                 success=success,
                 source=source,
                 user_id=user_id,
-                session_id=session_id
+                session_id=session_id,
+                business_id=business_id
             )
 
             # Add to database and commit
             db.add(scan_event)
             db.commit()
-            db.refresh(scan_event)  # Refresh to get the ID and timestamps
+            db.refresh(scan_event)
 
-            logger.info(f"📊 Tracked scan event: {barcode}, success: {success}, source: {source}")
+            logger.info(f"📊 Tracked scan event: {barcode}, success: {success}, source: {source}, business: {business_id}")
             return scan_event
 
         except Exception as e:
             logger.error(f"❌ Failed to track scan event: {e}")
-            db.rollback()  # Rollback the transaction on error
-            # Don't raise exception - analytics tracking shouldn't break the main functionality
+            db.rollback()
             return None
 
-    def get_daily_scan_stats(self, db: Session) -> List[Tuple[Date, int]]:
+    def get_daily_scan_stats(self, db: Session, business_id: int = None) -> List[Tuple[Date, int]]:
         """
-        Get daily scan statistics.
+        Get daily scan statistics for a specific business.
         Returns a list of tuples: (date, scan_count) for each day.
-        This follows the simple, direct query pattern.
         """
         try:
-            # Query to count scans grouped by date (cast created_at to Date)
-            daily_stats = db.query(
+            query = db.query(
                 func.date(BarcodeScanEvent.created_at).label('scan_date'),
                 func.count(BarcodeScanEvent.id).label('scan_count')
-            ).group_by(
+            )
+            
+            if business_id is not None:
+                query = query.filter(BarcodeScanEvent.business_id == business_id)
+            
+            daily_stats = query.group_by(
                 func.date(BarcodeScanEvent.created_at)
             ).order_by(
                 func.date(BarcodeScanEvent.created_at)
@@ -72,25 +76,25 @@ class AnalyticsService:
             logger.error(f"❌ Failed to fetch daily scan stats: {e}")
             return []
 
-    def get_user_activity_stats(self, db: Session) -> List[Tuple[int, str, int]]:
+    def get_user_activity_stats(self, db: Session, business_id: int = None) -> List[Tuple[int, str, int]]:
         """
-        Get user activity statistics (scan counts per user).
+        Get user activity statistics (scan counts per user) for a specific business.
         Returns a list of tuples: (user_id, username, scan_count).
-        This follows the simple, direct query pattern.
         """
         try:
-            # Query to count scans grouped by user
-            # Note: We need to import User model for the relationship
             from app.models.user import User
             
-            user_stats = db.query(
-                User.id.label('user_id'),
-                User.username.label('username'),
+            query = db.query(
+                BarcodeScanEvent.user_id,
+                User.username,
                 func.count(BarcodeScanEvent.id).label('scan_count')
-            ).join(
-                BarcodeScanEvent, User.id == BarcodeScanEvent.user_id
-            ).group_by(
-                User.id, User.username
+            ).join(User, BarcodeScanEvent.user_id == User.id)
+            
+            if business_id is not None:
+                query = query.filter(BarcodeScanEvent.business_id == business_id)
+            
+            user_stats = query.group_by(
+                BarcodeScanEvent.user_id, User.username
             ).order_by(
                 func.count(BarcodeScanEvent.id).desc()
             ).all()
@@ -100,7 +104,7 @@ class AnalyticsService:
         except Exception as e:
             logger.error(f"❌ Failed to fetch user activity stats: {e}")
             return []
-  
+
 
 # Create a singleton instance
 analytics_service = AnalyticsService()

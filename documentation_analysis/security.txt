@@ -1,0 +1,16 @@
+Security Features:
+=================
+✓ JWT Authentication
+✓ Role-Based Access Control (RBAC)
+✓ Business Data Isolation
+✓ Password Hashing
+✓ CORS Configuration
+✓ Input Validation with Pydantic
+
+Permission System:
+-----------------
+from .permission import Permission, Role
+role_permission = Table(
+    'role_permission',
+    Column('permission_id', ForeignKey('permissions.id'), primary_key=True)
+    __tablename__ = "permissions"

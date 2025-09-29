@@ -5,9 +5,9 @@ import { SalesReport, DashboardMetrics, InventoryReport, FinancialReport } from 
 // Add these interfaces at the top
 export interface SalesTrend {
   date: string;
-  daily_sales: number;
+  sales: number;
   transactions: number;
-  average_order_value: number;
+  //average_order_value: number;
 }
 
 export interface TopProduct {
@@ -18,7 +18,7 @@ export interface TopProduct {
   profit_margin: number;
 }
 
-interface ReportsState {
+export interface ReportsState {
   // State
   salesReport: SalesReport | null;
   dashboardMetrics: DashboardMetrics | null;
@@ -98,7 +98,11 @@ export const useReports = create<ReportsState>((set) => ({
   loadSalesTrends: async (startDate?: string, endDate?: string) => {
     try {
       const data = await reportsService.getSalesTrends(startDate, endDate);
-      set({ salesTrends: data });
+      set({ salesTrends: data.map(item => ({ 
+        date: item.date, 
+        sales: item.sales,
+        transactions: item.transactions,
+      })) });
     } catch (err: any) {
       set({ error: err.response?.data?.detail || 'Failed to load sales trends' });
     }
@@ -108,7 +112,13 @@ export const useReports = create<ReportsState>((set) => ({
   loadTopProducts: async (startDate?: string, endDate?: string) => {
     try {
       const data = await reportsService.getTopProducts(startDate, endDate);
-      set({ topProducts: data });
+      set({ topProducts: data.map(item => ({ 
+        product_id: item.product_id, 
+        product_name: item.product_name, 
+        quantity_sold: item.quantity_sold, 
+        total_revenue: item.total_revenue, 
+        profit_margin: item.profit_margin 
+      })) });
     } catch (err: any) {
       set({ error: err.response?.data?.detail || 'Failed to load top products' });
     }

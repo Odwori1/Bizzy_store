@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useReports } from '../hooks/useReports';
-import { ReportFormat } from '../types';
+//import { ReportFormat } from '../types';
+import { ReportFormat } from '../types/reports';
 import { reportsService } from '../services/reports';
 import BackButton from '../components/BackButton';
 import { CurrencyDisplay } from '../components/CurrencyDisplay';

@@ -14,17 +14,20 @@ class Supplier(Base):
     address = Column(Text)
     tax_id = Column(String(50))
     payment_terms = Column(String(50))
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)  # 🚨 ADD THIS
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     # Relationships
     purchase_orders = relationship("PurchaseOrder", back_populates="supplier")
+    business = relationship("Business")  # 🚨 ADD THIS
 
 class PurchaseOrder(Base):
     __tablename__ = "purchase_orders"
 
     id = Column(Integer, primary_key=True, index=True)
     supplier_id = Column(Integer, ForeignKey("suppliers.id"))
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)  # 🚨 ADD THIS
     po_number = Column(String(50), unique=True, index=True)
     status = Column(String(20), default="draft")  # draft, ordered, received, cancelled
     total_amount = Column(Float, default=0.0)
@@ -38,6 +41,7 @@ class PurchaseOrder(Base):
 
     # Relationships
     supplier = relationship("Supplier", back_populates="purchase_orders")
+    business = relationship("Business")  # 🚨 ADD THIS
     creator = relationship("User")
     po_items = relationship("PurchaseOrderItem", back_populates="purchase_order", cascade="all, delete-orphan")
 

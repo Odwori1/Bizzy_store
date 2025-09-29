@@ -31,7 +31,9 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     payment_method: 'cash',
     is_recurring: false,
     recurrence_interval: undefined,
-    receipt_url: undefined
+    receipt_url: undefined,
+    currency_code: businessCurrencyCode, // Required by ExpenseCreate
+    amount: 0
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
