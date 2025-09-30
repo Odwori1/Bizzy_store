@@ -45,7 +45,7 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data }) => {
               textAnchor="end"
               height={80}
             />
-            <YAxis 
+            <YAxis
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => `${currencySymbol}${value.toLocaleString()}`}
             />

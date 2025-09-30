@@ -254,3 +254,33 @@
   gap: 0.5rem;
   min-height: 3rem;
 }
+
+/* Professional Shield Eye Logo Styles */
+.bizzy-logo-shield-eye {
+  filter: drop-shadow(0 4px 8px rgba(30, 64, 175, 0.15));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bizzy-logo-shield-eye:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 20px rgba(30, 64, 175, 0.25));
+}
+
+.bizzy-logo-minimal {
+  transition: transform 0.2s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.bizzy-logo-minimal:hover {
+  transform: scale(1.08);
+}
+
+.bizzy-logo-badge {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+  transition: all 0.3s ease;
+}
+
+.bizzy-logo-badge:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
+}

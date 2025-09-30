@@ -3,47 +3,35 @@ import { useUsersStore } from '../hooks/useUsers';
 import { useAuthStore } from '../hooks/useAuth';
 import { User, UserCreate } from '../types';
 import BackButton from '../components/BackButton';
-// NEW: Import 2FA service and modal
 import { twoFactorService, TwoFactorStatusResponse } from '../services/twoFactor';
 import TwoFactorSetupModal from '../components/TwoFactorSetupModal';
-// NEW: Import roles service and types
 import UserForm from "../components/UserForm";
 import { rolesService, Role } from '../services/roles';
-// END NEW
 
-// ... [The UserForm component remains exactly the same. KEEP IT] ...
-
-// Main Page Component
 const UserManagement: React.FC = () => {
-  const { users, isLoading, error, fetchUsers, createUser, deleteUser, clearError } = useUsersStore();
+  const { users, isLoading, error, fetchUsers, createUser, deleteUser, clearError, toggleUserStatus } = useUsersStore();
   const { user: currentUser, hasPermission } = useAuthStore();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
-  // NEW: State for Roles and role assignment loading
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
-  const [assigningRole, setAssigningRole] = useState<number | null>(null); // user ID for which role is being assigned
-  // NEW: State for 2FA modal and status
+  const [assigningRole, setAssigningRole] = useState<number | null>(null);
   const [is2FAModalOpen, setIs2FAModalOpen] = useState(false);
   const [user2FAStatus, setUser2FAStatus] = useState<Record<number, boolean>>({});
-  // END NEW
 
   useEffect(() => {
     if (currentUser !== undefined) {
       setIsAuthChecked(true);
       if (currentUser && hasPermission('user:read')) {
         fetchUsers();
-        // Fetch 2FA status for the current user only (admin/manager)
         fetch2FAStatus(currentUser.id);
       }
-      // NEW: Fetch available roles if user has permission to manage them
       if (currentUser && hasPermission('role:manage')) {
         fetchRoles();
       }
     }
-  }, [currentUser, fetchUsers, hasPermission]); // RBAC CHANGE: Added hasPermission to dependencies
+  }, [currentUser, fetchUsers, hasPermission]);
 
-  // NEW: Function to fetch available roles
   const fetchRoles = async () => {
     setIsLoadingRoles(true);
     try {
@@ -51,7 +39,6 @@ const UserManagement: React.FC = () => {
       setRoles(rolesData);
     } catch (error) {
       console.error('Failed to fetch roles:', error);
-      // Handle error (e.g., show a message)
     } finally {
       setIsLoadingRoles(false);
     }
@@ -72,21 +59,24 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleToggleStatus = (user: User) => {
+  // ✅ FIXED: Updated to match the store function signature
+  const handleToggleStatus = async (user: User) => {
     if (window.confirm(`Are you sure you want to ${user.is_active ? 'disable' : 'enable'} user "${user.username}"?`)) {
-// TODO: Implement toggleUserStatus function\n//      // TODO: Implement toggleUserStatus function
-        // toggleUserStatus(user.id).catch(console.error);
+      try {
+        await toggleUserStatus(user.id);
+        // No need to refresh - the store already updates the local state
+      } catch (error) {
+        console.error('Failed to toggle user status:', error);
+        // Error is already handled in the store
+      }
     }
   };
 
-  // NEW: Function to handle role changes
   const handleRoleChange = async (userId: number, roleId: number) => {
     setAssigningRole(userId);
     try {
       await rolesService.assignRoleToUser(userId, roleId);
-      // Optimistically update the UI, or refetch users to get the new role name
-      await fetchUsers(); // Simplest way: refetch the user list
-      // Alternatively, you could update the local state without a full refetch
+      await fetchUsers();
     } catch (error) {
       console.error('Failed to assign role:', error);
       alert('Failed to assign role. Please try again.');
@@ -95,7 +85,6 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  // NEW: Function to fetch 2FA status for the current user (admin/manager only)
   const fetch2FAStatus = async (userId: number) => {
     try {
       const statusResponse: TwoFactorStatusResponse = await twoFactorService.getStatus();
@@ -113,7 +102,6 @@ const UserManagement: React.FC = () => {
     );
   }
 
-  // RBAC CHANGE: Replaced role check with permission check
   if (!currentUser || !hasPermission('user:read')) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -166,7 +154,6 @@ const UserManagement: React.FC = () => {
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          {/* Added max-h-screen and overflow-y-auto for scrolling */}
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <UserForm
               onSubmit={handleCreateUser}
@@ -177,20 +164,18 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
       )}
-      {/* NEW: 2FA Setup Modal */}
+
       <TwoFactorSetupModal
         isOpen={is2FAModalOpen}
         onClose={() => setIs2FAModalOpen(false)}
         onSetupComplete={() => {
           if (currentUser) {
-            fetch2FAStatus(currentUser.id); // Refresh status after setup
+            fetch2FAStatus(currentUser.id);
           }
           setIs2FAModalOpen(false);
         }}
       />
-      {/* END NEW */}
 
-      {/* REPLACED: JSX block with overflow-x-auto for horizontal scrolling */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg overflow-x-auto">
         {isLoading && users.length === 0 ? (
           <div className="p-6 text-center">Loading users...</div>
@@ -201,10 +186,8 @@ const UserManagement: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                {/* RBAC CHANGE: Replaced Role with Permissions */}
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                {/* 2FA Status Column - Only show for current user */}
                 {currentUser && (
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">2FA</th>
                 )}
@@ -217,7 +200,6 @@ const UserManagement: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.username}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                  {/* RBAC CHANGE: Replaced Permissions count with Role selector */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {hasPermission('role:manage') ? (
                       isLoadingRoles || assigningRole === user.id ? (
@@ -249,7 +231,6 @@ const UserManagement: React.FC = () => {
                       {user.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  {/* 2FA Status Cell - Only show for current user */}
                   {currentUser && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.id === currentUser.id ? (
@@ -263,6 +244,7 @@ const UserManagement: React.FC = () => {
                     </td>
                   )}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {/* ✅ FIXED: Status toggle button now works */}
                     <button
                       onClick={() => handleToggleStatus(user)}
                       className={`mr-3 px-3 py-1 text-xs font-medium rounded-md ${
@@ -275,7 +257,6 @@ const UserManagement: React.FC = () => {
                     >
                       {user.is_active ? 'Disable' : 'Enable'}
                     </button>
-                    {/* 2FA Button (only shown for the current user) */}
                     {user.id === currentUser?.id && (
                       <button
                         onClick={() => setIs2FAModalOpen(true)}
@@ -289,7 +270,6 @@ const UserManagement: React.FC = () => {
                         {user2FAStatus[user.id] ? 'Disable 2FA' : 'Enable 2FA'}
                       </button>
                     )}
-                    {/* Delete Button */}
                     <button
                       onClick={() => handleDeleteUser(user)}
                       className="text-red-600 hover:text-red-900 disabled:opacity-50"

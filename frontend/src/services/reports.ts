@@ -3,6 +3,15 @@ import { SalesReport, DashboardMetrics, InventoryReport, FinancialReport } from 
 import { ReportFormat } from '../types/reports';
 import { SalesTrend, TopProduct } from '../hooks/useReports';
 
+// Interface for backend response (different from frontend)
+interface BackendSalesTrend {
+  date: string;
+  daily_sales: number;
+  daily_sales_original: number;
+  transactions: number;
+  average_order_value: number;
+}
+
 // Sales report
 export const reportsService = {
   getSalesReport: async (startDate?: string, endDate?: string): Promise<SalesReport> => {
@@ -71,14 +80,20 @@ export const reportsService = {
     return response.data;
   },
 
-  // Sales trends report - CORRECT ENDPOINT
+  // Sales trends report - FIXED: Transform backend data to frontend format
   getSalesTrends: async (startDate?: string, endDate?: string): Promise<SalesTrend[]> => {
     const params = new URLSearchParams();
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
 
-    const response = await api.get<SalesTrend[]>(`/api/reports/sales/trends?${params}`);
-    return response.data;
+    const response = await api.get<BackendSalesTrend[]>(`/api/reports/sales/trends?${params}`);
+    
+    // Transform backend data to frontend format
+    return response.data.map(item => ({
+      date: item.date,
+      sales: item.daily_sales,      // Transform daily_sales → sales
+      transactions: item.transactions,
+    }));
   },
 
   // Top products report - CORRECT ENDPOINT

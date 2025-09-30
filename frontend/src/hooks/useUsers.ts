@@ -7,12 +7,13 @@ interface UsersState {
   isLoading: boolean;
   error: string | null;
   selectedUser: User | null;
-  
+
   // Actions
   fetchUsers: () => Promise<void>;
   createUser: (userData: UserCreate) => Promise<void>;
   updateUser: (id: number, userData: UserCreate) => Promise<void>;
   deleteUser: (id: number) => Promise<void>;
+  toggleUserStatus: (id: number) => Promise<void>; // ✅ ADD THIS LINE
   setSelectedUser: (user: User | null) => void;
   clearError: () => void;
 }
@@ -38,9 +39,9 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     try {
       const newUser = await userService.createUser(userData);
       // Add the new user to the local state
-      set(state => ({ 
+      set(state => ({
         users: [...state.users, newUser],
-        isLoading: false 
+        isLoading: false
       }));
     } catch (error: any) {
       set({ error: error.response?.data?.detail || 'Failed to create user', isLoading: false });
@@ -69,9 +70,9 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     try {
       await userService.deleteUser(id);
       // Remove the user from the local state
-      set(state => ({ 
+      set(state => ({
         users: state.users.filter(user => user.id !== id),
-        isLoading: false 
+        isLoading: false
       }));
     } catch (error: any) {
       set({ error: error.response?.data?.detail || 'Failed to delete user', isLoading: false });
@@ -87,12 +88,12 @@ export const useUsersStore = create<UsersState>((set, get) => ({
       set(state => ({
         users: state.users.map(user => user.id === id ? updatedUser : user),
         isLoading: false
-    }));
-  }   catch (error: any) {
+      }));
+    } catch (error: any) {
       set({ error: error.response?.data?.detail || 'Failed to toggle user status', isLoading: false });
       throw error;
-  }
-},
+    }
+  },
 
   setSelectedUser: (user: User | null) => set({ selectedUser: user }),
   clearError: () => set({ error: null }),

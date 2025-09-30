@@ -43,14 +43,15 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart, search
                 {product.barcode}
               </p>
 
-              {/* Price - Prominent but well-spaced */}
-              <div className="mb-3">
-                <div className="text-lg font-bold text-gray-900 leading-tight">
+              {/* Price - Currency symbol and amount on separate lines */}
+              <div className="mb-3 flex flex-col items-center justify-center space-y-1">
+                <div className="text-sm font-bold text-gray-900 text-center">
                   <CurrencyDisplay
                     amount={product.price}
                     originalAmount={product.original_price}
                     originalCurrencyCode={product.original_currency_code}
                     exchangeRateAtCreation={product.exchange_rate_at_creation}
+                    multiLine={true}
                   />
                 </div>
               </div>

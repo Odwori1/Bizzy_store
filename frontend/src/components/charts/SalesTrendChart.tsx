@@ -15,6 +15,10 @@ interface SalesTrendChartProps {
 const SalesTrendChart: React.FC<SalesTrendChartProps> = ({ data }) => {
   const { formatCurrency, getCurrencySymbol, isLoading } = useCurrency();
 
+  // ADD DEBUG LOGGING
+  console.log('SalesTrendChart - Received data:', data);
+  console.log('SalesTrendChart - Data length:', data.length);
+
   // Convert sales data to local currency for display
   const convertedData = data.map(item => ({
     ...item,
