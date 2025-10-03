@@ -15,13 +15,22 @@ from app.routers import currency
 
 app = FastAPI(lifespan=lifespan)
 
-# CORS Middleware - UPDATE THIS SECTION
-origins = [
-    "http://localhost:3000",  # Default port for Create React App
-    "http://localhost:5173",  # Default port for Vite
-    "http://127.0.0.1:3000",  # Add this line
-    "http://127.0.0.1:5173",   # Add this line
-]
+# OLD CORS Middleware - COMMENTED OUT FOR DEPLOYMENT
+# origins = [
+#     "http://localhost:3000",  # Default port for Create React App
+#     "http://localhost:5173",  # Default port for Vite
+#     "http://127.0.0.1:3000",  # Add this line
+#     "http://127.0.0.1:5173",   # Add this line
+# ]
+
+# NEW CORS Middleware - Dynamic configuration for production
+import os
+
+# Get allowed origins from environment variable or use defaults
+origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173")
+origins = [origin.strip() for origin in origins_raw.split(",")]
+
+print(f"CORS Allowed Origins: {origins}")  # Debug logging
 
 app.add_middleware(
     CORSMiddleware,
