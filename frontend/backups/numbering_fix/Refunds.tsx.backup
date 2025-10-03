@@ -99,7 +99,7 @@ export default function Refunds() {
                   {refunds.map((refund) => (
                     <tr key={refund.id} className="border-b hover:bg-gray-50">
                       <td className="p-3">Refund #{refund.business_refund_number}</td>
-                      <td className="p-3">Sale #{refund.business_sale_number}</td>
+                      <td className="p-3">Sale #{refund.sale_id}</td>
                       <td className="p-3">
                         <CurrencyDisplay
                           amount={refund.total_amount}

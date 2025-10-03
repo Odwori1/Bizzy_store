@@ -1,31 +1,31 @@
+# ~/Bizzy_store/backend/app/crud/expense.py - COMPLETE FIXED VERSION
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 from app.models.expense import Expense
 from app.schemas.expense_schema import ExpenseCreate
-
-# ADD imports at top
 from app.crud.business import get_business_by_user_id
-from app.services.currency_service import CurrencyService
-import asyncio
-
+from app.services.sequence_service import SequenceService
 from app.models.expense import ExpenseCategory
 from app.schemas.expense_schema import ExpenseCategoryCreate
 
 def create_expense(db: Session, expense_data, user_id: int, usd_amount: float, exchange_rate: Optional[float] = None):
-    """
-    Create a new expense with multi-currency support.
-    Saves the original amount, original currency, and the calculated USD amount.
-    """
+    """Create a new expense with multi-currency support - FIXED VERSION"""
     try:
-        # ADD: Get business context for currency
+        # Get business context for currency
         business = get_business_by_user_id(db, user_id)
+        if not business:
+            raise ValueError("User business not found")
+            
         business_currency = business.currency_code if business else 'USD'
-        
+
+        # FIXED PATTERN: Get sequence number FIRST, then create record
+        business_expense_number = SequenceService.get_next_number(db, expense_data.business_id, 'expense')
+
         db_expense = Expense(
             # These are the calculated values for internal use
-            amount=usd_amount,  # The calculated USD amount
-            exchange_rate=exchange_rate, # The rate used for the conversion
+            amount=usd_amount,
+            exchange_rate=exchange_rate,
 
             # These are the original user inputs to preserve intent
             original_amount=expense_data.original_amount,
@@ -39,7 +39,10 @@ def create_expense(db: Session, expense_data, user_id: int, usd_amount: float, e
             is_recurring=getattr(expense_data, 'is_recurring', False),
             recurrence_interval=getattr(expense_data, 'recurrence_interval', None),
             receipt_url=getattr(expense_data, 'receipt_url', None),
-            created_by=user_id
+            created_by=user_id,
+
+            # Use the sequence number we already obtained
+            business_expense_number=business_expense_number
         )
         db.add(db_expense)
         db.commit()
@@ -53,7 +56,6 @@ def get_business_expenses(db: Session, business_id: int,
                           start_date: Optional[datetime] = None,
                           end_date: Optional[datetime] = None):
     """Get expenses for a business with optional date filtering"""
-    # Updated query to join with ExpenseCategory and include category name
     query = db.query(
         Expense,
         ExpenseCategory.name.label('category_name')
@@ -70,13 +72,11 @@ def get_business_expenses(db: Session, business_id: int,
         query = query.filter(Expense.date <= end_date)
 
     results = query.order_by(Expense.date.desc()).all()
-
     expenses_with_category = []
     for expense, category_name in results:
         expense_with_category = expense
         expense_with_category.category_name = category_name
         expenses_with_category.append(expense_with_category)
-
     return expenses_with_category
 
 def delete_expense(db: Session, expense_id: int):

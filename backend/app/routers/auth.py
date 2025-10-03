@@ -31,7 +31,7 @@ def login_for_token(login_data: UserLogin, db: Session = Depends(get_db)):
 
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_403_FORBIDDEN,  # Changed from 401 to 403
             detail="Account is disabled. Please contact administrator.",
             headers={"WWW-Authenticate": "Bearer"}
         )

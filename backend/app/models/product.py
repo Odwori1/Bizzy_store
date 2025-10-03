@@ -29,3 +29,6 @@ class Product(Base):
 
     # Relationships
     sale_items = relationship("SaleItem", back_populates="product")
+
+    # Add business-scoped numbering
+    business_product_number = Column(Integer)  # Business-scoped product number

@@ -24,11 +24,11 @@ export default function Login() {
   }, [isAuthenticated, navigate]);
 
   // Reset the form if the user comes back to the login page after 2FA was required
-  //useEffect(() => {
-    //if (requires2FA) {
-      //clear2FA();
-    //}
-  //}, [clear2FA, requires2FA]);
+  // useEffect(() => {
+  //   if (requires2FA) {
+  //     clear2FA();
+  //   }
+  // }, [clear2FA, requires2FA]);
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +40,14 @@ export default function Login() {
       // DO NOT check state here. Let the useEffect above handle navigation.
       // The store update (isAuthenticated=true OR requires2FA=true) will trigger a re-render.
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+      // ✅ IMPROVED: Differentiate between disabled accounts and wrong credentials
+      if (err.response?.status === 403) {
+        setError('Your account has been disabled. Please contact your administrator.');
+      } else if (err.response?.status === 401) {
+        setError('Incorrect email/username or password. Please check your credentials.');
+      } else {
+        setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -65,8 +72,6 @@ export default function Login() {
     }
   };
 
-
-
   // If 2FA is required, show the code input form
   if (requires2FA) {
     return (
@@ -83,8 +88,36 @@ export default function Login() {
 
           <form className="mt-8 space-y-6" onSubmit={handle2FALogin}>
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {error}
+              <div className={`rounded-md p-4 ${
+                error.includes('disabled') 
+                  ? 'bg-red-50 border border-red-200' 
+                  : 'bg-yellow-50 border border-yellow-200'
+              }`}>
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    {error.includes('disabled') ? (
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="ml-3">
+                    <h3 className={`text-sm font-medium ${
+                      error.includes('disabled') ? 'text-red-800' : 'text-yellow-800'
+                    }`}>
+                      {error}
+                    </h3>
+                    {error.includes('disabled') && (
+                      <div className="mt-2 text-sm text-red-700">
+                        <p>Please contact your business owner or administrator to reactivate your account.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -145,14 +178,40 @@ export default function Login() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Use your email address or username
           </p>
-
-
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handlePasswordLogin}>
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
+            <div className={`rounded-md p-4 ${
+              error.includes('disabled') 
+                ? 'bg-red-50 border border-red-200' 
+                : 'bg-yellow-50 border border-yellow-200'
+            }`}>
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  {error.includes('disabled') ? (
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+                <div className="ml-3">
+                  <h3 className={`text-sm font-medium ${
+                    error.includes('disabled') ? 'text-red-800' : 'text-yellow-800'
+                  }`}>
+                    {error}
+                  </h3>
+                  {error.includes('disabled') && (
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>Please contact your business owner or administrator to reactivate your account.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -206,12 +265,12 @@ export default function Login() {
             >
               Forgot your password?
             </Link>
-	    <Link
-    	      to="/register"
-    	      className="text-blue-600 hover:text-blue-500 text-sm block"
+            <Link
+              to="/register"
+              className="text-blue-600 hover:text-blue-500 text-sm block"
             >
-    	      Create new account
-  	    </Link>
+              Create new account
+            </Link>
           </div>
         </form>
       </div>

@@ -43,3 +43,6 @@ class Expense(Base):
 
     def __repr__(self):
         return f"<Expense {self.description}: {self.original_amount} {self.original_currency_code} >"
+
+    # Add business-scoped numbering
+    business_expense_number = Column(Integer)  # Business-scoped expense number

@@ -56,7 +56,7 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
       ${business?.address || 'Business Address'}
       ${business?.phone || 'Phone: N/A'}
 
-      Receipt #: ${sale.business_sale_number}
+      Receipt #: ${sale.id}
       Date: ${receiptDate}
       Cashier: ${sale.user_name || 'System'}
 
@@ -86,7 +86,7 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `receipt-${sale.business_sale_number}.txt`;
+    a.download = `receipt-${sale.id}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -109,7 +109,7 @@ const Receipt: React.FC<ReceiptProps> = ({ sale, business, payments, amountRecei
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Receipt #:</span>
-            <span className="font-semibold">{sale.business_sale_number}</span>
+            <span className="font-semibold">{sale.id}</span>
           </div>
           <div className="flex justify-between">
             <span>Date:</span>

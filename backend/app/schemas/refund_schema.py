@@ -28,9 +28,10 @@ class RefundCreate(RefundBase):
 class Refund(RefundBase):
     id: int
     sale_id: int
+    business_sale_number: int  # 🆕 ADD THIS FIELD - for display purposes
     user_id: int
-    business_id: int  # 🆕 ADD THIS
-    business_refund_number: int  # 🆕 ADD THIS
+    business_id: int
+    business_refund_number: int
     total_amount: float  # USD amount
     # NEW: Currency context fields for historical preservation
     original_amount: float  # Local currency amount (PRESERVED)

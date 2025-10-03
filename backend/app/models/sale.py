@@ -24,6 +24,9 @@ class Sale(Base):
     usd_amount = Column(Float, default=0.0)            # USD equivalent
     usd_tax_amount = Column(Float, default=0.0)        # USD tax equivalent
 
+    # Add business-scoped numbering - CORRECT PLACEMENT
+    business_sale_number = Column(Integer)  # Business-scoped sale number
+
     payment_status = Column(String(20), default="pending")
     created_at = Column(DateTime, default=func.now())
 
