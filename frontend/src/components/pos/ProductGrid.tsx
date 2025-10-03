@@ -51,7 +51,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart, search
                     originalAmount={product.original_price}
                     originalCurrencyCode={product.original_currency_code}
                     exchangeRateAtCreation={product.exchange_rate_at_creation}
-                    multiLine={true}
                   />
                 </div>
               </div>

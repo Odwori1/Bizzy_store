@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm run preview"
+
+[[services]]
+name = "bizzy-pos-frontend"  
+[[services.ports]]
+port = 4173

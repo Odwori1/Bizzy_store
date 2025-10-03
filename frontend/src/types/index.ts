@@ -356,7 +356,6 @@ export interface Refund {
   business_id: number;
   business_refund_number: number;
   business_sale_number: number;  // 🆕 ADD business sale number for display
-  business_sale_number: number;  // 🆕 ADD business sale number for display
   reason: string | null;
   total_amount: number;
   
