@@ -27,7 +27,7 @@ app = FastAPI(lifespan=lifespan)
 import os
 
 # Get allowed origins from environment variable or use defaults
-origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173,https://bizzy-pos.netlify.app")
+origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173,https://bizzy-pos.netlify.app,https://bizzy-pos-backend-production.up.railway.app")
 origins = [origin.strip() for origin in origins_raw.split(",")]
 
 print(f"CORS Allowed Origins: {origins}")  # Debug logging
