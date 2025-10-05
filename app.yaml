@@ -5,7 +5,7 @@ services:
   github:
     repo: Odwori1/Bizzy_store
     branch: main
-  run_command: pip install -r requirements.txt && python -m uvicorn app.main:app --host 0.0.0.0 --port 8080
+  run_command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8080
   environment_slug: python
   instance_count: 1
   instance_size_slug: basic-xxs
@@ -28,7 +28,7 @@ services:
   static_sites:
     build_command: npm install && npm run build
     output_dir: dist
-    environment_slug: static
+  environment_slug: static
   instance_count: 1
   instance_size_slug: basic-xxs
   envs:
@@ -39,4 +39,3 @@ databases:
 - engine: PG
   name: bizzy-pos-db
   version: "13"
-  size: db-s-1vcpu-1gb

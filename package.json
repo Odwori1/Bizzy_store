@@ -1,0 +1,11 @@
+{
+  "name": "bizzy-pos-fullstack",
+  "version": "1.0.0",
+  "description": "Bizzy POS System - Fullstack Application",
+  "scripts": {
+    "postinstall": "echo 'Fullstack app detected'"
+  },
+  "keywords": ["pos", "fullstack", "python", "react"],
+  "author": "Odwori",
+  "license": "MIT"
+}
