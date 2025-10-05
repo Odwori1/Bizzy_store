@@ -1,0 +1,6 @@
+Testing Information:
+===================
+
+Frontend Tests:
+--------------
+Vitest configuration detected

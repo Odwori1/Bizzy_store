@@ -1,0 +1,16 @@
+SALES SUMMARY
+Total Sales,$25.50
+Total Tax,$3.52
+Transactions,1
+Avg Transaction Value,$25.50
+
+PAYMENT METHODS
+cash,1
+
+TOP PRODUCTS
+Product,Quantity Sold,Revenue,Margin
+Test Product,2,$21.98,30.0%
+
+SALES TRENDS
+Date,Daily Sales,Transactions,Avg Order Value
+2025-08-20,$25.50,1,$25.50

@@ -1,0 +1,181 @@
+Database Schema:
+================
+
+📊 Analytics
+----------------------------------------
+class BarcodeScanEvent(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    barcode = Column(String(50), index=True)
+    success = Column(Boolean, default=False)
+    source = Column(String(20))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    session_id = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=func.now())
+
+📊 Business
+----------------------------------------
+class Business(Base):
+    id = Column(Integer, primary_key=True)
+    #user_id = Column(Integer, ForeignKey("users.id"))
+    name = Column(String(100))
+    address = Column(String(200))
+    phone = Column(String(20))
+    email = Column(String(100))
+    logo_url = Column(String(200))
+    tax_id = Column(String(50))
+    currency_code = Column(String(3), ForeignKey('currencies.code'), default='USD')
+    country = Column(String(100), default="United States")
+
+📊 Currency
+----------------------------------------
+class Currency(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(3), unique=True, nullable=False)  # ISO 4217 code: USD, UGX, EUR
+    name = Column(String(100), nullable=False)
+    symbol = Column(String(10), nullable=False)
+    decimal_places = Column(Integer, default=2)
+    symbol_position = Column(String(20), default="before")  # before, after, space_before, space_after
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    id = Column(Integer, primary_key=True, index=True)
+    base_currency = Column(String(3), ForeignKey('currencies.code'), nullable=False)
+
+📊 Customer
+----------------------------------------
+class Customer(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, index=True)
+    phone = Column(String(20), nullable=True)
+    address = Column(String(200), nullable=True)
+    loyalty_points = Column(Integer, default=0)
+    total_spent = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=func.now())
+    last_purchase = Column(DateTime, nullable=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)
+
+📊 Expense
+----------------------------------------
+class ExpenseCategory(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False)
+    description = Column(String(255))
+    is_active = Column(Boolean, default=True)
+    id = Column(Integer, primary_key=True, index=True)
+    amount = Column(Numeric(10, 2), nullable=False)
+    original_amount = Column(Numeric(10, 2), nullable=False)
+    original_currency_code = Column(String(3), nullable=False)
+    exchange_rate = Column(Numeric(10, 6))
+    description = Column(String(255))
+
+📊 Inventory
+----------------------------------------
+class InventoryHistory(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"))
+    business_id = Column(Integer, ForeignKey("businesses.id"))          # 🆕 ADD
+    business_inventory_number = Column(Integer)                         # 🆕 ADD
+    change_type = Column(String(20))  # 'restock', 'sale', 'adjustment', 'damage'
+    quantity_change = Column(Integer)  # Positive for restock, negative for sale
+    previous_quantity = Column(Integer)
+    new_quantity = Column(Integer)
+    reason = Column(String(200), nullable=True)  # Optional reason for adjustment
+    changed_by = Column(Integer, ForeignKey("users.id"))  # User who made the change
+
+📊 Payment
+----------------------------------------
+class Payment(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    sale_id = Column(Integer, ForeignKey("sales.id"))
+    amount = Column(Float)
+    payment_method = Column(String(20))  # cash, card, mobile_money
+    transaction_id = Column(String(100), nullable=True)
+    status = Column(String(20), default="pending")  # pending, completed, failed
+    created_at = Column(DateTime, default=func.now())
+    original_amount = Column(Float)  # Local currency amount (PRESERVED)
+    original_currency_code = Column(String(3), default='USD')  # Currency code
+    exchange_rate_at_payment = Column(Float, default=1.0)   # Rate used for conversion
+
+📊 Permission
+----------------------------------------
+class Permission(Base):
+    Column('role_id', ForeignKey('roles.id'), primary_key=True),
+    Column('permission_id', ForeignKey('permissions.id'), primary_key=True)
+    Column('user_id', ForeignKey('users.id'), primary_key=True),
+    Column('role_id', ForeignKey('roles.id'), primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, index=True, nullable=False)  # e.g., "product:create"
+    description = Column(String(255))  # e.g., "Allows creating new products"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), unique=True, index=True, nullable=False)  # e.g., "Owner", "Manager", "Cashier"
+    description = Column(String(255))  # e.g., "Has full access to all features"
+
+📊 Product
+----------------------------------------
+class Product(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), index=True)
+    description = Column(String(300), nullable=True)
+    price = Column(Float) # Price in USD (existing field)
+    cost_price = Column(Float, nullable=True)  # Cost price in USD for profit calculation
+    barcode = Column(String(50), unique=True)
+    stock_quantity = Column(Integer, default=0)
+    min_stock_level = Column(Integer, default=5)  # Minimum stock before alert
+    last_restocked = Column(DateTime, default=func.now())  # Last restock date
+    created_at = Column(DateTime, default=func.now())  # Creation timestamp
+
+📊 Refund
+----------------------------------------
+class Refund(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    sale_id = Column(Integer, ForeignKey("sales.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))  # The staff who processed the refund
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)  # 🆕 ADD THIS
+    business_refund_number = Column(Integer)  # 🆕 ADD THIS - per-business sequence
+    reason = Column(Text, nullable=True)  # Reason for the refund
+    total_amount = Column(Float)  # Total amount refunded (USD)
+    original_amount = Column(Float)  # Total amount refunded in the original local currency (PRESERVED)
+    original_currency = Column(String(3))  # Currency code at the time of the original sale (e.g., 'UGX')
+    exchange_rate_at_refund = Column(Float)  # Exchange rate used (Local -> USD)
+
+📊 Sale
+----------------------------------------
+class Sale(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)  # <-- ADD THIS
+    total_amount = Column(Float, default=0.0)          # USD amount
+    tax_amount = Column(Float, default=0.0)           # USD tax amount
+    original_amount = Column(Float, default=0.0)       # Local currency amount
+    original_currency = Column(String(3), default='USD')  # Currency at time of sale
+    exchange_rate_at_sale = Column(Float, default=1.0)   # Rate used for conversion
+    usd_amount = Column(Float, default=0.0)            # USD equivalent
+
+📊 Supplier
+----------------------------------------
+class Supplier(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    contact_person = Column(String(100))
+    email = Column(String(100))
+    phone = Column(String(20))
+    address = Column(Text)
+    tax_id = Column(String(50))
+    payment_terms = Column(String(50))
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+📊 User
+----------------------------------------
+class User(Base):
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=True, index=True)
+    hashed_password = Column(String(128), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    reset_token = Column(String(100), unique=True, index=True, nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=True)
+    two_factor_enabled = Column(Boolean, default=False)

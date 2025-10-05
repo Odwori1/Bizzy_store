@@ -1,0 +1,21 @@
+API Usage Examples:
+==================
+Authentication:
+--------------
+POST /api/auth/token
+curl -X POST http://localhost:8000/api/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "test_owner", "password": "secret"}'
+
+Sales:
+-----
+GET /api/sales
+curl -H "Authorization: Bearer <token>" http://localhost:8000/api/sales
+
+Inventory:
+---------
+POST /api/inventory/adjust
+curl -X POST -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"product_id": 1, "quantity_change": 5, "reason": "Restock"}'
+  http://localhost:8000/api/inventory/adjust

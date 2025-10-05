@@ -1,0 +1,19 @@
+[package]
+name = "bizzy-pos"
+version = "1.0.0"
+description = "Bizzy POS Desktop Application"
+authors = ["Bizzy Team"]
+license = "MIT"
+edition = "2021"
+
+[[bin]]
+name = "bizzy-pos"
+path = "src/main.rs"
+
+[dependencies]
+tauri = { version = "2.0.0", features = ["api-all"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.107"
+
+[build-dependencies]
+tauri-build = { version = "2.0.0" }
