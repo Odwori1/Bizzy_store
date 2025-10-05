@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.*
+
+# Database
+*.db
+*.sqlite3
+test.db
+
+# Logs
+*.log
+logs/
+
+# Pytest cache
+.pytest_cache/
+
+# Alembic swap files
+*.swp
+*.swo
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Electron
+dist-electron/
+electron/
+*.AppImage
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.asar
+
+# Android
+android/
+capacitor-cordova-android-plugins/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.tar.gz
+*.zip
+
+# Build outputs (we'll selectively add source)
+# !backend/app/
+# !frontend/src/
+# !dist-packages/

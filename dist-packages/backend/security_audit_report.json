@@ -1,0 +1,4171 @@
+{
+  "timestamp": "2025-09-24T06:45:20.788281",
+  "summary": {
+    "critical": 2,
+    "high": 0,
+    "medium": 0,
+    "secure": 50,
+    "total": 52
+  },
+  "results": [
+    {
+      "endpoint": "/api/analytics/dashboard",
+      "method": "GET",
+      "description": "Dashboard analytics",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:18 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:18 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/analytics/sales-trends",
+      "method": "GET",
+      "description": "Sales trends",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:18 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:18 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/analytics/top-products",
+      "method": "GET",
+      "description": "Top products",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:18 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:18 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/activity/recent",
+      "method": "GET",
+      "description": "Recent activities",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "activities": [
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T23:32:00.202750",
+              "id": 16,
+              "amount": 100000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 28.5,
+              "product_id": null,
+              "user_id": 14,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T23:32:00.202750",
+              "id": 27,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 21,
+              "user_id": 14,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T23:28:28.936979",
+              "id": 15,
+              "amount": 50000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 14.25,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T23:28:28.936979",
+              "id": 26,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 20,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T17:56:37.413277",
+              "id": 14,
+              "amount": 50000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 14.27278043888631,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T17:56:37.413277",
+              "id": 25,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 20,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "expense",
+              "description": "Expense: transport",
+              "timestamp": "2025-09-23T08:49:44.905615",
+              "id": 2,
+              "amount": 10000.0,
+              "currency_code": "UGX",
+              "exchange_rate": 0.000286,
+              "usd_amount": 2.86,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock adjustment: -1 units",
+              "timestamp": "2025-09-23T08:45:21.203830",
+              "id": 24,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 19,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T08:45:21.163488",
+              "id": 13,
+              "amount": 100000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 28.57016003999699,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T08:45:21.163488",
+              "id": 23,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 19,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:18 GMT",
+          "server": "uvicorn",
+          "content-length": "2476",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "activities": [
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T23:32:00.202750",
+              "id": 16,
+              "amount": 100000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 28.5,
+              "product_id": null,
+              "user_id": 14,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T23:32:00.202750",
+              "id": 27,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 21,
+              "user_id": 14,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T23:28:28.936979",
+              "id": 15,
+              "amount": 50000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 14.25,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T23:28:28.936979",
+              "id": 26,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 20,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T17:56:37.413277",
+              "id": 14,
+              "amount": 50000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 14.27278043888631,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T17:56:37.413277",
+              "id": 25,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 20,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "expense",
+              "description": "Expense: transport",
+              "timestamp": "2025-09-23T08:49:44.905615",
+              "id": 2,
+              "amount": 10000.0,
+              "currency_code": "UGX",
+              "exchange_rate": 0.000286,
+              "usd_amount": 2.86,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock adjustment: -1 units",
+              "timestamp": "2025-09-23T08:45:21.203830",
+              "id": 24,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 19,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "sale",
+              "description": "Sale completed",
+              "timestamp": "2025-09-23T08:45:21.163488",
+              "id": 13,
+              "amount": 100000.0,
+              "currency_code": "UGX",
+              "exchange_rate": null,
+              "usd_amount": 28.57016003999699,
+              "product_id": null,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            },
+            {
+              "type": "inventory",
+              "description": "Stock sale: -1 units",
+              "timestamp": "2025-09-23T08:45:21.163488",
+              "id": 23,
+              "amount": null,
+              "currency_code": null,
+              "exchange_rate": null,
+              "usd_amount": null,
+              "product_id": 19,
+              "user_id": 15,
+              "username": null,
+              "created_at": null
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "2476",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/products/",
+      "method": "GET",
+      "description": "List products for POS",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "Audit Test Product - business_2",
+            "description": "Security audit test product",
+            "price": 0.2854556087777262,
+            "cost_price": 0.1427278043888631,
+            "barcode": "AUDIT123business_2",
+            "stock_quantity": 10,
+            "min_stock_level": 2,
+            "id": 22,
+            "business_product_number": 7,
+            "created_at": "2025-09-24T00:01:10.293873",
+            "updated_at": "2025-09-24T00:01:10.293873",
+            "last_restocked": "2025-09-24T00:01:10.293873",
+            "original_price": 1000.0,
+            "original_cost_price": 500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          },
+          {
+            "name": "Security Test Product",
+            "description": null,
+            "price": 0.28517015316894845,
+            "cost_price": null,
+            "barcode": "SEC_TEST_001",
+            "stock_quantity": 5,
+            "min_stock_level": 1,
+            "id": 24,
+            "business_product_number": 8,
+            "created_at": "2025-09-24T00:01:11.816978",
+            "updated_at": "2025-09-24T00:01:11.816978",
+            "last_restocked": "2025-09-24T00:01:11.816978",
+            "original_price": 999.0,
+            "original_cost_price": null,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          },
+          {
+            "name": "Imported Chocolate",
+            "description": "Imported chocolate",
+            "price": 5.99,
+            "cost_price": 3.0,
+            "barcode": "USD001",
+            "stock_quantity": 20,
+            "min_stock_level": 5,
+            "id": 4,
+            "business_product_number": 11,
+            "created_at": null,
+            "updated_at": null,
+            "last_restocked": null,
+            "original_price": 5.99,
+            "original_cost_price": 3.0,
+            "original_currency_code": "USD",
+            "exchange_rate_at_creation": 1.0
+          },
+          {
+            "name": "Soda Can",
+            "description": "Local soda",
+            "price": 0.85,
+            "cost_price": 0.4,
+            "barcode": "UGX001",
+            "stock_quantity": 98,
+            "min_stock_level": 20,
+            "id": 1,
+            "business_product_number": 10,
+            "created_at": null,
+            "updated_at": "2025-09-14T23:01:44.486471",
+            "last_restocked": null,
+            "original_price": 3000.0,
+            "original_cost_price": 1400.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285
+          },
+          {
+            "name": "Milk 1L",
+            "description": "Local milk",
+            "price": 2.14,
+            "cost_price": 1.07,
+            "barcode": "UGX003",
+            "stock_quantity": 28,
+            "min_stock_level": 5,
+            "id": 3,
+            "business_product_number": 9,
+            "created_at": null,
+            "updated_at": "2025-09-15T07:59:53.694643",
+            "last_restocked": null,
+            "original_price": 7500.0,
+            "original_cost_price": 3750.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285
+          },
+          {
+            "name": "Test Product Fixed",
+            "description": "Test product with fixed currency conversion",
+            "price": 0.5687418568340732,
+            "cost_price": 0.2843709284170366,
+            "barcode": "TEST124",
+            "stock_quantity": 10,
+            "min_stock_level": 5,
+            "id": 9,
+            "business_product_number": 3,
+            "created_at": "2025-09-15T09:04:54.833901",
+            "updated_at": "2025-09-15T09:04:54.833901",
+            "last_restocked": "2025-09-15T09:04:54.833901",
+            "original_price": 2000.0,
+            "original_cost_price": 1000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366
+          },
+          {
+            "name": "cola cola",
+            "description": "soft drink",
+            "price": 0.28437,
+            "cost_price": 0.142185,
+            "barcode": "coke1234",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 7,
+            "business_product_number": 2,
+            "created_at": "2025-09-15T08:28:58.190143",
+            "updated_at": "2025-09-15T08:29:22.671599",
+            "last_restocked": "2025-09-15T08:28:58.190143",
+            "original_price": 1000.0,
+            "original_cost_price": 500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284
+          },
+          {
+            "name": "airpods",
+            "description": "earphones",
+            "price": 1.421854642085183,
+            "cost_price": 0.8531127852511098,
+            "barcode": "Arp09786",
+            "stock_quantity": 5,
+            "min_stock_level": 5,
+            "id": 10,
+            "business_product_number": 4,
+            "created_at": "2025-09-15T09:08:28.739107",
+            "updated_at": "2025-09-16T17:25:25.780662",
+            "last_restocked": "2025-09-15T09:08:28.739107",
+            "original_price": 5000.0,
+            "original_cost_price": 3000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366
+          },
+          {
+            "name": "Samsung Galaxy s24",
+            "description": "smart phone",
+            "price": 28.5,
+            "cost_price": 22.86,
+            "barcode": "sgs1234567890",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 6,
+            "business_product_number": 1,
+            "created_at": "2025-09-14T20:22:28.487226",
+            "updated_at": "2025-09-14T20:22:55.667062",
+            "last_restocked": "2025-09-14T20:22:28.487226",
+            "original_price": 100000.0,
+            "original_cost_price": 80000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284590665256279
+          },
+          {
+            "name": "motorola g7",
+            "description": "smart phone",
+            "price": 28.543523623515558,
+            "cost_price": 22.834818898812447,
+            "barcode": "mt142532415",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 11,
+            "business_product_number": 5,
+            "created_at": "2025-09-20T12:13:53.355773",
+            "updated_at": "2025-09-20T12:51:28.100715",
+            "last_restocked": "2025-09-20T12:13:53.355773",
+            "original_price": 100000.0,
+            "original_cost_price": 80000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854352362351556
+          },
+          {
+            "name": "Test Product Fixed",
+            "description": "Test description after fix",
+            "price": 4.285524005999548,
+            "cost_price": 2.857016003999699,
+            "barcode": "TESTFIXED123",
+            "stock_quantity": 50,
+            "min_stock_level": 5,
+            "id": 18,
+            "business_product_number": 6,
+            "created_at": "2025-09-23T08:37:42.990354",
+            "updated_at": "2025-09-23T08:37:42.990354",
+            "last_restocked": "2025-09-23T08:37:42.990354",
+            "original_price": 15000.0,
+            "original_cost_price": 10000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002857016003999699
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "4916",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "party box",
+            "description": "outdoor speakers",
+            "price": 28.57016003999699,
+            "cost_price": 22.856128031997592,
+            "barcode": "pb00100910",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 19,
+            "business_product_number": 1,
+            "created_at": "2025-09-23T08:43:12.361517",
+            "updated_at": "2025-09-23T08:45:21.203830",
+            "last_restocked": "2025-09-23T08:43:12.361517",
+            "original_price": 100000.0,
+            "original_cost_price": 80000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002857016003999699
+          },
+          {
+            "name": "itel pro",
+            "description": "mobile phone",
+            "price": 14.27278043888631,
+            "cost_price": 8.563668263331786,
+            "barcode": "itp34526231",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 20,
+            "business_product_number": 2,
+            "created_at": "2025-09-23T17:56:12.364904",
+            "updated_at": "2025-09-23T23:28:28.936979",
+            "last_restocked": "2025-09-23T17:56:12.364904",
+            "original_price": 50000.0,
+            "original_cost_price": 30000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          },
+          {
+            "name": "Audit Test Product - business_7",
+            "description": "Security audit test product",
+            "price": 0.2854556087777262,
+            "cost_price": 0.1427278043888631,
+            "barcode": "AUDIT123business_7",
+            "stock_quantity": 10,
+            "min_stock_level": 2,
+            "id": 23,
+            "business_product_number": 3,
+            "created_at": "2025-09-24T00:01:10.638069",
+            "updated_at": "2025-09-24T00:01:10.638069",
+            "last_restocked": "2025-09-24T00:01:10.638069",
+            "original_price": 1000.0,
+            "original_cost_price": 500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "1465",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper business isolation"
+    },
+    {
+      "endpoint": "/api/products/barcode/AUDIT123business_2",
+      "method": "GET",
+      "description": "Barcode scan Business 2",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/products/barcode/AUDIT123business_7",
+      "method": "GET",
+      "description": "Barcode scan Business 7",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/sales/",
+      "method": "GET",
+      "description": "List all sales",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "id": 12,
+            "business_sale_number": 8,
+            "total_amount": 28.5,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-20T12:51:28.041101",
+            "user_name": "test_owner",
+            "original_amount": 100000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.000285
+          },
+          {
+            "id": 10,
+            "business_sale_number": 7,
+            "total_amount": 1.4268310102723825,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-16T17:25:25.746010",
+            "user_name": "test_owner",
+            "original_amount": 5000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.0002853662020544765
+          },
+          {
+            "id": 9,
+            "business_sale_number": 6,
+            "total_amount": 1.4271578829203955,
+            "tax_amount": 0.0,
+            "payment_status": "refunded",
+            "created_at": "2025-09-16T08:20:06.803802",
+            "user_name": "test_owner",
+            "original_amount": 5000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.0002854315765840791
+          },
+          {
+            "id": 8,
+            "business_sale_number": 5,
+            "total_amount": 1.4200000000000002,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-15T09:09:01.042479",
+            "user_name": "test_owner",
+            "original_amount": 5000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.000284
+          },
+          {
+            "id": 7,
+            "business_sale_number": 4,
+            "total_amount": 0.28400000000000003,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-15T08:29:22.633133",
+            "user_name": "test_owner",
+            "original_amount": 1000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.000284
+          },
+          {
+            "id": 6,
+            "business_sale_number": 3,
+            "total_amount": 2.1327819631277745,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-15T07:59:53.655415",
+            "user_name": "test_owner",
+            "original_amount": 7500.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.0002843709284170366
+          },
+          {
+            "id": 5,
+            "business_sale_number": 2,
+            "total_amount": 0.855,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-14T23:01:44.429816",
+            "user_name": "test_owner",
+            "original_amount": 3000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.000285
+          },
+          {
+            "id": 4,
+            "business_sale_number": 1,
+            "total_amount": 28.5,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-14T20:22:55.621125",
+            "user_name": "test_owner",
+            "original_amount": 100000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.000285
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "2125",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "id": 15,
+            "business_sale_number": 3,
+            "total_amount": 14.25,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-23T23:28:28.936979",
+            "user_name": "security_tester",
+            "original_amount": 50000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.000285
+          },
+          {
+            "id": 14,
+            "business_sale_number": 2,
+            "total_amount": 14.27278043888631,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-23T17:56:37.413277",
+            "user_name": "security_tester",
+            "original_amount": 50000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.0002854556087777262
+          },
+          {
+            "id": 13,
+            "business_sale_number": 1,
+            "total_amount": 28.57016003999699,
+            "tax_amount": 0.0,
+            "payment_status": "completed",
+            "created_at": "2025-09-23T08:45:21.163488",
+            "user_name": "security_tester",
+            "original_amount": 100000.0,
+            "original_currency": "UGX",
+            "exchange_rate_at_sale": 0.0002857016003999699
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "829",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper business isolation"
+    },
+    {
+      "endpoint": "/api/sales/1",
+      "method": "GET",
+      "description": "Access Sale #1 (Business 2)",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Sale not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "27",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Sale not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "27",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper access denial"
+    },
+    {
+      "endpoint": "/api/sales/13",
+      "method": "GET",
+      "description": "Access Sale #13 (Business 2)",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Sale not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "27",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "user_id": 15,
+          "id": 13,
+          "business_sale_number": null,
+          "total_amount": 28.57016003999699,
+          "tax_amount": 0.0,
+          "usd_amount": 28.57016003999699,
+          "usd_tax_amount": 0.0,
+          "original_amount": 100000.0,
+          "original_currency": "UGX",
+          "exchange_rate_at_sale": 0.0002857016003999699,
+          "payment_status": "completed",
+          "created_at": "2025-09-23T08:45:21.163488",
+          "sale_items": [
+            {
+              "product_id": 19,
+              "quantity": 1,
+              "unit_price": 28.57016003999699,
+              "product_name": "party box",
+              "id": 12,
+              "subtotal": 28.57016003999699,
+              "sale_id": 13,
+              "refunded_quantity": 0,
+              "original_unit_price": 100000.0,
+              "original_subtotal": 100000.0,
+              "exchange_rate_at_creation": 0.0002857016003999699
+            }
+          ],
+          "payments": [
+            {
+              "amount": 28.57016003999699,
+              "payment_method": "cash",
+              "transaction_id": null,
+              "original_amount": 100000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_payment": 0.0002857016003999699,
+              "id": 12,
+              "sale_id": 13,
+              "status": "completed",
+              "created_at": "2025-09-23T08:45:21.163488"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "887",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper access to own data"
+    },
+    {
+      "endpoint": "/api/sales/15",
+      "method": "GET",
+      "description": "Access Sale #15 (Business 7)",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Sale not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "27",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "user_id": 15,
+          "id": 15,
+          "business_sale_number": null,
+          "total_amount": 14.25,
+          "tax_amount": 0.0,
+          "usd_amount": 14.25,
+          "usd_tax_amount": 0.0,
+          "original_amount": 50000.0,
+          "original_currency": "UGX",
+          "exchange_rate_at_sale": 0.000285,
+          "payment_status": "completed",
+          "created_at": "2025-09-23T23:28:28.936979",
+          "sale_items": [
+            {
+              "product_id": 20,
+              "quantity": 1,
+              "unit_price": 14.25,
+              "product_name": "itel pro",
+              "id": 14,
+              "subtotal": 14.25,
+              "sale_id": 15,
+              "refunded_quantity": 0,
+              "original_unit_price": 50000.0,
+              "original_subtotal": 50000.0,
+              "exchange_rate_at_creation": 0.000285
+            }
+          ],
+          "payments": [
+            {
+              "amount": 14.25,
+              "payment_method": "cash",
+              "transaction_id": null,
+              "original_amount": 50000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_payment": 0.000285,
+              "id": 14,
+              "sale_id": 15,
+              "status": "completed",
+              "created_at": "2025-09-23T23:28:28.936979"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "783",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper access to own data"
+    },
+    {
+      "endpoint": "/api/sales/reports/daily",
+      "method": "GET",
+      "description": "Daily sales report",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "date": "2025-09-24",
+          "total_sales": 0.0,
+          "total_tax": 0.0,
+          "total_transactions": 0,
+          "payment_methods": {}
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "99",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "date": "2025-09-24",
+          "total_sales": 0.0,
+          "total_tax": 0.0,
+          "total_transactions": 0,
+          "payment_methods": {}
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "99",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/sales/reports/daily?report_date=2025-09-24",
+      "method": "GET",
+      "description": "Today's sales report",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "date": "2025-09-24",
+          "total_sales": 0.0,
+          "total_tax": 0.0,
+          "total_transactions": 0,
+          "payment_methods": {}
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "99",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "date": "2025-09-24",
+          "total_sales": 0.0,
+          "total_tax": 0.0,
+          "total_transactions": 0,
+          "payment_methods": {}
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "99",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/products/",
+      "method": "GET",
+      "description": "List all products",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "Audit Test Product - business_2",
+            "description": "Security audit test product",
+            "price": 0.2854556087777262,
+            "cost_price": 0.1427278043888631,
+            "barcode": "AUDIT123business_2",
+            "stock_quantity": 10,
+            "min_stock_level": 2,
+            "id": 22,
+            "business_product_number": 7,
+            "created_at": "2025-09-24T00:01:10.293873",
+            "updated_at": "2025-09-24T00:01:10.293873",
+            "last_restocked": "2025-09-24T00:01:10.293873",
+            "original_price": 1000.0,
+            "original_cost_price": 500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          },
+          {
+            "name": "Security Test Product",
+            "description": null,
+            "price": 0.28517015316894845,
+            "cost_price": null,
+            "barcode": "SEC_TEST_001",
+            "stock_quantity": 5,
+            "min_stock_level": 1,
+            "id": 24,
+            "business_product_number": 8,
+            "created_at": "2025-09-24T00:01:11.816978",
+            "updated_at": "2025-09-24T00:01:11.816978",
+            "last_restocked": "2025-09-24T00:01:11.816978",
+            "original_price": 999.0,
+            "original_cost_price": null,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          },
+          {
+            "name": "Imported Chocolate",
+            "description": "Imported chocolate",
+            "price": 5.99,
+            "cost_price": 3.0,
+            "barcode": "USD001",
+            "stock_quantity": 20,
+            "min_stock_level": 5,
+            "id": 4,
+            "business_product_number": 11,
+            "created_at": null,
+            "updated_at": null,
+            "last_restocked": null,
+            "original_price": 5.99,
+            "original_cost_price": 3.0,
+            "original_currency_code": "USD",
+            "exchange_rate_at_creation": 1.0
+          },
+          {
+            "name": "Soda Can",
+            "description": "Local soda",
+            "price": 0.85,
+            "cost_price": 0.4,
+            "barcode": "UGX001",
+            "stock_quantity": 98,
+            "min_stock_level": 20,
+            "id": 1,
+            "business_product_number": 10,
+            "created_at": null,
+            "updated_at": "2025-09-14T23:01:44.486471",
+            "last_restocked": null,
+            "original_price": 3000.0,
+            "original_cost_price": 1400.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285
+          },
+          {
+            "name": "Milk 1L",
+            "description": "Local milk",
+            "price": 2.14,
+            "cost_price": 1.07,
+            "barcode": "UGX003",
+            "stock_quantity": 28,
+            "min_stock_level": 5,
+            "id": 3,
+            "business_product_number": 9,
+            "created_at": null,
+            "updated_at": "2025-09-15T07:59:53.694643",
+            "last_restocked": null,
+            "original_price": 7500.0,
+            "original_cost_price": 3750.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000285
+          },
+          {
+            "name": "Test Product Fixed",
+            "description": "Test product with fixed currency conversion",
+            "price": 0.5687418568340732,
+            "cost_price": 0.2843709284170366,
+            "barcode": "TEST124",
+            "stock_quantity": 10,
+            "min_stock_level": 5,
+            "id": 9,
+            "business_product_number": 3,
+            "created_at": "2025-09-15T09:04:54.833901",
+            "updated_at": "2025-09-15T09:04:54.833901",
+            "last_restocked": "2025-09-15T09:04:54.833901",
+            "original_price": 2000.0,
+            "original_cost_price": 1000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366
+          },
+          {
+            "name": "cola cola",
+            "description": "soft drink",
+            "price": 0.28437,
+            "cost_price": 0.142185,
+            "barcode": "coke1234",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 7,
+            "business_product_number": 2,
+            "created_at": "2025-09-15T08:28:58.190143",
+            "updated_at": "2025-09-15T08:29:22.671599",
+            "last_restocked": "2025-09-15T08:28:58.190143",
+            "original_price": 1000.0,
+            "original_cost_price": 500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284
+          },
+          {
+            "name": "airpods",
+            "description": "earphones",
+            "price": 1.421854642085183,
+            "cost_price": 0.8531127852511098,
+            "barcode": "Arp09786",
+            "stock_quantity": 5,
+            "min_stock_level": 5,
+            "id": 10,
+            "business_product_number": 4,
+            "created_at": "2025-09-15T09:08:28.739107",
+            "updated_at": "2025-09-16T17:25:25.780662",
+            "last_restocked": "2025-09-15T09:08:28.739107",
+            "original_price": 5000.0,
+            "original_cost_price": 3000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002843709284170366
+          },
+          {
+            "name": "Samsung Galaxy s24",
+            "description": "smart phone",
+            "price": 28.5,
+            "cost_price": 22.86,
+            "barcode": "sgs1234567890",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 6,
+            "business_product_number": 1,
+            "created_at": "2025-09-14T20:22:28.487226",
+            "updated_at": "2025-09-14T20:22:55.667062",
+            "last_restocked": "2025-09-14T20:22:28.487226",
+            "original_price": 100000.0,
+            "original_cost_price": 80000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.000284590665256279
+          },
+          {
+            "name": "motorola g7",
+            "description": "smart phone",
+            "price": 28.543523623515558,
+            "cost_price": 22.834818898812447,
+            "barcode": "mt142532415",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 11,
+            "business_product_number": 5,
+            "created_at": "2025-09-20T12:13:53.355773",
+            "updated_at": "2025-09-20T12:51:28.100715",
+            "last_restocked": "2025-09-20T12:13:53.355773",
+            "original_price": 100000.0,
+            "original_cost_price": 80000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854352362351556
+          },
+          {
+            "name": "Test Product Fixed",
+            "description": "Test description after fix",
+            "price": 4.285524005999548,
+            "cost_price": 2.857016003999699,
+            "barcode": "TESTFIXED123",
+            "stock_quantity": 50,
+            "min_stock_level": 5,
+            "id": 18,
+            "business_product_number": 6,
+            "created_at": "2025-09-23T08:37:42.990354",
+            "updated_at": "2025-09-23T08:37:42.990354",
+            "last_restocked": "2025-09-23T08:37:42.990354",
+            "original_price": 15000.0,
+            "original_cost_price": 10000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002857016003999699
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "4916",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "party box",
+            "description": "outdoor speakers",
+            "price": 28.57016003999699,
+            "cost_price": 22.856128031997592,
+            "barcode": "pb00100910",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 19,
+            "business_product_number": 1,
+            "created_at": "2025-09-23T08:43:12.361517",
+            "updated_at": "2025-09-23T08:45:21.203830",
+            "last_restocked": "2025-09-23T08:43:12.361517",
+            "original_price": 100000.0,
+            "original_cost_price": 80000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002857016003999699
+          },
+          {
+            "name": "itel pro",
+            "description": "mobile phone",
+            "price": 14.27278043888631,
+            "cost_price": 8.563668263331786,
+            "barcode": "itp34526231",
+            "stock_quantity": 8,
+            "min_stock_level": 5,
+            "id": 20,
+            "business_product_number": 2,
+            "created_at": "2025-09-23T17:56:12.364904",
+            "updated_at": "2025-09-23T23:28:28.936979",
+            "last_restocked": "2025-09-23T17:56:12.364904",
+            "original_price": 50000.0,
+            "original_cost_price": 30000.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          },
+          {
+            "name": "Audit Test Product - business_7",
+            "description": "Security audit test product",
+            "price": 0.2854556087777262,
+            "cost_price": 0.1427278043888631,
+            "barcode": "AUDIT123business_7",
+            "stock_quantity": 10,
+            "min_stock_level": 2,
+            "id": 23,
+            "business_product_number": 3,
+            "created_at": "2025-09-24T00:01:10.638069",
+            "updated_at": "2025-09-24T00:01:10.638069",
+            "last_restocked": "2025-09-24T00:01:10.638069",
+            "original_price": 1000.0,
+            "original_cost_price": 500.0,
+            "original_currency_code": "UGX",
+            "exchange_rate_at_creation": 0.0002854556087777262
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "1465",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper business isolation"
+    },
+    {
+      "endpoint": "/api/products/1",
+      "method": "GET",
+      "description": "Access Product #1 (Business 2)",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "name": "Soda Can",
+          "description": "Local soda",
+          "price": 0.85,
+          "cost_price": 0.4,
+          "barcode": "UGX001",
+          "stock_quantity": 98,
+          "min_stock_level": 20,
+          "id": 1,
+          "business_product_number": null,
+          "created_at": null,
+          "updated_at": "2025-09-14T23:01:44.486471",
+          "last_restocked": null,
+          "original_price": 3000.0,
+          "original_cost_price": 1400.0,
+          "original_currency_code": "UGX",
+          "exchange_rate_at_creation": 0.000285
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "377",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "error": {
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        }
+      },
+      "vulnerability": "AUTH_FAILURE - Could not test properly"
+    },
+    {
+      "endpoint": "/api/products/19",
+      "method": "GET",
+      "description": "Access Product #19 (Business 7)",
+      "business_2_result": {
+        "error": {
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "name": "party box",
+          "description": "outdoor speakers",
+          "price": 28.57016003999699,
+          "cost_price": 22.856128031997592,
+          "barcode": "pb00100910",
+          "stock_quantity": 8,
+          "min_stock_level": 5,
+          "id": 19,
+          "business_product_number": null,
+          "created_at": "2025-09-23T08:43:12.361517",
+          "updated_at": "2025-09-23T08:45:21.203830",
+          "last_restocked": "2025-09-23T08:43:12.361517",
+          "original_price": 100000.0,
+          "original_cost_price": 80000.0,
+          "original_currency_code": "UGX",
+          "exchange_rate_at_creation": 0.0002857016003999699
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "479",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "AUTH_FAILURE - Could not test properly"
+    },
+    {
+      "endpoint": "/api/products/search?query=Audit",
+      "method": "GET",
+      "description": "Search products",
+      "business_2_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "product_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "search"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "158",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "product_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "search"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "158",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:422, B7:422"
+    },
+    {
+      "endpoint": "/api/products/low-stock",
+      "method": "GET",
+      "description": "Low stock products",
+      "business_2_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "product_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "low-stock"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "161",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "product_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "low-stock"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "161",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:422, B7:422"
+    },
+    {
+      "endpoint": "/api/inventory/history",
+      "method": "GET",
+      "description": "Inventory history",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 9,
+            "new_quantity": 8,
+            "reason": "Sale #12",
+            "changed_at": "2025-09-20T12:51:28.100715",
+            "id": 22,
+            "product_id": 11,
+            "product_name": "motorola g7",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 10,
+            "new_quantity": 9,
+            "reason": "Sale #12",
+            "changed_at": "2025-09-20T12:51:28.041101",
+            "id": 21,
+            "product_id": 11,
+            "product_name": "motorola g7",
+            "changed_by": 2
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 6,
+            "new_quantity": 5,
+            "reason": "Sale #10",
+            "changed_at": "2025-09-16T17:25:25.780662",
+            "id": 20,
+            "product_id": 10,
+            "product_name": "airpods",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 7,
+            "new_quantity": 6,
+            "reason": "Sale #10",
+            "changed_at": "2025-09-16T17:25:25.746010",
+            "id": 19,
+            "product_id": 10,
+            "product_name": "airpods",
+            "changed_by": 2
+          },
+          {
+            "change_type": "refund",
+            "quantity_change": 1,
+            "previous_quantity": 6,
+            "new_quantity": 7,
+            "reason": "Refund #1 for Sale #9",
+            "changed_at": "2025-09-16T08:32:48.642753",
+            "id": 18,
+            "product_id": 10,
+            "product_name": "airpods",
+            "changed_by": 2
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 7,
+            "new_quantity": 6,
+            "reason": "Sale #9",
+            "changed_at": "2025-09-16T08:20:06.844505",
+            "id": 17,
+            "product_id": 10,
+            "product_name": "airpods",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 8,
+            "new_quantity": 7,
+            "reason": "Sale #9",
+            "changed_at": "2025-09-16T08:20:06.803802",
+            "id": 16,
+            "product_id": 10,
+            "product_name": "airpods",
+            "changed_by": 2
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 9,
+            "new_quantity": 8,
+            "reason": "Sale #8",
+            "changed_at": "2025-09-15T09:09:01.088666",
+            "id": 15,
+            "product_id": 10,
+            "product_name": "airpods",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 10,
+            "new_quantity": 9,
+            "reason": "Sale #8",
+            "changed_at": "2025-09-15T09:09:01.042479",
+            "id": 14,
+            "product_id": 10,
+            "product_name": "airpods",
+            "changed_by": 2
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 9,
+            "new_quantity": 8,
+            "reason": "Sale #7",
+            "changed_at": "2025-09-15T08:29:22.671599",
+            "id": 13,
+            "product_id": 7,
+            "product_name": "cola cola",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 10,
+            "new_quantity": 9,
+            "reason": "Sale #7",
+            "changed_at": "2025-09-15T08:29:22.633133",
+            "id": 12,
+            "product_id": 7,
+            "product_name": "cola cola",
+            "changed_by": 2
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 29,
+            "new_quantity": 28,
+            "reason": "Sale #6",
+            "changed_at": "2025-09-15T07:59:53.694643",
+            "id": 11,
+            "product_id": 3,
+            "product_name": "Milk 1L",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 30,
+            "new_quantity": 29,
+            "reason": "Sale #6",
+            "changed_at": "2025-09-15T07:59:53.655415",
+            "id": 10,
+            "product_id": 3,
+            "product_name": "Milk 1L",
+            "changed_by": 2
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 99,
+            "new_quantity": 98,
+            "reason": "Sale #5",
+            "changed_at": "2025-09-14T23:01:44.486471",
+            "id": 9,
+            "product_id": 1,
+            "product_name": "Soda Can",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 100,
+            "new_quantity": 99,
+            "reason": "Sale #5",
+            "changed_at": "2025-09-14T23:01:44.429816",
+            "id": 8,
+            "product_id": 1,
+            "product_name": "Soda Can",
+            "changed_by": 2
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 9,
+            "new_quantity": 8,
+            "reason": "Sale #4",
+            "changed_at": "2025-09-14T20:22:55.667062",
+            "id": 7,
+            "product_id": 6,
+            "product_name": "Samsung Galaxy s24",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 10,
+            "new_quantity": 9,
+            "reason": "Sale #4",
+            "changed_at": "2025-09-14T20:22:55.621125",
+            "id": 6,
+            "product_id": 6,
+            "product_name": "Samsung Galaxy s24",
+            "changed_by": 2
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "3641",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 9,
+            "new_quantity": 8,
+            "reason": "Sale #15",
+            "changed_at": "2025-09-23T23:28:28.936979",
+            "id": 26,
+            "product_id": 20,
+            "product_name": "itel pro",
+            "changed_by": 15
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 10,
+            "new_quantity": 9,
+            "reason": "Sale #14",
+            "changed_at": "2025-09-23T17:56:37.413277",
+            "id": 25,
+            "product_id": 20,
+            "product_name": "itel pro",
+            "changed_by": 15
+          },
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 9,
+            "new_quantity": 8,
+            "reason": "Sale #13",
+            "changed_at": "2025-09-23T08:45:21.203830",
+            "id": 24,
+            "product_id": 19,
+            "product_name": "party box",
+            "changed_by": 15
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 10,
+            "new_quantity": 9,
+            "reason": "Sale #13",
+            "changed_at": "2025-09-23T08:45:21.163488",
+            "id": 23,
+            "product_id": 19,
+            "product_name": "party box",
+            "changed_by": 15
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "855",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/inventory/history?product_id=1",
+      "method": "GET",
+      "description": "Inventory history Product 1",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "change_type": "adjustment",
+            "quantity_change": -1,
+            "previous_quantity": 99,
+            "new_quantity": 98,
+            "reason": "Sale #5",
+            "changed_at": "2025-09-14T23:01:44.486471",
+            "id": 9,
+            "product_id": 1,
+            "product_name": "Soda Can",
+            "changed_by": 2
+          },
+          {
+            "change_type": "sale",
+            "quantity_change": -1,
+            "previous_quantity": 100,
+            "new_quantity": 99,
+            "reason": "Sale #5",
+            "changed_at": "2025-09-14T23:01:44.429816",
+            "id": 8,
+            "product_id": 1,
+            "product_name": "Soda Can",
+            "changed_by": 2
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "426",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "2",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/inventory/stock-levels",
+      "method": "GET",
+      "description": "Current stock levels",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "product_id": 22,
+            "product_name": "Audit Test Product - business_2",
+            "current_stock": 10,
+            "min_stock_level": 2,
+            "last_restocked": "2025-09-24T00:01:10.293873",
+            "needs_restock": false
+          },
+          {
+            "product_id": 24,
+            "product_name": "Security Test Product",
+            "current_stock": 5,
+            "min_stock_level": 1,
+            "last_restocked": "2025-09-24T00:01:11.816978",
+            "needs_restock": false
+          },
+          {
+            "product_id": 4,
+            "product_name": "Imported Chocolate",
+            "current_stock": 20,
+            "min_stock_level": 5,
+            "last_restocked": null,
+            "needs_restock": false
+          },
+          {
+            "product_id": 1,
+            "product_name": "Soda Can",
+            "current_stock": 98,
+            "min_stock_level": 20,
+            "last_restocked": null,
+            "needs_restock": false
+          },
+          {
+            "product_id": 3,
+            "product_name": "Milk 1L",
+            "current_stock": 28,
+            "min_stock_level": 5,
+            "last_restocked": null,
+            "needs_restock": false
+          },
+          {
+            "product_id": 9,
+            "product_name": "Test Product Fixed",
+            "current_stock": 10,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-15T09:04:54.833901",
+            "needs_restock": false
+          },
+          {
+            "product_id": 7,
+            "product_name": "cola cola",
+            "current_stock": 8,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-15T08:28:58.190143",
+            "needs_restock": false
+          },
+          {
+            "product_id": 10,
+            "product_name": "airpods",
+            "current_stock": 5,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-15T09:08:28.739107",
+            "needs_restock": true
+          },
+          {
+            "product_id": 6,
+            "product_name": "Samsung Galaxy s24",
+            "current_stock": 8,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-14T20:22:28.487226",
+            "needs_restock": false
+          },
+          {
+            "product_id": 11,
+            "product_name": "motorola g7",
+            "current_stock": 8,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-20T12:13:53.355773",
+            "needs_restock": false
+          },
+          {
+            "product_id": 18,
+            "product_name": "Test Product Fixed",
+            "current_stock": 50,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-23T08:37:42.990354",
+            "needs_restock": false
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "1657",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "product_id": 19,
+            "product_name": "party box",
+            "current_stock": 8,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-23T08:43:12.361517",
+            "needs_restock": false
+          },
+          {
+            "product_id": 20,
+            "product_name": "itel pro",
+            "current_stock": 8,
+            "min_stock_level": 5,
+            "last_restocked": "2025-09-23T17:56:12.364904",
+            "needs_restock": false
+          },
+          {
+            "product_id": 23,
+            "product_name": "Audit Test Product - business_7",
+            "current_stock": 10,
+            "min_stock_level": 2,
+            "last_restocked": "2025-09-24T00:01:10.638069",
+            "needs_restock": false
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "476",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/inventory/low-stock",
+      "method": "GET",
+      "description": "Low stock alerts",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "product_id": 10,
+            "product_name": "airpods",
+            "current_stock": 5,
+            "min_stock_level": 5
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "82",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "2",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/reports/financial",
+      "method": "GET",
+      "description": "Financial reports",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "summary": {
+            "total_revenue": 63.118612973400154,
+            "total_revenue_original": 221500.0,
+            "exchange_rate": 0.000285,
+            "primary_currency": "UGX",
+            "cogs": 49.013229469314666,
+            "cogs_original": 171650.0,
+            "gross_profit": 14.105383504085488,
+            "gross_profit_original": 49850.0,
+            "gross_margin": 22.347423112782703,
+            "gross_margin_original": 22.505643340857787,
+            "tax_collected": 0.0,
+            "tax_collected_original": 0.0,
+            "operating_expenses": 1.43,
+            "operating_expenses_original": 5000.0,
+            "operating_expenses_exchange_rate": 0.000286,
+            "net_profit": 12.675383504085488,
+            "net_profit_original": 44850.0,
+            "net_income": 12.675383504085488,
+            "net_income_original": 44850.0
+          },
+          "profitability": [
+            {
+              "product_id": 6,
+              "product_name": "Samsung Galaxy s24",
+              "revenue": 28.5,
+              "revenue_original": 100000.0,
+              "cost": 22.86,
+              "cost_original": 80000.0,
+              "profit": 5.640000000000001,
+              "profit_original": 20000.0,
+              "margin": 19.789473684210527,
+              "exchange_rate_revenue": 0.000285,
+              "exchange_rate_cost": 0.00028575,
+              "exchange_rate_profit": 0.000282
+            },
+            {
+              "product_id": 11,
+              "product_name": "motorola g7",
+              "revenue": 28.5,
+              "revenue_original": 100000.0,
+              "cost": 22.834818898812447,
+              "cost_original": 80000.0,
+              "profit": 5.665181101187553,
+              "profit_original": 20000.0,
+              "margin": 19.877828425219484,
+              "exchange_rate_revenue": 0.000285,
+              "exchange_rate_cost": 0.0002854352362351556,
+              "exchange_rate_profit": 0.00028325905505937764
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "revenue": 2.846831010272383,
+              "revenue_original": 10000.0,
+              "cost": 1.7062255705022196,
+              "cost_original": 6000.0,
+              "profit": 1.1406054397701633,
+              "profit_original": 4000.0,
+              "margin": 40.06579370726438,
+              "exchange_rate_revenue": 0.00028468310102723826,
+              "exchange_rate_cost": 0.0002843709284170366,
+              "exchange_rate_profit": 0.0002851513599425408
+            },
+            {
+              "product_id": 3,
+              "product_name": "Milk 1L",
+              "revenue": 2.1327819631277745,
+              "revenue_original": 7500.0,
+              "cost": 1.07,
+              "cost_original": 3750.0,
+              "profit": 1.0627819631277744,
+              "profit_original": 3750.0,
+              "margin": 49.830783526,
+              "exchange_rate_revenue": 0.0002843709284170366,
+              "exchange_rate_cost": 0.00028533333333333335,
+              "exchange_rate_profit": 0.00028340852350073985
+            },
+            {
+              "product_id": 1,
+              "product_name": "Soda Can",
+              "revenue": 0.855,
+              "revenue_original": 3000.0,
+              "cost": 0.4,
+              "cost_original": 1400.0,
+              "profit": 0.45499999999999996,
+              "profit_original": 1600.0,
+              "margin": 53.21637426900584,
+              "exchange_rate_revenue": 0.000285,
+              "exchange_rate_cost": 0.00028571428571428574,
+              "exchange_rate_profit": 0.00028437499999999996
+            },
+            {
+              "product_id": 7,
+              "product_name": "cola cola",
+              "revenue": 0.28400000000000003,
+              "revenue_original": 1000.0,
+              "cost": 0.142185,
+              "cost_original": 500.0,
+              "profit": 0.14181500000000002,
+              "profit_original": 500.0,
+              "margin": 49.934859154929576,
+              "exchange_rate_revenue": 0.000284,
+              "exchange_rate_cost": 0.00028437,
+              "exchange_rate_profit": 0.00028363000000000005
+            }
+          ],
+          "cash_flow": {
+            "cash_in": 64.54577085632056,
+            "cash_in_original": 226500.0,
+            "cash_out": 50.443229469314666,
+            "cash_out_original": 176650.0,
+            "net_cash_flow": 14.102541387005893,
+            "net_cash_flow_original": 49850.0,
+            "cash_in_exchange_rate": 0.00028497029075638214,
+            "cash_out_exchange_rate": 0.0002855546530954694,
+            "net_cash_flow_exchange_rate": 0.0002828995263190751,
+            "payment_method_breakdown": {
+              "cash": 226500.0
+            }
+          },
+          "expense_breakdown": [
+            {
+              "category": "Transportation",
+              "amount": 1.43,
+              "amount_original": 5000.0,
+              "percentage": 100.0,
+              "exchange_rate": 0.000285
+            }
+          ],
+          "date_range": {
+            "start_date": "2025-08-25",
+            "end_date": "2025-09-24"
+          }
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "3224",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "summary": {
+            "total_revenue": 57.0929404788833,
+            "total_revenue_original": 200000.0,
+            "exchange_rate": 0.000286,
+            "primary_currency": "UGX",
+            "cogs": 39.98346455866116,
+            "cogs_original": 140000.0,
+            "gross_profit": 17.10947592022214,
+            "gross_profit_original": 60000.0,
+            "gross_margin": 29.96776094682028,
+            "gross_margin_original": 30.0,
+            "tax_collected": 0.0,
+            "tax_collected_original": 0.0,
+            "operating_expenses": 2.86,
+            "operating_expenses_original": 10000.0,
+            "operating_expenses_exchange_rate": 0.000286,
+            "net_profit": 14.249475920222139,
+            "net_profit_original": 50000.0,
+            "net_income": 14.249475920222139,
+            "net_income_original": 50000.0
+          },
+          "profitability": [
+            {
+              "product_id": 19,
+              "product_name": "party box",
+              "revenue": 28.57016003999699,
+              "revenue_original": 100000.0,
+              "cost": 22.856128031997592,
+              "cost_original": 80000.0,
+              "profit": 5.714032007999396,
+              "profit_original": 20000.0,
+              "margin": 19.999999999999996,
+              "exchange_rate_revenue": 0.0002857016003999699,
+              "exchange_rate_cost": 0.0002857016003999699,
+              "exchange_rate_profit": 0.00028570160039996983
+            },
+            {
+              "product_id": 20,
+              "product_name": "itel pro",
+              "revenue": 28.522780438886308,
+              "revenue_original": 100000.0,
+              "cost": 17.127336526663573,
+              "cost_original": 60000.0,
+              "profit": 11.395443912222735,
+              "profit_original": 40000.0,
+              "margin": 39.95207948481364,
+              "exchange_rate_revenue": 0.00028522780438886307,
+              "exchange_rate_cost": 0.0002854556087777262,
+              "exchange_rate_profit": 0.00028488609780556837
+            }
+          ],
+          "cash_flow": {
+            "cash_in": 57.0929404788833,
+            "cash_in_original": 200000.0,
+            "cash_out": 42.84346455866116,
+            "cash_out_original": 150000.0,
+            "net_cash_flow": 14.249475920222139,
+            "net_cash_flow_original": 50000.0,
+            "cash_in_exchange_rate": 0.0002854647023944165,
+            "cash_out_exchange_rate": 0.00028562309705774106,
+            "net_cash_flow_exchange_rate": 0.0002849895184044428,
+            "payment_method_breakdown": {
+              "cash": 200000.0
+            }
+          },
+          "expense_breakdown": [
+            {
+              "category": "Transportation",
+              "amount": 2.86,
+              "amount_original": 10000.0,
+              "percentage": 100.0,
+              "exchange_rate": 0.000286
+            }
+          ],
+          "date_range": {
+            "start_date": "2025-08-25",
+            "end_date": "2025-09-24"
+          }
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "1928",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/reports/sales",
+      "method": "GET",
+      "description": "Sales reports",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "summary": {
+            "total_sales": 63.118612973400154,
+            "total_sales_original": 221500.0,
+            "total_tax": 0.0,
+            "total_transactions": 7,
+            "average_transaction_value": 9.016944710485737,
+            "payment_methods": {
+              "cash": 8
+            },
+            "primary_currency": "UGX"
+          },
+          "top_products": [
+            {
+              "product_id": 6,
+              "product_name": "Samsung Galaxy s24",
+              "quantity_sold": 1,
+              "total_revenue": 28.5,
+              "total_revenue_original": 100000.0,
+              "profit_margin": 19.789473684210527
+            },
+            {
+              "product_id": 11,
+              "product_name": "motorola g7",
+              "quantity_sold": 1,
+              "total_revenue": 28.5,
+              "total_revenue_original": 100000.0,
+              "profit_margin": 19.877828425219484
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "quantity_sold": 2,
+              "total_revenue": 2.846831010272383,
+              "total_revenue_original": 10000.0,
+              "profit_margin": 40.06579370726438
+            },
+            {
+              "product_id": 3,
+              "product_name": "Milk 1L",
+              "quantity_sold": 1,
+              "total_revenue": 2.1327819631277745,
+              "total_revenue_original": 7500.0,
+              "profit_margin": 49.830783526
+            },
+            {
+              "product_id": 1,
+              "product_name": "Soda Can",
+              "quantity_sold": 1,
+              "total_revenue": 0.855,
+              "total_revenue_original": 3000.0,
+              "profit_margin": 53.21637426900584
+            },
+            {
+              "product_id": 7,
+              "product_name": "cola cola",
+              "quantity_sold": 1,
+              "total_revenue": 0.28400000000000003,
+              "total_revenue_original": 1000.0,
+              "profit_margin": 49.934859154929576
+            }
+          ],
+          "sales_trends": [
+            {
+              "date": "2025-09-14",
+              "daily_sales": 29.355,
+              "daily_sales_original": 103000.0,
+              "transactions": 2,
+              "average_order_value": 14.6775
+            },
+            {
+              "date": "2025-09-15",
+              "daily_sales": 3.836781963127774,
+              "daily_sales_original": 13500.0,
+              "transactions": 3,
+              "average_order_value": 1.2789273210425913
+            },
+            {
+              "date": "2025-09-16",
+              "daily_sales": 1.4268310102723825,
+              "daily_sales_original": 5000.0,
+              "transactions": 1,
+              "average_order_value": 1.4268310102723825
+            },
+            {
+              "date": "2025-09-20",
+              "daily_sales": 28.5,
+              "daily_sales_original": 100000.0,
+              "transactions": 1,
+              "average_order_value": 28.5
+            }
+          ],
+          "date_range": {
+            "start_date": "2025-08-25",
+            "end_date": "2025-09-24"
+          }
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "1789",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "summary": {
+            "total_sales": 57.0929404788833,
+            "total_sales_original": 200000.0,
+            "total_tax": 0.0,
+            "total_transactions": 3,
+            "average_transaction_value": 19.030980159627767,
+            "payment_methods": {
+              "cash": 3
+            },
+            "primary_currency": "UGX"
+          },
+          "top_products": [
+            {
+              "product_id": 19,
+              "product_name": "party box",
+              "quantity_sold": 1,
+              "total_revenue": 28.57016003999699,
+              "total_revenue_original": 100000.0,
+              "profit_margin": 19.999999999999996
+            },
+            {
+              "product_id": 20,
+              "product_name": "itel pro",
+              "quantity_sold": 2,
+              "total_revenue": 28.522780438886308,
+              "total_revenue_original": 100000.0,
+              "profit_margin": 39.95207948481364
+            }
+          ],
+          "sales_trends": [
+            {
+              "date": "2025-09-23",
+              "daily_sales": 57.0929404788833,
+              "daily_sales_original": 200000.0,
+              "transactions": 3,
+              "average_order_value": 19.030980159627767
+            }
+          ],
+          "date_range": {
+            "start_date": "2025-08-25",
+            "end_date": "2025-09-24"
+          }
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "789",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/reports/inventory",
+      "method": "GET",
+      "description": "Inventory reports",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "summary": {
+            "total_products": 11,
+            "total_stock_value": 952.9964479204905,
+            "total_stock_value_original": 2922114.8,
+            "primary_currency": "UGX",
+            "low_stock_items": 1,
+            "out_of_stock_items": 0,
+            "inventory_turnover": 0.0
+          },
+          "stock_movements": [
+            {
+              "product_id": 11,
+              "product_name": "motorola g7",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -28.543523623515558,
+              "value_original": -100000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002854352362351556,
+              "date": "2025-09-20"
+            },
+            {
+              "product_id": 11,
+              "product_name": "motorola g7",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -28.543523623515558,
+              "value_original": -100000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002854352362351556,
+              "date": "2025-09-20"
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -1.421854642085183,
+              "value_original": -5000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002843709284170366,
+              "date": "2025-09-16"
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -1.421854642085183,
+              "value_original": -5000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002843709284170366,
+              "date": "2025-09-16"
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "movement_type": "refund",
+              "quantity": 1,
+              "value": 1.421854642085183,
+              "value_original": 5000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002843709284170366,
+              "date": "2025-09-16"
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -1.421854642085183,
+              "value_original": -5000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002843709284170366,
+              "date": "2025-09-16"
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -1.421854642085183,
+              "value_original": -5000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002843709284170366,
+              "date": "2025-09-16"
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -1.421854642085183,
+              "value_original": -5000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002843709284170366,
+              "date": "2025-09-15"
+            },
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -1.421854642085183,
+              "value_original": -5000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002843709284170366,
+              "date": "2025-09-15"
+            },
+            {
+              "product_id": 7,
+              "product_name": "cola cola",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -0.28437,
+              "value_original": -1000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000284,
+              "date": "2025-09-15"
+            },
+            {
+              "product_id": 7,
+              "product_name": "cola cola",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -0.28437,
+              "value_original": -1000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000284,
+              "date": "2025-09-15"
+            },
+            {
+              "product_id": 3,
+              "product_name": "Milk 1L",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -2.14,
+              "value_original": -7500.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000285,
+              "date": "2025-09-15"
+            },
+            {
+              "product_id": 3,
+              "product_name": "Milk 1L",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -2.14,
+              "value_original": -7500.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000285,
+              "date": "2025-09-15"
+            },
+            {
+              "product_id": 1,
+              "product_name": "Soda Can",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -0.85,
+              "value_original": -3000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000285,
+              "date": "2025-09-14"
+            },
+            {
+              "product_id": 1,
+              "product_name": "Soda Can",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -0.85,
+              "value_original": -3000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000285,
+              "date": "2025-09-14"
+            },
+            {
+              "product_id": 6,
+              "product_name": "Samsung Galaxy s24",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -28.5,
+              "value_original": -100000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000284590665256279,
+              "date": "2025-09-14"
+            },
+            {
+              "product_id": 6,
+              "product_name": "Samsung Galaxy s24",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -28.5,
+              "value_original": -100000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.000284590665256279,
+              "date": "2025-09-14"
+            }
+          ],
+          "low_stock_alerts": [
+            {
+              "product_id": 10,
+              "product_name": "airpods",
+              "current_stock": 5,
+              "min_stock_level": 5
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "4193",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "summary": {
+            "total_products": 3,
+            "total_stock_value": 345.59807991884367,
+            "total_stock_value_original": 1210000.0,
+            "primary_currency": "UGX",
+            "low_stock_items": 0,
+            "out_of_stock_items": 0,
+            "inventory_turnover": 0.0
+          },
+          "stock_movements": [
+            {
+              "product_id": 20,
+              "product_name": "itel pro",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -14.27278043888631,
+              "value_original": -50000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002854556087777262,
+              "date": "2025-09-23"
+            },
+            {
+              "product_id": 20,
+              "product_name": "itel pro",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -14.27278043888631,
+              "value_original": -50000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002854556087777262,
+              "date": "2025-09-23"
+            },
+            {
+              "product_id": 19,
+              "product_name": "party box",
+              "movement_type": "adjustment",
+              "quantity": -1,
+              "value": -28.57016003999699,
+              "value_original": -100000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002857016003999699,
+              "date": "2025-09-23"
+            },
+            {
+              "product_id": 19,
+              "product_name": "party box",
+              "movement_type": "sale",
+              "quantity": -1,
+              "value": -28.57016003999699,
+              "value_original": -100000.0,
+              "original_currency_code": "UGX",
+              "exchange_rate_at_creation": 0.0002857016003999699,
+              "date": "2025-09-23"
+            }
+          ],
+          "low_stock_alerts": []
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "1195",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/reports/expenses",
+      "method": "GET",
+      "description": "Expense reports",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/customers/",
+      "method": "GET",
+      "description": "List all customers",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "Little Lion",
+            "email": "littlelion@little.com",
+            "phone": "+25677777777777",
+            "address": "little house",
+            "id": 1,
+            "loyalty_points": 0,
+            "total_spent": 0.0,
+            "created_at": "2025-09-16T17:40:44.576455",
+            "last_purchase": null
+          },
+          {
+            "name": "Audit Test Customer - business_2",
+            "email": "auditbusiness_2@test.com",
+            "phone": "1234567890",
+            "address": "Audit Test Address",
+            "id": 3,
+            "loyalty_points": 0,
+            "total_spent": 0.0,
+            "created_at": "2025-09-24T00:01:10.342518",
+            "last_purchase": null
+          },
+          {
+            "name": "Security Test Customer",
+            "email": "security@test.com",
+            "phone": "0000000000",
+            "address": null,
+            "id": 5,
+            "loyalty_points": 0,
+            "total_spent": 0.0,
+            "created_at": "2025-09-24T00:01:11.851640",
+            "last_purchase": null
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "657",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "levi",
+            "email": "levi@12tribe.com",
+            "phone": "00555444333",
+            "address": "levi st",
+            "id": 2,
+            "loyalty_points": 0,
+            "total_spent": 0.0,
+            "created_at": "2025-09-23T22:01:00.383046",
+            "last_purchase": null
+          },
+          {
+            "name": "Audit Test Customer - business_7",
+            "email": "auditbusiness_7@test.com",
+            "phone": "1234567890",
+            "address": "Audit Test Address",
+            "id": 4,
+            "loyalty_points": 0,
+            "total_spent": 0.0,
+            "created_at": "2025-09-24T00:01:10.664429",
+            "last_purchase": null
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "431",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper business isolation"
+    },
+    {
+      "endpoint": "/api/customers/1",
+      "method": "GET",
+      "description": "Access Customer #1",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "name": "Little Lion",
+          "email": "littlelion@little.com",
+          "phone": "+25677777777777",
+          "address": "little house",
+          "id": 1,
+          "loyalty_points": 0,
+          "total_spent": 0.0,
+          "created_at": "2025-09-16T17:40:44.576455",
+          "last_purchase": null
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "212",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Customer not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:19 GMT",
+          "server": "uvicorn",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper access denial"
+    },
+    {
+      "endpoint": "/api/customers/2",
+      "method": "GET",
+      "description": "Access Customer #2",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Customer not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "name": "levi",
+          "email": "levi@12tribe.com",
+          "phone": "00555444333",
+          "address": "levi st",
+          "id": 2,
+          "loyalty_points": 0,
+          "total_spent": 0.0,
+          "created_at": "2025-09-23T22:01:00.383046",
+          "last_purchase": null
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "191",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CRITICAL - Cross-business data access"
+    },
+    {
+      "endpoint": "/api/customers/1/purchase-history",
+      "method": "GET",
+      "description": "Customer purchase history",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "2",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "2",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/expenses/",
+      "method": "GET",
+      "description": "List all expenses",
+      "business_2_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "query",
+                "business_id"
+              ],
+              "msg": "Field required",
+              "input": null
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "97",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "query",
+                "business_id"
+              ],
+              "msg": "Field required",
+              "input": null
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "97",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:422, B7:422"
+    },
+    {
+      "endpoint": "/api/expenses/1",
+      "method": "GET",
+      "description": "Access Expense #1",
+      "business_2_result": {
+        "status_code": 405,
+        "response": {
+          "detail": "Method Not Allowed"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "allow": "DELETE",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 405,
+        "response": {
+          "detail": "Method Not Allowed"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "allow": "DELETE",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:405, B7:405"
+    },
+    {
+      "endpoint": "/api/expenses/categories",
+      "method": "GET",
+      "description": "Expense categories",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "Rent",
+            "description": "Store rental costs",
+            "id": 1,
+            "is_active": true
+          },
+          {
+            "name": "Utilities",
+            "description": "Electricity, water, internet",
+            "id": 2,
+            "is_active": true
+          },
+          {
+            "name": "Salaries",
+            "description": "Staff salaries and wages",
+            "id": 3,
+            "is_active": true
+          },
+          {
+            "name": "Inventory",
+            "description": "Product purchases and restocking",
+            "id": 4,
+            "is_active": true
+          },
+          {
+            "name": "Marketing",
+            "description": "Advertising and promotions",
+            "id": 5,
+            "is_active": true
+          },
+          {
+            "name": "Maintenance",
+            "description": "Equipment and facility maintenance",
+            "id": 6,
+            "is_active": true
+          },
+          {
+            "name": "Office Supplies",
+            "description": "Stationery and office materials",
+            "id": 7,
+            "is_active": true
+          },
+          {
+            "name": "Transportation",
+            "description": "Delivery and transportation costs",
+            "id": 8,
+            "is_active": true
+          },
+          {
+            "name": "Taxes",
+            "description": "Business taxes and fees",
+            "id": 9,
+            "is_active": true
+          },
+          {
+            "name": "Miscellaneous",
+            "description": "Other expenses",
+            "id": 10,
+            "is_active": true
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "892",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "Rent",
+            "description": "Store rental costs",
+            "id": 1,
+            "is_active": true
+          },
+          {
+            "name": "Utilities",
+            "description": "Electricity, water, internet",
+            "id": 2,
+            "is_active": true
+          },
+          {
+            "name": "Salaries",
+            "description": "Staff salaries and wages",
+            "id": 3,
+            "is_active": true
+          },
+          {
+            "name": "Inventory",
+            "description": "Product purchases and restocking",
+            "id": 4,
+            "is_active": true
+          },
+          {
+            "name": "Marketing",
+            "description": "Advertising and promotions",
+            "id": 5,
+            "is_active": true
+          },
+          {
+            "name": "Maintenance",
+            "description": "Equipment and facility maintenance",
+            "id": 6,
+            "is_active": true
+          },
+          {
+            "name": "Office Supplies",
+            "description": "Stationery and office materials",
+            "id": 7,
+            "is_active": true
+          },
+          {
+            "name": "Transportation",
+            "description": "Delivery and transportation costs",
+            "id": 8,
+            "is_active": true
+          },
+          {
+            "name": "Taxes",
+            "description": "Business taxes and fees",
+            "id": 9,
+            "is_active": true
+          },
+          {
+            "name": "Miscellaneous",
+            "description": "Other expenses",
+            "id": 10,
+            "is_active": true
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "892",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/business/",
+      "method": "GET",
+      "description": "Business settings",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "name": "Lit",
+          "address": "Nakagere, mukono",
+          "phone": "+256757354476",
+          "email": "litelectricals@lit.com",
+          "logo_url": "",
+          "tax_id": "txtv12345",
+          "country": null,
+          "country_code": null,
+          "currency_code": "UGX",
+          "id": 2
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "199",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "name": "Test Security Business",
+          "address": "",
+          "phone": "",
+          "email": "",
+          "logo_url": "",
+          "tax_id": "",
+          "country": null,
+          "country_code": null,
+          "currency_code": "UGX",
+          "id": 7
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "158",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/business/currency",
+      "method": "GET",
+      "description": "Business currency",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/refunds/",
+      "method": "GET",
+      "description": "List all refunds",
+      "business_2_result": {
+        "status_code": 405,
+        "response": {
+          "detail": "Method Not Allowed"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "allow": "POST",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 405,
+        "response": {
+          "detail": "Method Not Allowed"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "allow": "POST",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:405, B7:405"
+    },
+    {
+      "endpoint": "/api/refunds/1",
+      "method": "GET",
+      "description": "Access Refund #1",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "reason": "damaged",
+          "id": 1,
+          "sale_id": 9,
+          "user_id": 2,
+          "total_amount": 1.4271578829203955,
+          "original_amount": 5000.0,
+          "original_currency": "UGX",
+          "exchange_rate_at_refund": 0.0002854315765840791,
+          "status": "processed",
+          "created_at": "2025-09-16T08:32:48.642753",
+          "refund_items": [
+            {
+              "sale_item_id": 9,
+              "quantity": 1,
+              "id": 1,
+              "refund_id": 1
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "317",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "reason": "damaged",
+          "id": 1,
+          "sale_id": 9,
+          "user_id": 2,
+          "total_amount": 1.4271578829203955,
+          "original_amount": 5000.0,
+          "original_currency": "UGX",
+          "exchange_rate_at_refund": 0.0002854315765840791,
+          "status": "processed",
+          "created_at": "2025-09-16T08:32:48.642753",
+          "refund_items": [
+            {
+              "sale_item_id": 9,
+              "quantity": 1,
+              "id": 1,
+              "refund_id": 1
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "317",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/suppliers/",
+      "method": "GET",
+      "description": "List all suppliers",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "2",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "2",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper business isolation"
+    },
+    {
+      "endpoint": "/api/suppliers/1",
+      "method": "GET",
+      "description": "Access Supplier #1",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Supplier not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Supplier not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "31",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/purchase-orders/",
+      "method": "GET",
+      "description": "Purchase orders",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/users/",
+      "method": "GET",
+      "description": "List users",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "email": "test_owner@bizzy.com",
+            "username": "test_owner",
+            "id": 2,
+            "is_active": true,
+            "created_at": null,
+            "permissions": [],
+            "role_name": "Owner"
+          },
+          {
+            "email": "test_cashier@bizzy.com",
+            "username": "test_cashier",
+            "id": 3,
+            "is_active": true,
+            "created_at": "2025-09-13T07:24:30.232418",
+            "permissions": [],
+            "role_name": "Manager"
+          },
+          {
+            "email": "test_cashier_1@business.com",
+            "username": "testcashier1",
+            "id": 5,
+            "is_active": true,
+            "created_at": "2025-09-20T07:00:21.086426",
+            "permissions": [],
+            "role_name": null
+          },
+          {
+            "email": "Irene@lit.com",
+            "username": "irene",
+            "id": 8,
+            "is_active": true,
+            "created_at": "2025-09-20T08:25:54.130739",
+            "permissions": [],
+            "role_name": "Cashier"
+          },
+          {
+            "email": "test_cashier1@bizzy.com",
+            "username": "test_cashier1",
+            "id": 9,
+            "is_active": true,
+            "created_at": "2025-09-21T00:02:41.078390",
+            "permissions": [],
+            "role_name": null
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "782",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "email": "security@testbusiness.com",
+            "username": "security_tester",
+            "id": 15,
+            "is_active": true,
+            "created_at": "2025-09-21T09:11:26.968914",
+            "permissions": [],
+            "role_name": "Owner"
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "172",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "SECURE - Proper business isolation"
+    },
+    {
+      "endpoint": "/api/users/1",
+      "method": "GET",
+      "description": "Access User #1",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "User not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "27",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "User not found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "27",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/roles/",
+      "method": "GET",
+      "description": "List roles",
+      "business_2_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "Owner",
+            "description": "Has full access to all features and administrative functions",
+            "id": 1,
+            "is_default": false,
+            "permissions": [
+              "purchase_order:receive",
+              "supplier:delete",
+              "customer:delete",
+              "customer:update",
+              "product:read",
+              "purchase_order:delete",
+              "purchase_order:read",
+              "customer:read",
+              "user:update",
+              "customer:create",
+              "supplier:update",
+              "supplier:create",
+              "report:view",
+              "business:update",
+              "inventory:update",
+              "user:delete",
+              "inventory:read",
+              "supplier:read",
+              "user:read",
+              "user:create",
+              "sale:refund",
+              "sale:delete",
+              "role:manage",
+              "purchase_order:create",
+              "purchase_order:update",
+              "product:delete",
+              "sale:create",
+              "product:update",
+              "sale:read",
+              "product:create"
+            ]
+          },
+          {
+            "name": "Manager",
+            "description": "Can manage products, inventory, sales, and reports but not user permissions",
+            "id": 2,
+            "is_default": false,
+            "permissions": [
+              "purchase_order:receive",
+              "customer:update",
+              "product:read",
+              "purchase_order:read",
+              "customer:read",
+              "customer:create",
+              "supplier:update",
+              "supplier:create",
+              "report:view",
+              "inventory:update",
+              "inventory:read",
+              "supplier:read",
+              "sale:refund",
+              "purchase_order:update",
+              "purchase_order:create",
+              "product:update",
+              "sale:create",
+              "product:create",
+              "sale:read"
+            ]
+          },
+          {
+            "name": "Cashier",
+            "description": "Can process sales and view basic product information",
+            "id": 3,
+            "is_default": true,
+            "permissions": [
+              "sale:create",
+              "customer:read",
+              "customer:create",
+              "product:read"
+            ]
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "1335",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": [
+          {
+            "name": "Owner",
+            "description": "Has full access to all features and administrative functions",
+            "id": 1,
+            "is_default": false,
+            "permissions": [
+              "purchase_order:receive",
+              "supplier:delete",
+              "customer:delete",
+              "customer:update",
+              "product:read",
+              "purchase_order:delete",
+              "purchase_order:read",
+              "customer:read",
+              "user:update",
+              "customer:create",
+              "supplier:update",
+              "supplier:create",
+              "report:view",
+              "business:update",
+              "inventory:update",
+              "user:delete",
+              "inventory:read",
+              "supplier:read",
+              "user:read",
+              "user:create",
+              "sale:refund",
+              "sale:delete",
+              "role:manage",
+              "purchase_order:create",
+              "purchase_order:update",
+              "product:delete",
+              "sale:create",
+              "product:update",
+              "sale:read",
+              "product:create"
+            ]
+          },
+          {
+            "name": "Manager",
+            "description": "Can manage products, inventory, sales, and reports but not user permissions",
+            "id": 2,
+            "is_default": false,
+            "permissions": [
+              "purchase_order:receive",
+              "customer:update",
+              "product:read",
+              "purchase_order:read",
+              "customer:read",
+              "customer:create",
+              "supplier:update",
+              "supplier:create",
+              "report:view",
+              "inventory:update",
+              "inventory:read",
+              "supplier:read",
+              "sale:refund",
+              "purchase_order:update",
+              "purchase_order:create",
+              "product:update",
+              "sale:create",
+              "product:create",
+              "sale:read"
+            ]
+          },
+          {
+            "name": "Cashier",
+            "description": "Can process sales and view basic product information",
+            "id": 3,
+            "is_default": true,
+            "permissions": [
+              "sale:create",
+              "customer:read",
+              "customer:create",
+              "product:read"
+            ]
+          }
+        ],
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "1335",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CRITICAL - Data leakage between businesses"
+    },
+    {
+      "endpoint": "/api/permissions/",
+      "method": "GET",
+      "description": "List permissions",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/scanner/status",
+      "method": "GET",
+      "description": "Scanner status",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/scanner/test",
+      "method": "GET",
+      "description": "Scanner test",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/users/me",
+      "method": "GET",
+      "description": "Current user profile",
+      "business_2_result": {
+        "status_code": 200,
+        "response": {
+          "email": "test_owner@bizzy.com",
+          "username": "test_owner",
+          "id": 2,
+          "is_active": true,
+          "created_at": null,
+          "permissions": [
+            "customer:update",
+            "user:read",
+            "user:delete",
+            "sale:create",
+            "supplier:delete",
+            "supplier:read",
+            "purchase_order:delete",
+            "product:read",
+            "customer:read",
+            "inventory:read",
+            "sale:read",
+            "role:manage",
+            "sale:delete",
+            "inventory:update",
+            "purchase_order:update",
+            "product:delete",
+            "product:update",
+            "user:update",
+            "customer:delete",
+            "sale:refund",
+            "supplier:update",
+            "customer:create",
+            "purchase_order:receive",
+            "purchase_order:create",
+            "report:view",
+            "purchase_order:read",
+            "business:update",
+            "product:create",
+            "user:create",
+            "supplier:create"
+          ],
+          "role_name": null
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "646",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 200,
+        "response": {
+          "email": "security@testbusiness.com",
+          "username": "security_tester",
+          "id": 15,
+          "is_active": true,
+          "created_at": "2025-09-21T09:11:26.968914",
+          "permissions": [
+            "customer:update",
+            "user:read",
+            "user:delete",
+            "sale:create",
+            "supplier:delete",
+            "supplier:read",
+            "purchase_order:delete",
+            "product:read",
+            "customer:read",
+            "inventory:read",
+            "sale:read",
+            "role:manage",
+            "sale:delete",
+            "inventory:update",
+            "purchase_order:update",
+            "product:delete",
+            "product:update",
+            "user:update",
+            "customer:delete",
+            "sale:refund",
+            "supplier:update",
+            "customer:create",
+            "purchase_order:receive",
+            "purchase_order:create",
+            "report:view",
+            "purchase_order:read",
+            "business:update",
+            "product:create",
+            "user:create",
+            "supplier:create"
+          ],
+          "role_name": null
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "681",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:200, B7:200"
+    },
+    {
+      "endpoint": "/api/users/profile",
+      "method": "GET",
+      "description": "User profile",
+      "business_2_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "user_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "profile"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "156",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 422,
+        "response": {
+          "detail": [
+            {
+              "type": "int_parsing",
+              "loc": [
+                "path",
+                "user_id"
+              ],
+              "msg": "Input should be a valid integer, unable to parse string as an integer",
+              "input": "profile"
+            }
+          ]
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "156",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:422, B7:422"
+    },
+    {
+      "endpoint": "/api/currency/rates",
+      "method": "GET",
+      "description": "Currency exchange rates",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/currency/convert?from=USD&to=UGX&amount=100",
+      "method": "GET",
+      "description": "Currency conversion",
+      "business_2_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "22",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:404, B7:404"
+    },
+    {
+      "endpoint": "/api/products/",
+      "method": "POST",
+      "description": "Create product",
+      "business_2_result": {
+        "status_code": 400,
+        "response": {
+          "detail": "Barcode already registered"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "39",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "status_code": 400,
+        "response": {
+          "detail": "Barcode already registered"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "39",
+          "content-type": "application/json"
+        }
+      },
+      "vulnerability": "CHECKED - Status B2:400, B7:400"
+    },
+    {
+      "endpoint": "/api/customers/",
+      "method": "POST",
+      "description": "Create customer",
+      "business_2_result": {
+        "status_code": 400,
+        "response": {
+          "detail": "Email already registered"
+        },
+        "headers": {
+          "date": "Wed, 24 Sep 2025 02:45:20 GMT",
+          "server": "uvicorn",
+          "content-length": "37",
+          "content-type": "application/json"
+        }
+      },
+      "business_7_result": {
+        "error": {
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        }
+      },
+      "vulnerability": "AUTH_FAILURE - Could not test properly"
+    }
+  ]
+}
