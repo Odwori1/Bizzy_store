@@ -1,0 +1,42 @@
+name: bizzy-pos
+services:
+- name: backend
+  source_dir: /backend
+  github:
+    repo: Odwori1/Bizzy_store
+    branch: main
+  run_command: pip install -r requirements.txt && python -m uvicorn app.main:app --host 0.0.0.0 --port 8080
+  environment_slug: python
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 8080
+  envs:
+  - key: DATABASE_URL
+    value: ${bizzy-pos-db.DATABASE_URL}
+  - key: SECRET_KEY
+    value: your-super-secure-production-secret-key-here
+  - key: ALLOWED_ORIGINS
+    value: https://bizzy-pos.ondigitalocean.app
+  - key: NODE_ENV
+    value: production
+
+- name: frontend
+  source_dir: /frontend
+  github:
+    repo: Odwori1/Bizzy_store
+    branch: main
+  static_sites:
+    build_command: npm install && npm run build
+    output_dir: dist
+    environment_slug: static
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  envs:
+  - key: VITE_API_BASE_URL
+    value: https://backend-bizzy-pos.ondigitalocean.app/api
+
+databases:
+- engine: PG
+  name: bizzy-pos-db
+  version: "13"
+  size: db-s-1vcpu-1gb
